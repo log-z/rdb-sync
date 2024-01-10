@@ -1,0 +1,46 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=flink_cdc
+      - MYSQL_PASSWORD=flink_cdc
+
+  starrocks:
+    image: starrocks/allin1-ubuntu:latest
+    container_name: starrocks
+    ports:
+      - '9030:9030'
+      - '8080:8080'
+    environment:
+      - TZ=Asia/Shanghai
+
+  flink-job-manager:
+    image: flink:1.18.0-java11
+    ports:
+      - '8081:8081'
+    command: jobmanager
+    environment:
+      - TZ=Asia/Shanghai
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-job-manager        
+
+  flink-task-manager:
+    image: flink:1.18.0-java11
+    depends_on:
+      - flink-job-manager
+    command: taskmanager
+    environment:
+      - TZ=Asia/Shanghai
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-job-manager
+        taskmanager.numberOfTaskSlots: 10

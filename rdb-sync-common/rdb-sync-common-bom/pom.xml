@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>vip.logz</groupId>
+    <artifactId>rdb-sync-common-bom</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <flink.version>1.18.0</flink.version>
+        <flink.minor.version>1.18</flink.minor.version>
+        <flink.connector.jdbc>3.1.1-1.17</flink.connector.jdbc>
+        <flink.connector.cdc.version>3.0.0</flink.connector.cdc.version>
+        <flink.connector.starrocks.version>1.2.9_flink-${flink.minor.version}</flink.connector.starrocks.version>
+        <scala.binary.version>2.12</scala.binary.version>
+        <log4j2.version>2.22.0</log4j2.version>
+        <mybatis.version>3.5.15</mybatis.version>
+        <jackson.version>2.16.0</jackson.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Flink Base -->
+            <!-- flink-streaming-java -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-streaming-java</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- flink-clients -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-clients</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- flink-connector-base -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-base</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <!-- Flink Runtime -->
+            <!-- flink-table-api-scala-bridge -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- flink-table-planner -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <!-- Flink Connector Official -->
+            <!-- flink-connector-jdbc -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-jdbc</artifactId>
+                <version>${flink.connector.jdbc}</version>
+            </dependency>
+
+            <!-- Flink Connector CDC -->
+            <!-- flink-connector-debezium -->
+            <dependency>
+                <groupId>com.ververica</groupId>
+                <artifactId>flink-connector-debezium</artifactId>
+                <version>${flink.connector.cdc.version}</version>
+            </dependency>
+            <!-- flink-connector-mysql-cdc -->
+            <dependency>
+                <groupId>com.ververica</groupId>
+                <artifactId>flink-connector-mysql-cdc</artifactId>
+                <version>${flink.connector.cdc.version}</version>
+            </dependency>
+            <!-- flink-connector-starrocks -->
+            <dependency>
+                <groupId>com.starrocks</groupId>
+                <artifactId>flink-connector-starrocks</artifactId>
+                <version>${flink.connector.starrocks.version}</version>
+            </dependency>
+
+            <!-- Log -->
+            <!-- log4j2 -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j2.version}</version>
+            </dependency>
+
+            <!-- Data -->
+            <!-- mybatis -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            <!-- jackson-databind -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <!-- jackson-dataformat-yaml -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- RdbSync -->
+            <!-- rdb-sync-common-core -->
+            <dependency>
+                <groupId>vip.logz</groupId>
+                <artifactId>rdb-sync-common-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- rdb-sync-connector-mysql -->
+            <dependency>
+                <groupId>vip.logz</groupId>
+                <artifactId>rdb-sync-connector-mysql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- rdb-sync-connector-starrocks -->
+            <dependency>
+                <groupId>vip.logz</groupId>
+                <artifactId>rdb-sync-connector-starrocks</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

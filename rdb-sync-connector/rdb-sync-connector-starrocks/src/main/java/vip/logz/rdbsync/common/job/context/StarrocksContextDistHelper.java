@@ -7,7 +7,7 @@ import vip.logz.rdbsync.common.enums.SideOutputOp;
 import vip.logz.rdbsync.common.job.func.process.DispatcherProcess;
 import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Channel;
-import vip.logz.rdbsync.connector.starrocks.config.StarrocksConnectDistProperties;
+import vip.logz.rdbsync.connector.starrocks.config.StarrocksChannelDistProperties;
 import vip.logz.rdbsync.connector.starrocks.job.func.DebeziumEventToStarrocksMap;
 import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 
@@ -32,8 +32,8 @@ public class StarrocksContextDistHelper implements ContextDistHelper<Starrocks, 
     public Map<SideOutputTag, SideOutputContext<String>> getSideOutContexts(ContextMeta contextMeta) {
         // 1. 提取元数据
         Channel<Starrocks> channel = (Channel<Starrocks>) contextMeta.getChannel();
-        StarrocksConnectDistProperties connectDistProperties =
-                (StarrocksConnectDistProperties) contextMeta.getConnectDistProperties();
+        StarrocksChannelDistProperties channelDistProperties =
+                (StarrocksChannelDistProperties) contextMeta.getChannelDistProperties();
 
         // 2. 构建所有旁路输出上下文
         Map<SideOutputTag, SideOutputContext<String>> sideOutputContextMap = new HashMap<>();
@@ -47,12 +47,12 @@ public class StarrocksContextDistHelper implements ContextDistHelper<Starrocks, 
 
             // 旁路输出上下文：初始化Sink
             StarRocksSinkOptions options = StarRocksSinkOptions.builder()
-                    .withProperty("jdbc-url", connectDistProperties.getJdbcUrl())
-                    .withProperty("load-url", connectDistProperties.getLoadUrl())
-                    .withProperty("database-name", connectDistProperties.getDatabase())
+                    .withProperty("jdbc-url", channelDistProperties.getJdbcUrl())
+                    .withProperty("load-url", channelDistProperties.getLoadUrl())
+                    .withProperty("database-name", channelDistProperties.getDatabase())
                     .withProperty("table-name", distTable)
-                    .withProperty("username", connectDistProperties.getUsername())
-                    .withProperty("password", connectDistProperties.getPassword())
+                    .withProperty("username", channelDistProperties.getUsername())
+                    .withProperty("password", channelDistProperties.getPassword())
                     .withProperty("sink.properties.format", "json")
                     .withProperty("sink.properties.strip_outer_array", "true")
                     .build();

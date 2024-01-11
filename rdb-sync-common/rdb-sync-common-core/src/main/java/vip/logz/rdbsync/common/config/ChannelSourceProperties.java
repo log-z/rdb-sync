@@ -14,9 +14,6 @@ public class ChannelSourceProperties {
     /** 名称 */
     private String name;
 
-    /** 连接来源ID */
-    private String connectId;
-
     /** 协议 */
     private String protocol;
 
@@ -48,21 +45,6 @@ public class ChannelSourceProperties {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * 获取连接来源ID
-     */
-    public String getConnectId() {
-        return connectId;
-    }
-
-    /**
-     * 设置连接来源ID
-     * @param connectId 连接来源ID
-     */
-    public void setConnectId(String connectId) {
-        this.connectId = connectId;
     }
 
     /**

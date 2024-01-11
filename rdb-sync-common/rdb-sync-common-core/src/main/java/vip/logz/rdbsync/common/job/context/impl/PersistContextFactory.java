@@ -5,12 +5,8 @@ import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import vip.logz.rdbsync.common.config.ChannelDistPropertiesLoader;
 import vip.logz.rdbsync.common.config.ChannelSourcePropertiesLoader;
-import vip.logz.rdbsync.common.config.ConnectDistPropertiesLoader;
-import vip.logz.rdbsync.common.config.ConnectSourcePropertiesLoader;
 import vip.logz.rdbsync.common.config.impl.PersistChannelDistPropertiesLoaderProxy;
 import vip.logz.rdbsync.common.config.impl.PersistChannelSourcePropertiesLoaderProxy;
-import vip.logz.rdbsync.common.config.impl.PersistConnectDistPropertiesLoaderProxy;
-import vip.logz.rdbsync.common.config.impl.PersistConnectSourcePropertiesLoaderProxy;
 import vip.logz.rdbsync.common.job.context.ContextFactory;
 import vip.logz.rdbsync.common.persistence.SqlSessionProxy;
 import vip.logz.rdbsync.common.rule.Channel;
@@ -68,22 +64,6 @@ public class PersistContextFactory extends ContextFactory {
     @Override
     protected ChannelDistPropertiesLoader getChannelDistPropertiesLoader() {
         return new PersistChannelDistPropertiesLoaderProxy(sqlSessionProxy);
-    }
-
-    /**
-     * 获取连接来源属性加载器
-     */
-    @Override
-    protected ConnectSourcePropertiesLoader getConnectSourcePropertiesLoader() {
-        return new PersistConnectSourcePropertiesLoaderProxy(sqlSessionProxy);
-    }
-
-    /**
-     * 获取连接目标属性加载器
-     */
-    @Override
-    protected ConnectDistPropertiesLoader getConnectDistPropertiesLoader() {
-        return new PersistConnectDistPropertiesLoaderProxy(sqlSessionProxy);
     }
 
     /**

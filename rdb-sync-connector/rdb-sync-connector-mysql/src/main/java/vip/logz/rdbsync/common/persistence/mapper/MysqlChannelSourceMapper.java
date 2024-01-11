@@ -22,8 +22,14 @@ public interface MysqlChannelSourceMapper {
      */
     @Select("select cs.id" +
             ", cs.name" +
-            ", cs.connect_id" +
             ", cs.protocol" +
+            ", csm.host" +
+            ", csm.port" +
+            ", csm.database" +
+            ", csm.username" +
+            ", csm.password" +
+            ", csm.connect_timeout_seconds" +
+            ", csm.jdbc_properties" +
             ", csm.server_id" +
             ", csm.startup_mode" +
             ", csm.startup_specific_offset_file" +

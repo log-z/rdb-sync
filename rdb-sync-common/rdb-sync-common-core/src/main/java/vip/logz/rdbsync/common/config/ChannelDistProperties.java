@@ -14,12 +14,6 @@ public class ChannelDistProperties {
     /** 名称 */
     private String name;
 
-    /**
-     * 连接目标ID
-     * @see ConnectDistProperties
-     */
-    private String connectId;
-
     /** 协议 */
     private String protocol;
 
@@ -51,23 +45,6 @@ public class ChannelDistProperties {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * 获取连接目标ID
-     * @see ConnectDistProperties
-     */
-    public String getConnectId() {
-        return connectId;
-    }
-
-    /**
-     * 设置连接目标ID
-     * @param connectId 连接目标ID
-     * @see ConnectDistProperties
-     */
-    public void setConnectId(String connectId) {
-        this.connectId = connectId;
     }
 
     /**

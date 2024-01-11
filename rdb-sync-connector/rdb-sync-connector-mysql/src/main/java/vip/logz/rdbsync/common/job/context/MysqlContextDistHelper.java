@@ -11,7 +11,7 @@ import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Channel;
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
-import vip.logz.rdbsync.connector.mysql.config.MysqlConnectDistProperties;
+import vip.logz.rdbsync.connector.mysql.config.MysqlChannelDistProperties;
 import vip.logz.rdbsync.connector.mysql.job.func.DebeziumEventToMysqlMap;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 import vip.logz.rdbsync.connector.mysql.utils.MysqlDeleteSqlGenerator;
@@ -41,8 +41,8 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, Map<Stri
     public Map<SideOutputTag, SideOutputContext<Map<String, Object>>> getSideOutContexts(ContextMeta contextMeta) {
         // 1. 提取元数据
         Channel<Mysql> channel = (Channel<Mysql>) contextMeta.getChannel();
-        MysqlConnectDistProperties connectDistProperties =
-                (MysqlConnectDistProperties) contextMeta.getConnectDistProperties();
+        MysqlChannelDistProperties channelDistProperties =
+                (MysqlChannelDistProperties) contextMeta.getChannelDistProperties();
 
         // 2. 构建所有旁路输出上下文
         Map<SideOutputTag, SideOutputContext<Map<String, Object>>> sideOutputContextMap = new HashMap<>();
@@ -59,10 +59,10 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, Map<Stri
 
             // JDBC连接选项
             JdbcConnectionOptions options = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                    .withUrl(connectDistProperties.getUrl())
-                    // .withDriverName()
-                    .withUsername(connectDistProperties.getUsername())
-                    .withPassword(connectDistProperties.getPassword())
+                    .withUrl(channelDistProperties.getUrl())
+                    // .withDriverName()  TODO
+                    .withUsername(channelDistProperties.getUsername())
+                    .withPassword(channelDistProperties.getPassword())
                     .build();
 
             // MySQL模板生成器

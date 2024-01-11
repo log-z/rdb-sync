@@ -91,7 +91,7 @@ public class ContextDistHelperProxy implements ContextDistHelper<Rdb, Object> {
      */
     @Override
     public Map<SideOutputTag, SideOutputContext<Object>> getSideOutContexts(ContextMeta contextMeta) {
-        String protocol = contextMeta.getConnectDistProperties().getProtocol();
+        String protocol = contextMeta.getChannelDistProperties().getProtocol();
         ContextDistHelper<Rdb, Object> rawHelper = getRawHelper(protocol);
         return rawHelper.getSideOutContexts(contextMeta);
     }
@@ -102,7 +102,7 @@ public class ContextDistHelperProxy implements ContextDistHelper<Rdb, Object> {
      */
     @Override
     public DispatcherProcess getDispatcher(ContextMeta contextMeta) {
-        String protocol = contextMeta.getConnectDistProperties().getProtocol();
+        String protocol = contextMeta.getChannelDistProperties().getProtocol();
         ContextDistHelper<Rdb, Object> rawHelper = getRawHelper(protocol);
         return rawHelper.getDispatcher(contextMeta);
     }

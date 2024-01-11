@@ -20,12 +20,17 @@ public interface StarrocksChannelDistMapper {
     /**
      * 列出所有
      */
-    @Select("select cs.id" +
-            ", cs.name" +
-            ", cs.connect_id" +
-            ", cs.protocol " +
-            "from channel_dist as cs " +
-            "where cs.protocol = 'Starrocks'")
+    @Select("select cd.id" +
+            ", cd.name" +
+            ", cd.protocol" +
+            ", cds.jdbc_url" +
+            ", cds.load_url" +
+            ", cds.`database`" +
+            ", cds.username" +
+            ", cds.password " +
+            "from channel_dist as cd " +
+            "inner join channel_dist_starrocks as cds " +
+            "on cd.id = cds.id")
     List<StarrocksChannelDistProperties> listAll();
 
 }

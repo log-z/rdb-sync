@@ -1,6 +1,9 @@
 package vip.logz.rdbsync.common.job.context;
 
-import vip.logz.rdbsync.common.config.*;
+import vip.logz.rdbsync.common.config.ChannelDistProperties;
+import vip.logz.rdbsync.common.config.ChannelDistPropertiesLoader;
+import vip.logz.rdbsync.common.config.ChannelSourceProperties;
+import vip.logz.rdbsync.common.config.ChannelSourcePropertiesLoader;
 import vip.logz.rdbsync.common.job.context.impl.ContextDistHelperProxy;
 import vip.logz.rdbsync.common.job.context.impl.ContextSourceHelperProxy;
 import vip.logz.rdbsync.common.rule.Channel;
@@ -25,16 +28,6 @@ public abstract class ContextFactory {
     protected abstract ChannelDistPropertiesLoader getChannelDistPropertiesLoader();
 
     /**
-     * 获取连接来源属性加载器
-     */
-    protected abstract ConnectSourcePropertiesLoader getConnectSourcePropertiesLoader();
-
-    /**
-     * 获取连接目标属性加载器
-     */
-    protected abstract ConnectDistPropertiesLoader getConnectDistPropertiesLoader();
-
-    /**
      * 获取频道
      */
     protected abstract Channel<?> getChannel();
@@ -52,29 +45,21 @@ public abstract class ContextFactory {
         ChannelDistProperties channelDistProperties = getChannelDistPropertiesLoader()
                 .loadAll()
                 .get(channel.getDistId());
-        ConnectSourceProperties connectSourceProperties = getConnectSourcePropertiesLoader()
-                .loadAll()
-                .get(channelSourceProperties.getConnectId());
-        ConnectDistProperties connectDistProperties = getConnectDistPropertiesLoader()
-                .loadAll()
-                .get(channelDistProperties.getConnectId());
+        if (channelSourceProperties == null) {
+            throw new RuntimeException("channel source [" + channel.getSourceId() +  "] properties not found.");
+        }
+        if (channelDistProperties == null) {
+            throw new RuntimeException("channel dist [" + channel.getDistId() +  "] properties not found.");
+        }
 
-        // TODO：检查完整性
-
-        ContextMeta contextMeta = new ContextMeta(
-                channel,
-                channelSourceProperties,
-                channelDistProperties,
-                connectSourceProperties,
-                connectDistProperties
-        );
+        ContextMeta contextMeta = new ContextMeta(channel, channelSourceProperties, channelDistProperties);
 
         // 2. 构造任务上下文
         Context<Object> context = new Context<>();
         // 设置来源
         ContextSourceHelperProxy contextSourceHelper = new ContextSourceHelperProxy();
         context.setSource(contextSourceHelper.getSource(contextMeta));
-        context.setSourceName(connectSourceProperties.getName());
+        context.setSourceName(channelSourceProperties.getName());
         // 设置去向
         ContextDistHelperProxy contextDistHelper = new ContextDistHelperProxy();
         context.setSideOutputContextMap(contextDistHelper.getSideOutContexts(contextMeta));

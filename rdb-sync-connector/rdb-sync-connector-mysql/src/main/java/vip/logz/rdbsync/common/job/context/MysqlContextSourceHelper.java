@@ -11,7 +11,6 @@ import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.job.debezium.SimpleDebeziumDeserializationSchema;
 import vip.logz.rdbsync.common.utils.JacksonUtils;
 import vip.logz.rdbsync.connector.mysql.config.MysqlChannelSourceProperties;
-import vip.logz.rdbsync.connector.mysql.config.MysqlConnectSourceProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 import java.time.Duration;
@@ -38,8 +37,6 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
         // 1. 获取配置
         MysqlChannelSourceProperties channelProperties =
                 (MysqlChannelSourceProperties) contextMeta.getChannelSourceProperties();
-        MysqlConnectSourceProperties connectProperties =
-                (MysqlConnectSourceProperties) contextMeta.getConnectSourceProperties();
 
         // 构建启动模式
         StartupOptions startupOptions;
@@ -82,13 +79,13 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
 
         // 2. 构造数据源
         return MySqlSource.<DebeziumEvent>builder()
-                .hostname(connectProperties.getHost())
-                .port(connectProperties.getPort())
-                .databaseList(connectProperties.getDatabase())
-                .username(connectProperties.getUsername())
-                .password(connectProperties.getPassword())
-                .connectTimeout(Duration.ofSeconds(connectProperties.getConnectTimeoutSeconds()))
-                .jdbcProperties(parseJdbcProperties(connectProperties.getJdbcProperties()))
+                .hostname(channelProperties.getHost())
+                .port(channelProperties.getPort())
+                .databaseList(channelProperties.getDatabase())
+                .username(channelProperties.getUsername())
+                .password(channelProperties.getPassword())
+                .connectTimeout(Duration.ofSeconds(channelProperties.getConnectTimeoutSeconds()))
+                .jdbcProperties(parseJdbcProperties(channelProperties.getJdbcProperties()))
                 .serverId(channelProperties.getServerId())
                 .startupOptions(startupOptions)
                 .tableList(".*")

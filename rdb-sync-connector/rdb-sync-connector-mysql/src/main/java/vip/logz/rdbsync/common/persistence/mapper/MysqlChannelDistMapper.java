@@ -23,10 +23,13 @@ public interface MysqlChannelDistMapper {
      */
     @Select("select cs.id" +
             ", cs.name" +
-            ", cs.connect_id" +
-            ", cs.protocol " +
+            ", cs.protocol" +
+            ", csm.jdbc_url" +
+            ", csm.username" +
+            ", csm.password " +
             "from channel_dist as cs " +
-            "where cs.protocol = 'Mysql'")
+            "inner join channel_dist_mysql as csm " +
+            "on cs.id = csm.id")
     List<MysqlChannelDistProperties> listAll();
 
 }

@@ -18,6 +18,7 @@
     <modules>
         <module>rdb-sync-common</module>
         <module>rdb-sync-connector</module>
+        <module>rdb-sync-job</module>
     </modules>
 
     <dependencyManagement>

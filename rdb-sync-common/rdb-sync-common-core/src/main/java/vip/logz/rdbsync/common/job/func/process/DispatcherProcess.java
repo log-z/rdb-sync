@@ -11,7 +11,6 @@ import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Channel;
 
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * 分发器过程

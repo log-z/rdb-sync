@@ -1,7 +1,11 @@
 package vip.logz.rdbsync.common.utils.sql;
 
+import vip.logz.rdbsync.common.rule.Channel;
 import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.table.Mapping;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * SQL建表语句生成器
@@ -31,5 +35,16 @@ public interface DDLGenerator<DB extends Rdb> extends SqlGenerator<DB> {
      * @return 返回SQL建表语句
      */
     String generate(String table, Mapping<DB> mapping);
+
+    /**
+     * 批量生成SQL建表语句
+     * @param channel 频道
+     * @return 返回SQL建表语句列表
+     */
+    default List<String> generate(Channel<DB> channel) {
+        return channel.getBindings().stream()
+                .map(binding -> generate(binding.getDistTable(), binding.getMapping()))
+                .collect(Collectors.toList());
+    }
 
 }

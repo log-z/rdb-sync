@@ -18,7 +18,7 @@ import java.util.Set;
 public class PersistPropertiesLoaders {
 
     /** 日志记录器 */
-    private static final Logger log = LoggerFactory.getLogger(PersistPropertiesLoaders.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PersistPropertiesLoaders.class);
 
     /**
      * 创建加载器
@@ -38,7 +38,7 @@ public class PersistPropertiesLoaders {
                 T loader = (T) constructor.newInstance();
                 loaderSet.add(loader);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-                log.info("Create " + loaderClass + " instance failed.", e);
+                LOG.info("Create " + loaderClass + " instance failed.", e);
             }
         }
 

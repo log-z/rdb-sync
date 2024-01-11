@@ -26,7 +26,7 @@ import java.util.Map;
 public class ContextSourceHelperProxy implements ContextSourceHelper<Rdb> {
 
     /** 日志记录器 */
-    private static final Logger log = LoggerFactory.getLogger(ContextSourceHelperProxy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ContextSourceHelperProxy.class);
 
     /** 原生辅助映射 [protocol -> helper] */
     private final Map<String, ContextSourceHelper<Rdb>> rawHelperMap = new HashMap<>();
@@ -53,7 +53,7 @@ public class ContextSourceHelperProxy implements ContextSourceHelper<Rdb> {
                 // 记录辅助实例
                 rawHelperMap.put(protocol, loader);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-                log.info("Create " + helperClass + " instance failed.", e);
+                LOG.info("Create " + helperClass + " instance failed.", e);
             }
         }
     }

@@ -26,13 +26,4 @@ public interface Converter<S, T> extends Serializable {
         return val;
     }
 
-    /**
-     * 预定义转换：转换为字符串
-     *
-     * <P>用法：Converter::toString
-     */
-    static <S> String toString(S val) {
-        return String.valueOf(val);
-    }
-
 }

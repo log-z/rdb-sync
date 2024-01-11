@@ -27,7 +27,7 @@ import java.util.Map;
 public class ContextDistHelperProxy implements ContextDistHelper<Rdb, Object> {
 
     /** 日志记录器 */
-    private static final Logger log = LoggerFactory.getLogger(ContextDistHelperProxy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ContextDistHelperProxy.class);
 
     /** 原生辅助映射 [protocol -> helper] */
     private final Map<String, ContextDistHelper<Rdb, Object>> rawHelperMap = new HashMap<>();
@@ -54,7 +54,7 @@ public class ContextDistHelperProxy implements ContextDistHelper<Rdb, Object> {
                 // 记录辅助实例
                 rawHelperMap.put(protocol, loader);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-                log.info("Create " + helperClass + " instance failed.", e);
+                LOG.info("Create " + helperClass + " instance failed.", e);
             }
         }
     }

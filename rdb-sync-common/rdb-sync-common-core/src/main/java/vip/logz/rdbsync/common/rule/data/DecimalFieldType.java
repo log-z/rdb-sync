@@ -43,10 +43,10 @@ public class DecimalFieldType<DB extends Rdb> extends AbstractFieldType<DB, BigD
      */
     @Override
     public void config(ConverterRegistrar<BigDecimal> converterRegistrar) {
-        converterRegistrar.withInt(BigDecimal::new)
-                .withLong(BigDecimal::new)
-                .withFloat(BigDecimal::new)
-                .withDouble(BigDecimal::new)
+        converterRegistrar.withInt(val -> new BigDecimal(Integer.toString(val)))
+                .withLong(BigDecimal::valueOf)
+                .withFloat(val -> new BigDecimal(Float.toString(val)))
+                .withDouble(BigDecimal::valueOf)
                 .withBoolean(val -> val ? BigDecimal.ONE : BigDecimal.ZERO)
                 .withBigInteger(BigDecimal::new)
                 .withBigDecimal(Converter::invariant)

@@ -3,10 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>vip.logz</groupId>
+        <artifactId>rdb-sync-job</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
 
-    <groupId>vip.logz</groupId>
-    <artifactId>rdb-sync-simple</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <artifactId>rdb-sync-job-simple</artifactId>
 
     <properties>
         <scala.binary.version>2.12</scala.binary.version>
@@ -81,20 +84,6 @@
         </dependency>
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- Common -->
-            <!-- rdb-sync-common-bom -->
-            <dependency>
-                <groupId>vip.logz</groupId>
-                <artifactId>rdb-sync-common-bom</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <build>
         <plugins>
             <plugin>
@@ -109,7 +98,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>vip.logz.flink.cdc.job.test.Main</mainClass>
+                                    <mainClass>vip.logz.rdbsync.job.simple.Main</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

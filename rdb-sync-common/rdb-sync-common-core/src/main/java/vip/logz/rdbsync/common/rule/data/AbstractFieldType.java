@@ -1,5 +1,7 @@
 package vip.logz.rdbsync.common.rule.data;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.convert.Converter;
 import vip.logz.rdbsync.common.rule.convert.ConverterRegistrar;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
  * @param <T> 有效值类型
  */
 public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<DB, T> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractFieldType.class);
 
     /** 参数列表 */
     private final Object[] args;
@@ -57,7 +61,13 @@ public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<
         }
 
         Converter<S, T> converter = (Converter<S, T>) converterMap.get(val.getClass());
-        return converter.convert(val);
+        try {
+            return converter.convert(val);
+        } catch (Exception e) {
+            String msg = String.format("can not cast %s[%s] to %s", val.getClass(), val, getName());
+            LOG.warn(msg, e);
+            return null;
+        }
     }
 
     /**

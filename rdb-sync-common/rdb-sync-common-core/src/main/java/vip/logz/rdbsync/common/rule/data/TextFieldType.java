@@ -43,12 +43,12 @@ public class TextFieldType<DB extends Rdb> extends AbstractFieldType<DB, String>
      */
     @Override
     public void config(ConverterRegistrar<String> converterRegistrar) {
-        converterRegistrar.withInt(Converter::toString)
-                .withLong(Converter::toString)
-                .withFloat(Converter::toString)
-                .withDouble(Converter::toString)
-                .withBoolean(Converter::toString)
-                .withBigInteger(Converter::toString)
+        converterRegistrar.withInt(Object::toString)
+                .withLong(Object::toString)
+                .withFloat(Object::toString)
+                .withDouble(Object::toString)
+                .withBoolean(Object::toString)
+                .withBigInteger(Object::toString)
                 .withBigDecimal(BigDecimal::toPlainString)
                 .withString(Converter::invariant);
     }

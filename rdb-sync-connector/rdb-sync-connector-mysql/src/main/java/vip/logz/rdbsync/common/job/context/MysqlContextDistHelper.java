@@ -1,6 +1,7 @@
 package vip.logz.rdbsync.common.job.context;
 
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
+import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
@@ -32,6 +33,8 @@ import java.util.Map;
 @Scannable
 public class MysqlContextDistHelper implements ContextDistHelper<Mysql, Map<String, Object>> {
 
+    private static final String JDBC_MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
+
     /**
      * 获取旁路输出上下文映射
      * @param contextMeta 任务上下文元数据
@@ -57,10 +60,16 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, Map<Stri
             sideOutputContextMap.put(upsertOutputTag, upsertSideOutputContext);
             sideOutputContextMap.put(deleteOutputTag, deleteSideOutputContext);
 
+            // JDBC执行选项
+            JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
+                    .withBatchSize(1)
+                    .withBatchIntervalMs(0L)
+                    .withMaxRetries(1)
+                    .build();
             // JDBC连接选项
             JdbcConnectionOptions options = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                     .withUrl(channelDistProperties.getUrl())
-                    // .withDriverName()  TODO
+                    .withDriverName(JDBC_MYSQL_DRIVER)
                     .withUsername(channelDistProperties.getUsername())
                     .withPassword(channelDistProperties.getPassword())
                     .build();
@@ -74,11 +83,13 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, Map<Stri
             SinkFunction<Map<String, Object>> upsertSink = JdbcSink.sink(
                     upsertSqlGenerator.generate(distTable, mapping),
                     new MysqlJdbcStatementBuilder(mapping, SideOutputOp.UPSERT),
+                    executionOptions,
                     options
             );
             SinkFunction<Map<String, Object>> deleteSink = JdbcSink.sink(
                     deleteSqlGenerator.generate(distTable, mapping),
                     new MysqlJdbcStatementBuilder(mapping, SideOutputOp.DELETE),
+                    executionOptions,
                     options
             );
             upsertSideOutputContext.setSink(upsertSink);

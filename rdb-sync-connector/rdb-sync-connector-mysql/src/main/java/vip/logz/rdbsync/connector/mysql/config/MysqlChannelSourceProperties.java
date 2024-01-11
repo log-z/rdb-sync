@@ -77,7 +77,7 @@ public class MysqlChannelSourceProperties extends ChannelSourceProperties {
     /** 启动参数：起始日志文件内位置 */
     private Long startupSpecificOffsetPos;
 
-    /** 启动参数：起始GTID */
+    /** 启动参数：起始事务编码 */
     private String startupSpecificOffsetGtidSet;
 
     /** 启动参数：起始时间戳 */

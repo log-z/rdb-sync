@@ -4,6 +4,3 @@ rdb-sync:
     url: jdbc:mysql://local:3306/rdb_sync
     username: flink_cdc
     password: flink_cdc
-execution:
-  checkpointing:
-    interval: 3000

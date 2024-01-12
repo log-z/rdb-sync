@@ -13,15 +13,27 @@ import org.apache.flink.configuration.Configuration;
  */
 public class StartupParameter {
 
+    /** 配置选项：运行环境（简写） */
+    private static final ConfigOption<String> CONFIG_OPTION_E =  ConfigOptions.key("e")
+            .stringType()
+            .defaultValue("dev");
+
     /** 配置选项：运行环境 */
     private static final ConfigOption<String> CONFIG_OPTION_ENV =  ConfigOptions.key("env")
             .stringType()
-            .defaultValue("dev");
+            .defaultValue("dev")
+            .withFallbackKeys(CONFIG_OPTION_E.key());
+
+    /** 配置选项：启动管道（简写） */
+    private static final ConfigOption<String> CONFIG_OPTION_P =  ConfigOptions.key("p")
+            .stringType()
+            .noDefaultValue();
 
     /** 配置选项：启动管道 */
     private static final ConfigOption<String> CONFIG_OPTION_PIPELINE =  ConfigOptions.key("pipeline")
             .stringType()
-            .noDefaultValue();
+            .noDefaultValue()
+            .withFallbackKeys(CONFIG_OPTION_P.key());
 
     /** 配置 */
     private final Configuration configuration;

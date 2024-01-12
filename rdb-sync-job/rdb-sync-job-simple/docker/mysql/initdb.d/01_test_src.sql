@@ -1,6 +1,9 @@
--- MySQL
-CREATE DATABASE test_src_a;
-USE test_src_a;
+-- ----------------------------
+-- 测试来源库
+-- 2024-01-12
+-- ----------------------------
+CREATE DATABASE test_src;
+USE test_src;
 
 CREATE TABLE products (
   id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -1,14 +1,17 @@
--- MySQL
-CREATE DATABASE test_dw_ods;
-USE test_dw_ods;
+-- ----------------------------
+-- 测试目标库
+-- 2024-01-12
+-- ----------------------------
+CREATE DATABASE test_dist;
+USE test_dist;
 
-CREATE TABLE a$products (
+CREATE TABLE products (
   id INTEGER NOT NULL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   description VARCHAR(512)
 );
 
-CREATE TABLE a$orders (
+CREATE TABLE orders (
   order_id INTEGER NOT NULL PRIMARY KEY,
   order_date DATETIME NOT NULL,
   customer_name VARCHAR(255) NOT NULL,

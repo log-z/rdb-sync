@@ -1,4 +1,11 @@
 -- ----------------------------
+-- RDB Sync 配置库
+-- 2024-01-12
+-- ----------------------------
+CREATE DATABASE rdb_sync;
+USE rdb_sync;
+
+-- ----------------------------
 -- Table pipeline_dist
 -- ----------------------------
 create table `pipeline_dist` (
@@ -63,3 +70,29 @@ create table `pipeline_source_mysql` (
   `startup_timestamp_millis` bigint(20) comment '启动参数：起始时间戳',
   primary key (`id`) using btree
 ) comment = '管道来源-MySQL扩展';
+
+-- ----------------------------
+-- Records of pipeline_dist
+-- ----------------------------
+INSERT INTO `pipeline_dist` VALUES ('simple_dist_mysql', 'Simple Dist MySQL', 'mysql');
+INSERT INTO `pipeline_dist` VALUES ('simple_dist_starrocks', 'Simple Dist StarRocks', 'starrocks');
+
+-- ----------------------------
+-- Records of pipeline_dist_mysql
+-- ----------------------------
+INSERT INTO `pipeline_dist_mysql` VALUES ('simple_dist_mysql', 'jdbc:mysql://mysql:3306/test_dist', 'rdb_sync', 'rdb_sync');
+
+-- ----------------------------
+-- Records of pipeline_dist_starrocks
+-- ----------------------------
+INSERT INTO `pipeline_dist_starrocks` VALUES ('simple_dist_starrocks', 'jdbc:mysql://starrocks:9030', 'starrocks:8080', 'dw_ods', 'rdb_sync', 'rdb_sync');
+
+-- ----------------------------
+-- Records of pipeline_source
+-- ----------------------------
+INSERT INTO `pipeline_source` VALUES ('simple_source_mysql', 'Simple Source MySQL', 'mysql', 4);
+
+-- ----------------------------
+-- Records of pipeline_source_mysql
+-- ----------------------------
+INSERT INTO `pipeline_source_mysql` VALUES ('simple_source_mysql', 'mysql', 3306, 'test_src', 'rdb_sync', 'rdb_sync', 10, NULL, '5000-5010', 'initial', NULL, NULL, NULL, NULL);

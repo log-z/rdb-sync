@@ -1,6 +1,6 @@
 rdb-sync:
   datasource:
     driver: com.mysql.jdbc.Driver
-    url: jdbc:mysql://local:3306/rdb_sync
-    username: flink_cdc
-    password: flink_cdc
+    url: jdbc:mysql://mysql:3306/rdb_sync
+    username: rdb_sync
+    password: rdb_sync

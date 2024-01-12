@@ -10,8 +10,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_USER=flink_cdc
-      - MYSQL_PASSWORD=flink_cdc
+      - MYSQL_USER=rdb_sync
+      - MYSQL_PASSWORD=rdb_sync
 
   starrocks:
     image: starrocks/allin1-ubuntu:latest
@@ -24,6 +24,7 @@ services:
 
   flink-job-manager:
     image: flink:1.18.0-java11
+    container_name: flink-job-manager
     ports:
       - '8081:8081'
     command: jobmanager
@@ -35,6 +36,7 @@ services:
 
   flink-task-manager:
     image: flink:1.18.0-java11
+    container_name: flink-task-manager
     depends_on:
       - flink-job-manager
     command: taskmanager

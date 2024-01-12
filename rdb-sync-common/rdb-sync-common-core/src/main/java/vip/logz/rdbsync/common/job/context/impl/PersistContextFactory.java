@@ -1,10 +1,8 @@
 package vip.logz.rdbsync.common.job.context.impl;
 
-import org.apache.flink.configuration.ConfigOption;
-import org.apache.flink.configuration.ConfigOptions;
-import org.apache.flink.configuration.Configuration;
 import vip.logz.rdbsync.common.config.ChannelDistPropertiesLoader;
 import vip.logz.rdbsync.common.config.ChannelSourcePropertiesLoader;
+import vip.logz.rdbsync.common.config.StartupParameter;
 import vip.logz.rdbsync.common.config.impl.PersistChannelDistPropertiesLoaderProxy;
 import vip.logz.rdbsync.common.config.impl.PersistChannelSourcePropertiesLoaderProxy;
 import vip.logz.rdbsync.common.job.context.ContextFactory;
@@ -22,32 +20,19 @@ import java.util.Map;
  */
 public class PersistContextFactory extends ContextFactory {
 
-    /** 配置选项：运行环境 */
-    private static final ConfigOption<String> CONFIG_OPTION_ENV =  ConfigOptions.key("env")
-            .stringType()
-            .defaultValue("dev");
-
-    /** 配置选项：启动频道 */
-    private static final ConfigOption<String> CONFIG_OPTION_CHANNEL =  ConfigOptions.key("channel")
-            .stringType()
-            .noDefaultValue();
-
     /** SQL会话代理 */
     private final SqlSessionProxy sqlSessionProxy;
-
-    /** 启动频道ID */
-    private final String startupChannelId;
 
     /** 频道映射 [id -> Channel] */
     private final Map<String, Channel<?>> channelMap = new HashMap<>();
 
     /**
      * 构造器
-     * @param configuration 配置信息
+     * @param startupParameter 启动参数
      */
-    public PersistContextFactory(Configuration configuration) {
-        this.sqlSessionProxy = new SqlSessionProxy(configuration.getString(CONFIG_OPTION_ENV));
-        this.startupChannelId = configuration.getString(CONFIG_OPTION_CHANNEL);
+    public PersistContextFactory(StartupParameter startupParameter) {
+        super(startupParameter);
+        this.sqlSessionProxy = new SqlSessionProxy(startupParameter.getEnv());
     }
 
     /**
@@ -71,7 +56,7 @@ public class PersistContextFactory extends ContextFactory {
      */
     @Override
     protected Channel<?> getChannel() {
-        return channelMap.get(startupChannelId);
+        return channelMap.get(startupParameter.getChannel());
     }
 
     /**

@@ -12,17 +12,38 @@ import java.util.Map;
  */
 public class Context<Mid> {
 
+    /** 执行器环境信息 */
+    private ExecutionInfo executionInfo;
+
     /** 数据源 */
     private Source<DebeziumEvent, ?, ?> source;
 
     /** 数据源名称 */
     private String sourceName;
 
+    /** 数据源并行度 */
+    private int sourceParallelism;
+
     /** 分发器 */
     private DispatcherProcess dispatcher;
 
     /** 旁路输出上下文映射 */
     private Map<SideOutputTag, SideOutputContext<Mid>> sideOutputContextMap;
+
+    /**
+     * 获取执行器信息
+     */
+    public ExecutionInfo getExecutionInfo() {
+        return executionInfo;
+    }
+
+    /**
+     * 设置执行器信息
+     * @param executionInfo 执行器信息
+     */
+    public void setExecutionInfo(ExecutionInfo executionInfo) {
+        this.executionInfo = executionInfo;
+    }
 
     /**
      * 获取数据源
@@ -52,6 +73,21 @@ public class Context<Mid> {
      */
     public void setSourceName(String sourceName) {
         this.sourceName = sourceName;
+    }
+
+    /**
+     * 获取数据源并行度
+     */
+    public int getSourceParallelism() {
+        return sourceParallelism;
+    }
+
+    /**
+     * 设置数据源并行度
+     * @param sourceParallelism 数据源并行度
+     */
+    public void setSourceParallelism(int sourceParallelism) {
+        this.sourceParallelism = sourceParallelism;
     }
 
     /**

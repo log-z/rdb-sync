@@ -9,7 +9,7 @@ package vip.logz.rdbsync.common.persistence;
 public class DataSourceProperties {
 
     /** 属性在配置文件中的路径 */
-    public static final String PATH = "database";
+    public static final String PATH = "rdb-sync.datasource";
 
     /** JDBC驱动 */
     private String driver;

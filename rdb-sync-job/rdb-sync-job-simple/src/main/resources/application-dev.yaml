@@ -1,5 +1,6 @@
-database:
-  driver: com.mysql.jdbc.Driver
-  url: jdbc:mysql://local:3306/rdb_sync
-  username: flink_cdc
-  password: flink_cdc
+rdb-sync:
+  datasource:
+    driver: com.mysql.jdbc.Driver
+    url: jdbc:mysql://local:3306/rdb_sync
+    username: flink_cdc
+    password: flink_cdc

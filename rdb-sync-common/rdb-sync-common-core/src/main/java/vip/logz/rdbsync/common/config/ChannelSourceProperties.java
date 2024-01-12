@@ -8,6 +8,9 @@ package vip.logz.rdbsync.common.config;
  */
 public class ChannelSourceProperties {
 
+    /** 默认值：并行度 */
+    private static final int DEFAULT_PARALLELISM = 1;
+
     /** ID */
     private String id;
 
@@ -16,6 +19,9 @@ public class ChannelSourceProperties {
 
     /** 协议 */
     private String protocol;
+
+    /** 并行度 */
+    private Integer parallelism;
 
     /**
      * 获取ID
@@ -60,6 +66,21 @@ public class ChannelSourceProperties {
      */
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    /**
+     * 获取并行度
+     */
+    public int getParallelism() {
+        return parallelism != null ? parallelism : DEFAULT_PARALLELISM;
+    }
+
+    /**
+     * 设置并行度
+     * @param parallelism 并行度
+     */
+    public void setParallelism(int parallelism) {
+        this.parallelism = parallelism;
     }
 
 }

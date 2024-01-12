@@ -39,6 +39,7 @@ create table `channel_source`  (
   `id` varchar(32) not null comment 'ID',
   `name` varchar(64) not null comment '名称',
   `protocol` varchar(32) not null comment '协议',
+  `parallelism` int comment '并行度',
   primary key (`id`) using btree
 ) comment = '频道来源';
 

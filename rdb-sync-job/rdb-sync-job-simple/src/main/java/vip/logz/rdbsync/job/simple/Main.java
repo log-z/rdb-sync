@@ -17,8 +17,8 @@ public class Main {
         // 初始化任务上下文工厂
         StartupParameter startupParameter = StartupParameter.fromArgs(args);
         ContextFactory contextFactory = new PersistContextFactory(startupParameter)
-                .register(Channels.mysqlToMysqlChannel)
-                .register(Channels.mysqlToStarrocksChannel);
+                .register(Pipelines.mysqlToMysqlPipeline)
+                .register(Pipelines.mysqlToStarrocksPipeline);
 
         // 构造数据同步执行器，并启动它
         new RdbSyncExecution(contextFactory).start();

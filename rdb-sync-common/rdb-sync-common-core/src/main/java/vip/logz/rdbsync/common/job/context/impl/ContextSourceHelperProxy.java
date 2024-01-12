@@ -90,7 +90,7 @@ public class ContextSourceHelperProxy implements ContextSourceHelper<Rdb> {
      */
     @Override
     public Source<DebeziumEvent, ?, ?> getSource(ContextMeta contextMeta) {
-        String protocol = contextMeta.getChannelSourceProperties().getProtocol().toLowerCase();
+        String protocol = contextMeta.getPipelineSourceProperties().getProtocol().toLowerCase();
         ContextSourceHelper<Rdb> rawHelper = getRawHelper(protocol);
         return rawHelper.getSource(contextMeta);
     }

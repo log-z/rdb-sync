@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 频道
+ * 管道
  *
  * @author logz
  * @date 2024-01-10
  * @param <DistDB> 目标数据库实现
  */
-public class Channel<DistDB extends Rdb> implements Serializable {
+public class Pipeline<DistDB extends Rdb> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -20,13 +20,13 @@ public class Channel<DistDB extends Rdb> implements Serializable {
 
     /**
      * 来源ID
-     * @see vip.logz.rdbsync.common.config.ChannelSourceProperties
+     * @see vip.logz.rdbsync.common.config.PipelineSourceProperties
      */
     private String sourceId;
 
     /**
      * 目标ID
-     * @see vip.logz.rdbsync.common.config.ChannelDistProperties
+     * @see vip.logz.rdbsync.common.config.PipelineDistProperties
      */
     private String distId;
 
@@ -52,7 +52,7 @@ public class Channel<DistDB extends Rdb> implements Serializable {
 
     /**
      * 获取来源ID
-     * @see vip.logz.rdbsync.common.config.ChannelSourceProperties
+     * @see vip.logz.rdbsync.common.config.PipelineSourceProperties
      */
     public String getSourceId() {
         return sourceId;
@@ -61,7 +61,7 @@ public class Channel<DistDB extends Rdb> implements Serializable {
     /**
      * 设置来源ID
      * @param sourceId 来源ID
-     * @see vip.logz.rdbsync.common.config.ChannelSourceProperties
+     * @see vip.logz.rdbsync.common.config.PipelineSourceProperties
      */
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
@@ -69,7 +69,7 @@ public class Channel<DistDB extends Rdb> implements Serializable {
 
     /**
      * 获取目标ID
-     * @see vip.logz.rdbsync.common.config.ChannelDistProperties
+     * @see vip.logz.rdbsync.common.config.PipelineDistProperties
      */
     public String getDistId() {
         return distId;
@@ -78,7 +78,7 @@ public class Channel<DistDB extends Rdb> implements Serializable {
     /**
      * 设置目标ID
      * @param distId 目标ID
-     * @see vip.logz.rdbsync.common.config.ChannelDistProperties
+     * @see vip.logz.rdbsync.common.config.PipelineDistProperties
      */
     public void setDistId(String distId) {
         this.distId = distId;

@@ -1,15 +1,15 @@
 package vip.logz.rdbsync.connector.mysql.config;
 
-import vip.logz.rdbsync.common.config.ChannelSourceProperties;
+import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 /**
- * Mysql频道来源属性
+ * Mysql管道来源属性
  *
  * @author logz
  * @date 2024-01-09
  */
-public class MysqlChannelSourceProperties extends ChannelSourceProperties {
+public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
 
     /** 默认值：主机 */
     private static final String DEFAULT_HOST = "localhost";

@@ -6,8 +6,8 @@ import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.common.enums.SideOutputOp;
 import vip.logz.rdbsync.common.job.func.process.DispatcherProcess;
 import vip.logz.rdbsync.common.rule.Binding;
-import vip.logz.rdbsync.common.rule.Channel;
-import vip.logz.rdbsync.connector.starrocks.config.StarrocksChannelDistProperties;
+import vip.logz.rdbsync.common.rule.Pipeline;
+import vip.logz.rdbsync.connector.starrocks.config.StarrocksPipelineDistProperties;
 import vip.logz.rdbsync.connector.starrocks.job.func.DebeziumEventToStarrocksMap;
 import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 
@@ -31,13 +31,13 @@ public class StarrocksContextDistHelper implements ContextDistHelper<Starrocks, 
     @SuppressWarnings("unchecked")
     public Map<SideOutputTag, SideOutputContext<String>> getSideOutContexts(ContextMeta contextMeta) {
         // 1. 提取元数据
-        Channel<Starrocks> channel = (Channel<Starrocks>) contextMeta.getChannel();
-        StarrocksChannelDistProperties channelDistProperties =
-                (StarrocksChannelDistProperties) contextMeta.getChannelDistProperties();
+        Pipeline<Starrocks> pipeline = (Pipeline<Starrocks>) contextMeta.getPipeline();
+        StarrocksPipelineDistProperties pipelineDistProperties =
+                (StarrocksPipelineDistProperties) contextMeta.getPipelineDistProperties();
 
         // 2. 构建所有旁路输出上下文
         Map<SideOutputTag, SideOutputContext<String>> sideOutputContextMap = new HashMap<>();
-        for (Binding<Starrocks> binding : channel.getBindings()) {
+        for (Binding<Starrocks> binding : pipeline.getBindings()) {
             String distTable = binding.getDistTable();
             // 旁路输出标签
             SideOutputTag outputTag = new SideOutputTag(distTable, SideOutputOp.BOTH);
@@ -47,12 +47,12 @@ public class StarrocksContextDistHelper implements ContextDistHelper<Starrocks, 
 
             // 旁路输出上下文：初始化Sink
             StarRocksSinkOptions options = StarRocksSinkOptions.builder()
-                    .withProperty("jdbc-url", channelDistProperties.getJdbcUrl())
-                    .withProperty("load-url", channelDistProperties.getLoadUrl())
-                    .withProperty("database-name", channelDistProperties.getDatabase())
+                    .withProperty("jdbc-url", pipelineDistProperties.getJdbcUrl())
+                    .withProperty("load-url", pipelineDistProperties.getLoadUrl())
+                    .withProperty("database-name", pipelineDistProperties.getDatabase())
                     .withProperty("table-name", distTable)
-                    .withProperty("username", channelDistProperties.getUsername())
-                    .withProperty("password", channelDistProperties.getPassword())
+                    .withProperty("username", pipelineDistProperties.getUsername())
+                    .withProperty("password", pipelineDistProperties.getPassword())
                     .withProperty("sink.properties.format", "json")
                     .withProperty("sink.properties.strip_outer_array", "true")
                     .build();
@@ -71,7 +71,7 @@ public class StarrocksContextDistHelper implements ContextDistHelper<Starrocks, 
      */
     @Override
     public DispatcherProcess getDispatcher(ContextMeta contextMeta) {
-        return new DispatcherProcess(contextMeta.getChannel(), false);
+        return new DispatcherProcess(contextMeta.getPipeline(), false);
     }
 
 }

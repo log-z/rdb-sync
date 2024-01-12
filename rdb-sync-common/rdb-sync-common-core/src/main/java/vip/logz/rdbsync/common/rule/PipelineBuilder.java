@@ -5,33 +5,33 @@ import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.TableMatcher;
 
 /**
- * 频道构建器
+ * 管道构建器
  *
  * @author logz
  * @date 2024-01-10
  * @param <DistDB> 目标数据库实现
  */
-public class ChannelBuilder<DistDB extends Rdb> implements Builder<ChannelBuilder<DistDB>> {
+public class PipelineBuilder<DistDB extends Rdb> implements Builder<PipelineBuilder<DistDB>> {
 
-    /** 频道 */
-    private final Channel<DistDB> channel = new Channel<>();
+    /** 管道 */
+    private final Pipeline<DistDB> pipeline = new Pipeline<>();
 
     /**
      * 构建器
-     * @param channelId 频道ID
+     * @param pipelineId 管道ID
      */
-    private ChannelBuilder(String channelId) {
-        this.channel.setId(channelId);
+    private PipelineBuilder(String pipelineId) {
+        this.pipeline.setId(pipelineId);
     }
 
     /**
      * 设置来源ID
      * @param sourceId 来源ID
      * @return 返回当前对象
-     * @see vip.logz.rdbsync.common.config.ChannelSourceProperties
+     * @see vip.logz.rdbsync.common.config.PipelineSourceProperties
      */
-    public ChannelBuilder<DistDB> sourceId(String sourceId) {
-        channel.setSourceId(sourceId);
+    public PipelineBuilder<DistDB> sourceId(String sourceId) {
+        pipeline.setSourceId(sourceId);
         return this;
     }
 
@@ -39,10 +39,10 @@ public class ChannelBuilder<DistDB extends Rdb> implements Builder<ChannelBuilde
      * 设置目标ID
      * @param distId 目标ID
      * @return 返回当前对象
-     * @see vip.logz.rdbsync.common.config.ChannelDistProperties
+     * @see vip.logz.rdbsync.common.config.PipelineDistProperties
      */
-    public ChannelBuilder<DistDB> distId(String distId) {
-        channel.setDistId(distId);
+    public PipelineBuilder<DistDB> distId(String distId) {
+        pipeline.setDistId(distId);
         return this;
     }
 
@@ -53,7 +53,7 @@ public class ChannelBuilder<DistDB extends Rdb> implements Builder<ChannelBuilde
      * @param mapping 表映射
      * @return 返回当前对象
      */
-    public ChannelBuilder<DistDB> binding(String sourceTable, String distTable, Mapping<DistDB> mapping) {
+    public PipelineBuilder<DistDB> binding(String sourceTable, String distTable, Mapping<DistDB> mapping) {
         return binding(EqualTableMatcher.of(sourceTable), distTable, mapping);
     }
 
@@ -64,9 +64,9 @@ public class ChannelBuilder<DistDB extends Rdb> implements Builder<ChannelBuilde
      * @param mapping 表映射
      * @return 返回当前对象
      */
-    public ChannelBuilder<DistDB> binding(TableMatcher sourceTableMatcher, String distTable, Mapping<DistDB> mapping) {
+    public PipelineBuilder<DistDB> binding(TableMatcher sourceTableMatcher, String distTable, Mapping<DistDB> mapping) {
         Binding<DistDB> binding = new Binding<>(sourceTableMatcher, distTable, mapping);
-        channel.getBindings().add(binding);
+        pipeline.getBindings().add(binding);
         return this;
     }
 
@@ -75,26 +75,26 @@ public class ChannelBuilder<DistDB extends Rdb> implements Builder<ChannelBuilde
      * @return 当前构建器已经是最外围，将返回它本身
      */
     @Override
-    public ChannelBuilder<DistDB> and() {
+    public PipelineBuilder<DistDB> and() {
         return this;
     }
 
     /**
      * 执行构建
-     * @return 返回频道
+     * @return 返回管道
      */
-    public Channel<DistDB> build() {
-        return channel;
+    public Pipeline<DistDB> build() {
+        return pipeline;
     }
 
     /**
      * 工厂方法
-     * @param channelId 频道ID
-     * @return 返回一个新的频道构建器
+     * @param pipelineId 管道ID
+     * @return 返回一个新的管道构建器
      * @param <DistDB> 目标数据库实现
      */
-    public static <DistDB extends Rdb> ChannelBuilder<DistDB> of(String channelId) {
-        return new ChannelBuilder<>(channelId);
+    public static <DistDB extends Rdb> PipelineBuilder<DistDB> of(String pipelineId) {
+        return new PipelineBuilder<>(pipelineId);
     }
 
 }

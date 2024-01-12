@@ -1,8 +1,8 @@
 package vip.logz.rdbsync.common.job.context;
 
-import vip.logz.rdbsync.common.config.ChannelDistProperties;
-import vip.logz.rdbsync.common.config.ChannelSourceProperties;
-import vip.logz.rdbsync.common.rule.Channel;
+import vip.logz.rdbsync.common.config.PipelineDistProperties;
+import vip.logz.rdbsync.common.config.PipelineSourceProperties;
+import vip.logz.rdbsync.common.rule.Pipeline;
 
 /**
  * 任务上下文元数据
@@ -12,48 +12,48 @@ import vip.logz.rdbsync.common.rule.Channel;
  */
 public class ContextMeta {
 
-    /** 频道 */
-    private final Channel<?> channel;
+    /** 管道 */
+    private final Pipeline<?> pipeline;
 
-    /** 频道来源属性 */
-    private final ChannelSourceProperties channelSourceProperties;
+    /** 管道来源属性 */
+    private final PipelineSourceProperties pipelineSourceProperties;
 
-    /** 频道目标属性 */
-    private final ChannelDistProperties channelDistProperties;
+    /** 管道目标属性 */
+    private final PipelineDistProperties pipelineDistProperties;
 
     /**
      * 构造器
-     * @param channel 频道
-     * @param channelSourceProperties 频道来源属性
-     * @param channelDistProperties 频道目标属性
+     * @param pipeline 管道
+     * @param pipelineSourceProperties 管道来源属性
+     * @param pipelineDistProperties 管道目标属性
      */
-    public ContextMeta(Channel<?> channel,
-                       ChannelSourceProperties channelSourceProperties,
-                       ChannelDistProperties channelDistProperties) {
-        this.channel = channel;
-        this.channelSourceProperties = channelSourceProperties;
-        this.channelDistProperties = channelDistProperties;
+    public ContextMeta(Pipeline<?> pipeline,
+                       PipelineSourceProperties pipelineSourceProperties,
+                       PipelineDistProperties pipelineDistProperties) {
+        this.pipeline = pipeline;
+        this.pipelineSourceProperties = pipelineSourceProperties;
+        this.pipelineDistProperties = pipelineDistProperties;
     }
 
     /**
-     * 获取频道
+     * 获取管道
      */
-    public Channel<?> getChannel() {
-        return channel;
+    public Pipeline<?> getPipeline() {
+        return pipeline;
     }
 
     /**
-     * 获取频道来源属性
+     * 获取管道来源属性
      */
-    public ChannelSourceProperties getChannelSourceProperties() {
-        return channelSourceProperties;
+    public PipelineSourceProperties getPipelineSourceProperties() {
+        return pipelineSourceProperties;
     }
 
     /**
-     * 获取频道目标属性
+     * 获取管道目标属性
      */
-    public ChannelDistProperties getChannelDistProperties() {
-        return channelDistProperties;
+    public PipelineDistProperties getPipelineDistProperties() {
+        return pipelineDistProperties;
     }
 
 }

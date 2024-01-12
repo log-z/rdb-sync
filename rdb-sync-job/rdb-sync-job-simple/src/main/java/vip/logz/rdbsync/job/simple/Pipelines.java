@@ -1,7 +1,7 @@
 package vip.logz.rdbsync.job.simple;
 
-import vip.logz.rdbsync.common.rule.Channel;
-import vip.logz.rdbsync.common.rule.ChannelBuilder;
+import vip.logz.rdbsync.common.rule.Pipeline;
+import vip.logz.rdbsync.common.rule.PipelineBuilder;
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingBuilder;
 import vip.logz.rdbsync.common.rule.table.RegexTableMatcher;
@@ -11,12 +11,12 @@ import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 import vip.logz.rdbsync.connector.starrocks.utils.StarrocksDDLGenerator;
 
 /**
- * 简单地维护一下表映射和频道的元数据
+ * 简单地维护一下表映射和管道的元数据
  *
  * @author logz
  * @date 2024-01-11
  */
-public class Channels {
+public class Pipelines {
 
     /*
      Mysql --> Starrocks
@@ -32,8 +32,8 @@ public class Channels {
             .field("order_status").type(Starrocks.INT()).comment("订单状态").and()
             .build();
 
-    /** 频道：Mysql同步到Starrocks */
-    public final static Channel<Starrocks> mysqlToStarrocksChannel = ChannelBuilder.<Starrocks>of("mysql_to_starrocks")
+    /** 管道：Mysql同步到Starrocks */
+    public final static Pipeline<Starrocks> mysqlToStarrocksPipeline = PipelineBuilder.<Starrocks>of("mysql_to_starrocks")
             .sourceId("simple_source_mysql")
             .distId("simple_dist_starrocks")
             .binding("orders", "orders", ordersToStarrocksMapping)
@@ -54,8 +54,8 @@ public class Channels {
             .field("order_status").type(Mysql.TINYINT()).comment("订单状态").and()
             .build();
 
-    /** 频道：Mysql同步到Mysql */
-    public final static Channel<Mysql> mysqlToMysqlChannel = ChannelBuilder.<Mysql>of("mysql_to_mysql")
+    /** 管道：Mysql同步到Mysql */
+    public final static Pipeline<Mysql> mysqlToMysqlPipeline = PipelineBuilder.<Mysql>of("mysql_to_mysql")
             .sourceId("simple_source_mysql")
             .distId("simple_dist_mysql")
             .binding(t -> t.startsWith("orders"), "orders", ordersToMysqlMapping)
@@ -69,13 +69,13 @@ public class Channels {
 
     public static void main(String[] args) {
         System.out.println("Mysql同步到Starrocks：");
-        for (String ddl : new StarrocksDDLGenerator().generate(mysqlToStarrocksChannel)) {
+        for (String ddl : new StarrocksDDLGenerator().generate(mysqlToStarrocksPipeline)) {
             System.out.println(ddl);
         }
 
         System.out.println();
         System.out.println("Mysql同步到Mysql：");
-        for (String ddl : new MysqlDDLGenerator().generate(mysqlToMysqlChannel)) {
+        for (String ddl : new MysqlDDLGenerator().generate(mysqlToMysqlPipeline)) {
             System.out.println(ddl);
         }
     }

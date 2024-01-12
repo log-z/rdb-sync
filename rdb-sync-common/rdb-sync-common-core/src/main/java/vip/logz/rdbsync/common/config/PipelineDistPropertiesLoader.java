@@ -3,17 +3,17 @@ package vip.logz.rdbsync.common.config;
 import java.util.Map;
 
 /**
- * 频道来源属性加载器
+ * 管道目标属性加载器
  *
  * @author logz
  * @date 2024-01-09
  */
-public interface ChannelSourcePropertiesLoader {
+public interface PipelineDistPropertiesLoader {
 
     /**
      * 加载所有
      * @return [id -> properties]
      */
-    Map<String, ChannelSourceProperties> loadAll();
+    Map<String, PipelineDistProperties> loadAll();
 
 }

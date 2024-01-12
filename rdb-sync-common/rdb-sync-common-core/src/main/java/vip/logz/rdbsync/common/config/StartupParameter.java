@@ -18,8 +18,8 @@ public class StartupParameter {
             .stringType()
             .defaultValue("dev");
 
-    /** 配置选项：启动频道 */
-    private static final ConfigOption<String> CONFIG_OPTION_CHANNEL =  ConfigOptions.key("channel")
+    /** 配置选项：启动管道 */
+    private static final ConfigOption<String> CONFIG_OPTION_PIPELINE =  ConfigOptions.key("pipeline")
             .stringType()
             .noDefaultValue();
 
@@ -50,10 +50,10 @@ public class StartupParameter {
     }
 
     /**
-     * 获取启动频道
+     * 获取启动管道
      */
-    public String getChannel() {
-        return configuration.get(CONFIG_OPTION_CHANNEL);
+    public String getPipeline() {
+        return configuration.get(CONFIG_OPTION_PIPELINE);
     }
 
 }

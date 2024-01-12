@@ -1,15 +1,15 @@
 package vip.logz.rdbsync.connector.starrocks.config;
 
-import vip.logz.rdbsync.common.config.ChannelDistProperties;
+import vip.logz.rdbsync.common.config.PipelineDistProperties;
 import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 
 /**
- * Starrocks频道目标属性
+ * Starrocks管道目标属性
  *
  * @author logz
  * @date 2024-01-09
  */
-public class StarrocksChannelDistProperties extends ChannelDistProperties {
+public class StarrocksPipelineDistProperties extends PipelineDistProperties {
 
     /** 默认值：JDBC-URL */
     private static final String DEFAULT_JDBC_URL = "jdbc:mysql://localhost:9030";

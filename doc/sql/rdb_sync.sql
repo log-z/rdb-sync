@@ -1,28 +1,28 @@
 -- ----------------------------
--- Table channel_dist
+-- Table pipeline_dist
 -- ----------------------------
-create table `channel_dist`  (
+create table `pipeline_dist`  (
   `id` varchar(32) not null comment 'ID',
   `name` varchar(64) not null comment '名称',
   `protocol` varchar(32) not null comment '协议',
   primary key (`id`) using btree
-) comment = '频道目标';
+) comment = '管道目标';
 
 -- ----------------------------
--- Table channel_dist_mysql
+-- Table pipeline_dist_mysql
 -- ----------------------------
-create table `channel_dist_mysql`  (
+create table `pipeline_dist_mysql`  (
   `id` varchar(32) not null comment 'ID',
   `jdbc_url` varchar(255) not null comment 'JDBC-URL',
   `username` varchar(255) comment '用户名',
   `password` varchar(255) comment '密码',
   primary key (`id`) using btree
-) comment = '频道目标-MySQL扩展';
+) comment = '管道目标-MySQL扩展';
 
 -- ----------------------------
--- Table channel_dist_starrocks
+-- Table pipeline_dist_starrocks
 -- ----------------------------
-create table `channel_dist_starrocks`  (
+create table `pipeline_dist_starrocks`  (
   `id` varchar(32) not null comment 'ID',
   `jdbc_url` varchar(255) not null comment 'JDBC-URL',
   `load_url` varchar(255) not null comment 'FE-HTTP服务器',
@@ -30,23 +30,23 @@ create table `channel_dist_starrocks`  (
   `username` varchar(255) comment '用户名',
   `password` varchar(255) comment '密码',
   primary key (`id`) using btree
-) comment = '频道目标-StarRocks扩展';
+) comment = '管道目标-StarRocks扩展';
 
 -- ----------------------------
--- Table channel_source
+-- Table pipeline_source
 -- ----------------------------
-create table `channel_source`  (
+create table `pipeline_source`  (
   `id` varchar(32) not null comment 'ID',
   `name` varchar(64) not null comment '名称',
   `protocol` varchar(32) not null comment '协议',
   `parallelism` int comment '并行度',
   primary key (`id`) using btree
-) comment = '频道来源';
+) comment = '管道来源';
 
 -- ----------------------------
--- Table channel_source_mysql
+-- Table pipeline_source_mysql
 -- ----------------------------
-create table `channel_source_mysql`  (
+create table `pipeline_source_mysql`  (
   `id` varchar(32) not null comment 'id',
   `host` varchar(255) comment '主机',
   `port` int(11) comment '端口',
@@ -62,4 +62,4 @@ create table `channel_source_mysql`  (
   `startup_specific_offset_gtid_set` varchar(255) comment '启动参数：起始事务编码',
   `startup_timestamp_millis` bigint(20) comment '启动参数：起始时间戳',
   primary key (`id`) using btree
-) comment = '频道来源-MySQL扩展';
+) comment = '管道来源-MySQL扩展';

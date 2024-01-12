@@ -10,7 +10,7 @@ import vip.logz.rdbsync.common.exception.SourceException;
 import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.job.debezium.SimpleDebeziumDeserializationSchema;
 import vip.logz.rdbsync.common.utils.JacksonUtils;
-import vip.logz.rdbsync.connector.mysql.config.MysqlChannelSourceProperties;
+import vip.logz.rdbsync.connector.mysql.config.MysqlPipelineSourceProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 import java.time.Duration;
@@ -35,43 +35,43 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
     @Override
     public Source<DebeziumEvent, ?, ?> getSource(ContextMeta contextMeta) {
         // 1. 获取配置
-        MysqlChannelSourceProperties channelProperties =
-                (MysqlChannelSourceProperties) contextMeta.getChannelSourceProperties();
+        MysqlPipelineSourceProperties pipelineProperties =
+                (MysqlPipelineSourceProperties) contextMeta.getPipelineSourceProperties();
 
         // 构建启动模式
         StartupOptions startupOptions;
-        String startupMode = channelProperties.getStartupMode();
+        String startupMode = pipelineProperties.getStartupMode();
         switch (startupMode) {
             // INITIAL：先做快照，再读取最新日志
-            case MysqlChannelSourceProperties.STARTUP_MODE_INITIAL:
+            case MysqlPipelineSourceProperties.STARTUP_MODE_INITIAL:
                 startupOptions = StartupOptions.initial();
                 break;
             // EARLIEST：跳过快照，从最早可用位置读取日志
-            case MysqlChannelSourceProperties.STARTUP_MODE_EARLIEST:
+            case MysqlPipelineSourceProperties.STARTUP_MODE_EARLIEST:
                 startupOptions = StartupOptions.earliest();
                 break;
             // LATEST：跳过快照，仅读取最新日志
-            case MysqlChannelSourceProperties.STARTUP_MODE_LATEST:
+            case MysqlPipelineSourceProperties.STARTUP_MODE_LATEST:
                 startupOptions = StartupOptions.latest();
                 break;
             // OFFSET：跳过快照，从指定位置开始读取日志
-            case MysqlChannelSourceProperties.STARTUP_MODE_SPECIFIC_OFFSET:
-                String gtidSet = channelProperties.getStartupSpecificOffsetGtidSet();
-                Long pos = channelProperties.getStartupSpecificOffsetPos();
-                String file = channelProperties.getStartupSpecificOffsetFile();
+            case MysqlPipelineSourceProperties.STARTUP_MODE_SPECIFIC_OFFSET:
+                String gtidSet = pipelineProperties.getStartupSpecificOffsetGtidSet();
+                Long pos = pipelineProperties.getStartupSpecificOffsetPos();
+                String file = pipelineProperties.getStartupSpecificOffsetFile();
                 if (gtidSet != null) {
                     startupOptions = StartupOptions.specificOffset(gtidSet);
                 } else if (file != null) {
                     startupOptions = StartupOptions.specificOffset(file, pos);
                 } else {
                     throw new SourceException("StartupMode '" +
-                            MysqlChannelSourceProperties.STARTUP_MODE_SPECIFIC_OFFSET +
+                            MysqlPipelineSourceProperties.STARTUP_MODE_SPECIFIC_OFFSET +
                             "' Missing parameter.");
                 }
                 break;
             // TIMESTAMP：跳过快照，从指定时间戳开始读取日志
-            case MysqlChannelSourceProperties.STARTUP_MODE_TIMESTAMP:
-                startupOptions = StartupOptions.timestamp(channelProperties.getStartupTimestampMillis());
+            case MysqlPipelineSourceProperties.STARTUP_MODE_TIMESTAMP:
+                startupOptions = StartupOptions.timestamp(pipelineProperties.getStartupTimestampMillis());
                 break;
             default:
                 throw new SourceException("Unknown StartupMode: " + startupMode);
@@ -79,14 +79,14 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
 
         // 2. 构造数据源
         return MySqlSource.<DebeziumEvent>builder()
-                .hostname(channelProperties.getHost())
-                .port(channelProperties.getPort())
-                .databaseList(channelProperties.getDatabase())
-                .username(channelProperties.getUsername())
-                .password(channelProperties.getPassword())
-                .connectTimeout(Duration.ofSeconds(channelProperties.getConnectTimeoutSeconds()))
-                .jdbcProperties(parseJdbcProperties(channelProperties.getJdbcProperties()))
-                .serverId(channelProperties.getServerId())
+                .hostname(pipelineProperties.getHost())
+                .port(pipelineProperties.getPort())
+                .databaseList(pipelineProperties.getDatabase())
+                .username(pipelineProperties.getUsername())
+                .password(pipelineProperties.getPassword())
+                .connectTimeout(Duration.ofSeconds(pipelineProperties.getConnectTimeoutSeconds()))
+                .jdbcProperties(parseJdbcProperties(pipelineProperties.getJdbcProperties()))
+                .serverId(pipelineProperties.getServerId())
                 .startupOptions(startupOptions)
                 .tableList(".*")
                 .deserializer(new SimpleDebeziumDeserializationSchema())

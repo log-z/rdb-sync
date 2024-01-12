@@ -8,7 +8,7 @@ import vip.logz.rdbsync.common.exception.UnsupportedDebeziumEventOpException;
 import vip.logz.rdbsync.common.job.context.SideOutputTag;
 import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.rule.Binding;
-import vip.logz.rdbsync.common.rule.Channel;
+import vip.logz.rdbsync.common.rule.Pipeline;
 
 import java.util.Comparator;
 
@@ -22,23 +22,23 @@ import java.util.Comparator;
  */
 public class DispatcherProcess extends ProcessFunction<DebeziumEvent, DebeziumEvent> {
 
-    /** 频道 */
-    private final Channel<?> channel;
+    /** 管道 */
+    private final Pipeline<?> pipeline;
 
     /** 是否分离“更新或新增”和“删除”操作为两个旁路 */
     private final boolean separate;
 
     /**
      * 构造器
-     * @param channel 频道
+     * @param pipeline 管道
      * @param separate 是否分离“更新或新增”和“删除”操作为两个旁路
      */
-    public DispatcherProcess(Channel<?> channel, boolean separate) {
-        this.channel = channel;
+    public DispatcherProcess(Pipeline<?> pipeline, boolean separate) {
+        this.pipeline = pipeline;
         this.separate = separate;
 
         // 按匹配器优先级调整绑定顺序
-        channel.getBindings().sort(
+        pipeline.getBindings().sort(
                 Comparator.comparingInt(binding -> binding.getSourceTableMatcher().order())
         );
     }
@@ -57,7 +57,7 @@ public class DispatcherProcess extends ProcessFunction<DebeziumEvent, DebeziumEv
         String sourceTable = event.getSource().getTable();
 
         // 查找匹配的绑定
-        for (Binding<?> binding : channel.getBindings()) {
+        for (Binding<?> binding : pipeline.getBindings()) {
             if (!binding.getSourceTableMatcher().match(sourceTable)) {
                 continue;
             }

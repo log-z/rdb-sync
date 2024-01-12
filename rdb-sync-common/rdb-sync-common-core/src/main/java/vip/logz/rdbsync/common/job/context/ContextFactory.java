@@ -3,7 +3,7 @@ package vip.logz.rdbsync.common.job.context;
 import vip.logz.rdbsync.common.config.*;
 import vip.logz.rdbsync.common.job.context.impl.ContextDistHelperProxy;
 import vip.logz.rdbsync.common.job.context.impl.ContextSourceHelperProxy;
-import vip.logz.rdbsync.common.rule.Channel;
+import vip.logz.rdbsync.common.rule.Pipeline;
 import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.utils.PropertiesUtils;
 
@@ -29,19 +29,19 @@ public abstract class ContextFactory {
     }
 
     /**
-     * 频道来源属性加载器
+     * 管道来源属性加载器
      */
-    protected abstract ChannelSourcePropertiesLoader getChannelSourcePropertiesLoader();
+    protected abstract PipelineSourcePropertiesLoader getPipelineSourcePropertiesLoader();
 
     /**
-     * 频道目标属性加载器
+     * 管道目标属性加载器
      */
-    protected abstract ChannelDistPropertiesLoader getChannelDistPropertiesLoader();
+    protected abstract PipelineDistPropertiesLoader getPipelineDistPropertiesLoader();
 
     /**
-     * 获取频道
+     * 获取管道
      */
-    protected abstract Channel<?> getChannel();
+    protected abstract Pipeline<?> getPipeline();
 
     /**
      * 创建任务上下文
@@ -49,32 +49,36 @@ public abstract class ContextFactory {
     @SuppressWarnings("unchecked")
     public Context<?> create() {
         // 1. 获取元数据
-        Channel<Rdb> channel = (Channel<Rdb>) getChannel();
-        ChannelSourceProperties channelSourceProperties = getChannelSourcePropertiesLoader()
-                .loadAll()
-                .get(channel.getSourceId());
-        ChannelDistProperties channelDistProperties = getChannelDistPropertiesLoader()
-                .loadAll()
-                .get(channel.getDistId());
-        if (channelSourceProperties == null) {
-            throw new RuntimeException("channel source [" + channel.getSourceId() +  "] properties not found.");
-        }
-        if (channelDistProperties == null) {
-            throw new RuntimeException("channel dist [" + channel.getDistId() +  "] properties not found.");
+        Pipeline<Rdb> pipeline = (Pipeline<Rdb>) getPipeline();
+        if (pipeline == null) {
+            throw new IllegalArgumentException("pipeline not found.");
         }
 
-        ContextMeta contextMeta = new ContextMeta(channel, channelSourceProperties, channelDistProperties);
+        PipelineSourceProperties pipelineSourceProperties = getPipelineSourcePropertiesLoader()
+                .loadAll()
+                .get(pipeline.getSourceId());
+        PipelineDistProperties pipelineDistProperties = getPipelineDistPropertiesLoader()
+                .loadAll()
+                .get(pipeline.getDistId());
+        if (pipelineSourceProperties == null) {
+            throw new RuntimeException("pipeline source [" + pipeline.getSourceId() +  "] properties not found.");
+        }
+        if (pipelineDistProperties == null) {
+            throw new RuntimeException("pipeline dist [" + pipeline.getDistId() +  "] properties not found.");
+        }
+
+        ContextMeta contextMeta = new ContextMeta(pipeline, pipelineSourceProperties, pipelineDistProperties);
 
         // 2. 构造任务上下文
         Context<Object> context = new Context<>();
         // 设置执行器属性
-        ExecutionInfo executionInfo = getExecutionInfo(channel.getId());
+        ExecutionInfo executionInfo = getExecutionInfo(pipeline.getId());
         context.setExecutionInfo(executionInfo);
         // 设置来源
         ContextSourceHelperProxy contextSourceHelper = new ContextSourceHelperProxy();
         context.setSource(contextSourceHelper.getSource(contextMeta));
-        context.setSourceName(channelSourceProperties.getName());
-        context.setSourceParallelism(channelSourceProperties.getParallelism());
+        context.setSourceName(pipelineSourceProperties.getName());
+        context.setSourceParallelism(pipelineSourceProperties.getParallelism());
         // 设置去向
         ContextDistHelperProxy contextDistHelper = new ContextDistHelperProxy();
         context.setSideOutputContextMap(contextDistHelper.getSideOutContexts(contextMeta));

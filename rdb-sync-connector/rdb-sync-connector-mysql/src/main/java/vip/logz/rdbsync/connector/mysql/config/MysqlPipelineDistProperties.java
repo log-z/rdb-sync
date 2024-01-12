@@ -1,15 +1,15 @@
 package vip.logz.rdbsync.connector.mysql.config;
 
-import vip.logz.rdbsync.common.config.ChannelDistProperties;
+import vip.logz.rdbsync.common.config.PipelineDistProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 /**
- * Mysql频道目标属性
+ * Mysql管道目标属性
  *
  * @author logz
  * @date 2024-01-09
  */
-public class MysqlChannelDistProperties extends ChannelDistProperties {
+public class MysqlPipelineDistProperties extends PipelineDistProperties {
 
     /** 默认值：JDBC-URL */
     private static final String DEFAULT_JDBC_URL = "jdbc:mysql://localhost:3306";

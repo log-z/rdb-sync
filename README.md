@@ -37,7 +37,86 @@
 ## 教程
 
 ### 表映射 & 管道
-TODO...
+表映射：定义目标表结构，依据此进行类型转换和建表语句生成。
+
+管道：确定来源与目标的连接配置，定义来源表与目标表的绑定关系。
+
+> 不需要定义来源表结构，只需要目标表的结构与来源表匹配即可。
+```java
+// 表映射：订单表的Starrocks结构（目标表）
+Mapping<Starrocks> ordersToStarrocksMapping = MappingBuilder.<Starrocks>of()
+        .field("order_id").type(Starrocks.INT()).nonNull().primaryKey().comment("订单ID").and()
+        .field("order_date").type(Starrocks.DATETIME()).comment("下单日期").and()
+        .field("customer_name").type(Starrocks.STRING()).comment("客户名称").and()
+        .field("price").type(Starrocks.DECIMAL(10, 5)).comment("价格").and()
+        .field("product_id").type(Starrocks.INT()).comment("商品ID").and()
+        .field("order_status").type(Starrocks.INT()).comment("订单状态").and()
+        .build();
+
+// 管道：Mysql同步到Starrocks，管道ID是“mysql_to_starrocks”
+Pipeline<Starrocks> mysqlToStarrocksPipeline = PipelineBuilder.<Starrocks>of("mysql_to_starrocks")
+        .sourceId("simple_source_mysql")
+        .distId("simple_dist_starrocks")
+        // 来源表等值匹配
+        .binding("orders", "orders", ordersToStarrocksMapping)
+        // 来源表正则匹配
+        .binding(RegexTableMatcher.of("$orders_\\d+"), "orders", ordersToMysqlMapping)
+        // 来源表自定义匹配
+        .binding(t -> t.startsWith("orders_"), "orders", ordersToMysqlMapping)
+        .build();
+```
+
+通过各种 `DDLGenerator` 为管道批量生成目标表的建表语句。
+```java
+public static void printDDL() {
+    StarrocksDDLGenerator ddlGenerator = new StarrocksDDLGenerator();
+    for (String ddl : ddlGenerator.generate(mysqlToStarrocksPipeline)) {
+        System.out.println(ddl);
+    }
+}
+```
+
+启动 Flink 作业的主方法。
+```java
+public static void main(String[] args) throws Exception {
+    // 初始化任务上下文工厂
+    StartupParameter startupParameter = StartupParameter.fromArgs(args);
+    ContextFactory contextFactory = new PersistContextFactory(startupParameter)
+            // 注册管道（一个或多个），后续在启动时通过参数指定需要启动的管道
+            .register(mysqlToStarrocksPipeline);
+    
+    // 构造数据同步执行器，并启动它
+    new RdbSyncExecution(contextFactory).start();
+}
+```
 
 ### 配置
-TODO...
+RDB Sync 的关键配置保存在数据库中，下面以 MySQL 存储为例。
+
+推荐使用专用数据库 `rdb_sync` 和专用用户，执行 [doc/sql/rdb_sync.sql](doc/sql/rdb_sync.sql) 可生成全部配置表：
+* pipeline_source `管道来源`
+  * pipeline_source_mysql `管道来源-MySQL扩展`
+* pipeline_dist `管道目标`
+  * pipeline_dist_mysql `管道目标-MySQL扩展`
+  * pipeline_dist_starrocks `管道目标-StarRocks扩展`
+
+```
+pipeline_source.id <--> PipelineBuilder.sourceId(..)
+pipeline_dist.id <--> PipelineBuilder.distId(..)
+```
+
+在 Job 源码的资源文件 `application-${env}.yaml` 中可以指定 `rdb_sync` 数据库的连接信息。
+```yaml
+rdb-sync:
+  datasource:
+    driver: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/rdb_sync
+    username: ...
+    password: ...
+```
+
+### 启动参数
+| 参数 | 默认值 | 描述 |
+|---|---|---|
+| `-e`<br/>`--env` | dev | 指定运行环境 |
+| `-p`<br/>`--pipeline` | 必填 | 指定启动的管道ID |

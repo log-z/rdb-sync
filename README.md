@@ -1,5 +1,5 @@
 # RDB Sync
-基于 Apache Flink® 与 Ververica CDC Connectors 的数据同步解决方案。
+基于 Apache Flink® `1.18.x` 与 Ververica CDC Connectors 的数据同步解决方案。
 
 ## 演练场
 ### 第一阶段（MySQL --> MySQL）
@@ -117,7 +117,7 @@ pipeline_source.id <--> PipelineBuilder.sourceId(..)
 pipeline_dist.id <--> PipelineBuilder.distId(..)
 ```
 
-在 Job 源码的资源文件 `application-${env}.yaml` <sup>②</sup> 中可以指定 `rdb_sync` 数据库的连接信息：
+在 Job 源码的配置文件 `application-${env}.yaml` <sup>②</sup> 中可以指定 `rdb_sync` 数据库的连接信息：
 ```yaml
 rdb-sync:
   datasource:
@@ -126,6 +126,15 @@ rdb-sync:
     username: ...
     password: ...
 ```
+
+配置文件还支持管理 [Flink 配置](https://nightlies.apache.org/flink/flink-docs-release-1.18/zh/docs/deployment/config/)，这将覆盖 Flink 集群的默认配置。
+```yaml
+# 此处演示 state.checkpoints.dir 配置项
+state:
+  checkpoints:
+    dir: hdfs://...
+```
+
 > 补充说明：
 >
 > ① 启动 Flink 作业前，请按实际情况录入数据。

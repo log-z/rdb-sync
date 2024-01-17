@@ -69,27 +69,4 @@ public class SqlUtils {
         return String.format(FORMATTER_IDENTIFIER_LITERAL, escaped);
     }
 
-
-    /*
-     其它工具
-     */
-
-    /**
-     * 安全地删除尾部字符串
-     * @param sb 字符串构建器
-     * @param deleting 需要删除的内容
-     * @return 返回已截短的字符串构建器
-     */
-    public static StringBuilder deleteTail(StringBuilder sb, String deleting) {
-        int strLen = sb.length();
-        int tailLen = deleting.length();
-
-        String tail = sb.substring(strLen - tailLen);
-        if (tail.equals(deleting)) {
-            return sb.delete(strLen - tailLen, strLen);
-        } else {
-            return sb;
-        }
-    }
-
 }

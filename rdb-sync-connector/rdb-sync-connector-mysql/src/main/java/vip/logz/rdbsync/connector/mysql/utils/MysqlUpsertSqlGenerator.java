@@ -2,6 +2,7 @@ package vip.logz.rdbsync.connector.mysql.utils;
 
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
+import vip.logz.rdbsync.common.utils.StringUtils;
 import vip.logz.rdbsync.common.utils.sql.DMLGenerator;
 import vip.logz.rdbsync.common.utils.sql.SqlUtils;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
@@ -40,7 +41,7 @@ public class MysqlUpsertSqlGenerator implements DMLGenerator<Mysql> {
         }
 
         // 去除末尾逗号，然后闭合括号
-        SqlUtils.deleteTail(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+        StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
 
         // 3. 值信息
         sb.append(WHITESPACE)
@@ -52,7 +53,7 @@ public class MysqlUpsertSqlGenerator implements DMLGenerator<Mysql> {
         }
 
         // 去除末尾逗号，然后闭合括号
-        SqlUtils.deleteTail(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+        StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
 
         // 4. 键冲突处理（更新字段值）
         sb.append(WHITESPACE)
@@ -69,7 +70,7 @@ public class MysqlUpsertSqlGenerator implements DMLGenerator<Mysql> {
         }
 
         // 去除末尾逗号，然后结束
-        return SqlUtils.deleteTail(sb, TOKEN_COMMA)
+        return StringUtils.removeEnd(sb, TOKEN_COMMA)
                 .append(TOKEN_TERMINATOR)
                 .toString();
     }

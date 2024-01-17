@@ -1,10 +1,11 @@
 package vip.logz.rdbsync.connector.starrocks.utils;
 
-import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
+import vip.logz.rdbsync.common.utils.StringUtils;
 import vip.logz.rdbsync.common.utils.sql.DDLGenerator;
 import vip.logz.rdbsync.common.utils.sql.SqlUtils;
+import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
         }
 
         // 去除末尾逗号，然后闭合括号
-        SqlUtils.deleteTail(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+        StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
 
         // 3. 主键信息
         if (!primaryKeys.isEmpty()) {
@@ -105,7 +106,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
             }
 
             // 去除末尾逗号，然后闭合括号
-            SqlUtils.deleteTail(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+            StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
 
             // 3.1. 分桶键
             sb.append(WHITESPACE)
@@ -118,7 +119,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
             }
 
             // 去除末尾逗号，然后闭合括号
-            SqlUtils.deleteTail(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+            StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
         }
 
         // 4. 属性信息
@@ -135,7 +136,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
             );
 
             // 去除末尾逗号，然后闭合括号
-            SqlUtils.deleteTail(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+            StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
         }
 
         return sb.append(TOKEN_TERMINATOR).toString();

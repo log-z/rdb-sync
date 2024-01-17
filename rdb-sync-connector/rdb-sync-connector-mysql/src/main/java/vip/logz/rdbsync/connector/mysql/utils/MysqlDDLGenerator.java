@@ -2,6 +2,7 @@ package vip.logz.rdbsync.connector.mysql.utils;
 
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
+import vip.logz.rdbsync.common.utils.StringUtils;
 import vip.logz.rdbsync.common.utils.sql.DDLGenerator;
 import vip.logz.rdbsync.common.utils.sql.SqlUtils;
 import vip.logz.rdbsync.connector.mysql.enums.MysqlEngine;
@@ -92,13 +93,13 @@ public class MysqlDDLGenerator implements DDLGenerator<Mysql> {
             }
 
             // 去除末尾逗号，然后闭合括号
-            SqlUtils.deleteTail(sb, TOKEN_COMMA)
+            StringUtils.removeEnd(sb, TOKEN_COMMA)
                     .append(TOKEN_BRACKET_END)
                     .append(TOKEN_COMMA);
         }
 
         // 去除末尾逗号，然后闭合括号
-        SqlUtils.deleteTail(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+        StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
 
         // 4. 指定引擎
         sb.append(WHITESPACE)

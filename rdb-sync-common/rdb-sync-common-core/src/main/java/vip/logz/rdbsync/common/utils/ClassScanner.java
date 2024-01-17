@@ -69,19 +69,19 @@ public class ClassScanner {
     }
 
     /**
-     * 扫描所有类型
+     * 扫描类型
      * @return 返回已扫描到的类型集合
      * @throws IOException 资源访问出错时抛出此异常
      */
-    public Set<Class<?>> doScanAllClasses() throws IOException {
+    public Set<Class<?>> doScan() throws IOException {
+        // 类型收集容器
         Set<Class<?>> classes = new LinkedHashSet<>();
-        String packagePath = basePackage;
-
-        if (packagePath.endsWith(PACKAGE_DELIMITER)) {
-            packagePath = packagePath.substring(0, packagePath.length() - PACKAGE_DELIMITER.length());
-        }
-
+        // 包路径
+        String packagePath = StringUtils.removeEnd(basePackage, PACKAGE_DELIMITER);
+        // 包路径的文件表示
         String basePackageFilePath = packagePath.replace(PACKAGE_DELIMITER, FILEPATH_DELIMITER);
+
+        // 获取所有资源URL，并遍历
         Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(basePackageFilePath);
         while (resources.hasMoreElements()) {
             URL resource = resources.nextElement();
@@ -89,10 +89,12 @@ public class ClassScanner {
 
             try {
                 if (URL_PROTOCOL_FILE.equals(protocol)) {
+                    // 展开资源：当位于文件系统
                     String filePath = URLDecoder.decode(resource.getFile(), StandardCharsets.UTF_8);
-                    doScanPackClassesByFile(classes, packagePath, filePath);
+                    doScanByFile(classes, packagePath, filePath);
                 } else if (URL_PROTOCOL_JAR.equals(protocol)) {
-                    doScanPackClassesByJar(classes, packagePath, resource);
+                    // 展开资源：当位于JAR包
+                    doScanByJar(classes, packagePath, resource);
                 }
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
@@ -109,13 +111,16 @@ public class ClassScanner {
      * @param filePath 文件路径
      * @throws ClassNotFoundException 代码逻辑有误时可能抛出此异常
      */
-    private void doScanPackClassesByFile(Set<Class<?>> classes, String packagePath, String filePath)
+    private void doScanByFile(Set<Class<?>> classes, String packagePath, String filePath)
     throws ClassNotFoundException {
+        // 情形1：路径不存在或不是目录
         File dir = new File(filePath);
         if (!dir.exists() || !dir.isDirectory()) {
-            return;
+            return;  // 提前退出
         }
 
+        // 情形2：路径是有效目录
+        // 列出当前目录的 .class 文件，如需深度扫描则包含子目录
         File[] files = dir.listFiles(file -> {
             String fileName = file.getName();
             if (!file.isDirectory()) {
@@ -125,6 +130,8 @@ public class ClassScanner {
             if (!recursive) {
                 return false;
             }
+
+            // 包路径鉴定
             if (packagePredicate != null) {
                 return packagePredicate.test(packagePath + PACKAGE_DELIMITER + fileName);
             }
@@ -136,15 +143,19 @@ public class ClassScanner {
             return;
         }
 
+        // 处理这些文件或子目录
         for (File file : files) {
             String fileName = file.getName();
+
+            // 情形2.1：递归处理子目录
             if (file.isDirectory()) {
                 String subPackageName = packagePath + PACKAGE_DELIMITER + fileName;
-                doScanPackClassesByFile(classes, subPackageName, file.getAbsolutePath());
+                doScanByFile(classes, subPackageName, file.getAbsolutePath());
                 continue;
             }
 
-            String className = fileName.substring(0, fileName.length() - FILE_SUFFIX_CLASS.length());
+            // 情形2.2：加载 .class 文件并收集
+            String className = StringUtils.removeEnd(fileName, FILE_SUFFIX_CLASS);
             loadAndCollectClass(classes, packagePath + PACKAGE_DELIMITER + className);
         }
     }
@@ -157,33 +168,42 @@ public class ClassScanner {
      * @throws IOException 资源访问出错时抛出此异常
      * @throws ClassNotFoundException 代码逻辑有误时可能抛出此异常
      */
-    private void doScanPackClassesByJar(Set<Class<?>> classes, String packagePath, URL url)
+    private void doScanByJar(Set<Class<?>> classes, String packagePath, URL url)
     throws IOException, ClassNotFoundException {
+        // 包路径的文件表示
         String basePackageFilePath = packagePath.replace(PACKAGE_DELIMITER, FILEPATH_DELIMITER);
-        JarFile jar = ((JarURLConnection) url.openConnection()).getJarFile();
 
+        // 打开JAR文件
+        JarFile jar = ((JarURLConnection) url.openConnection()).getJarFile();
+        // 遍历JAR内部条目
         Enumeration<JarEntry> entries = jar.entries();
         while (entries.hasMoreElements()) {
             JarEntry jarEntry = entries.nextElement();
             String name = jarEntry.getName();
 
+            // 情形1：不在指定的包中，或这是个目录
             if (!name.startsWith(basePackageFilePath) || jarEntry.isDirectory()) {
-                continue;
+                continue;  // 忽略它
             }
 
+            // 情形2：禁用深度扫描时，却位于更深层的包中
             int endIndex = name.lastIndexOf(FILEPATH_DELIMITER);
             if (!recursive && endIndex != basePackageFilePath.length()) {
-                continue;
+                continue;  // 忽略它
             }
 
+            // 情形3：包路径鉴定不通过
             if (packagePredicate != null) {
-                String jarPackageName = name.substring(0, endIndex).replace(FILEPATH_DELIMITER, PACKAGE_DELIMITER);
+                String jarPackageName = name.substring(0, endIndex)
+                        .replace(FILEPATH_DELIMITER, PACKAGE_DELIMITER);
                 if (!packagePredicate.test(jarPackageName)) {
-                    continue;
+                    continue;  // 忽略它
                 }
             }
 
-            String className = name.substring(0, name.length() - FILE_SUFFIX_CLASS.length())
+            // 情形4：这是个有效的 .class 条目
+            // 加载 .class 条目并收集
+            String className = StringUtils.removeEnd(name, FILE_SUFFIX_CLASS)
                     .replace(FILEPATH_DELIMITER, PACKAGE_DELIMITER);
             loadAndCollectClass(classes, className);
         }
@@ -219,7 +239,7 @@ public class ClassScanner {
         ClassScanner classScanner = new ClassScanner(basePackage, true, null, classPredicate);
 
         try {
-            return (Set) classScanner.doScanAllClasses();
+            return (Set) classScanner.doScan();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -236,7 +256,7 @@ public class ClassScanner {
         ClassScanner classScanner = new ClassScanner(basePackage, true, null, classPredicate);
 
         try {
-            return classScanner.doScanAllClasses();
+            return classScanner.doScan();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

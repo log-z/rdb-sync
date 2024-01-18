@@ -1,20 +1,17 @@
 package vip.logz.rdbsync.common.enums;
 
 /**
- * 旁路输出操作
+ * 数据同步事件操作
  *
  * @author logz
- * @date 2024-01-09
+ * @date 2024-01-17
  */
-public enum SideOutputOp {
+public enum RdbSyncEventOp {
 
     /** 更新或插入 */
     UPSERT,
 
     /** 删除 */
     DELETE,
-
-    /** 二者通用 */
-    BOTH,
 
 }

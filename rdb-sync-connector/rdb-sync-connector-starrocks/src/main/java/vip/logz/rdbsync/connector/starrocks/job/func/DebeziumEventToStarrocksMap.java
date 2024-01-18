@@ -3,6 +3,8 @@ package vip.logz.rdbsync.connector.starrocks.job.func;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.starrocks.connector.flink.row.sink.StarRocksSinkOP;
+import vip.logz.rdbsync.common.exception.UnsupportedRdbSyncEventOpException;
+import vip.logz.rdbsync.common.job.RdbSyncEvent;
 import vip.logz.rdbsync.common.job.func.map.AbstractDebeziumEventToSinkMap;
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.utils.JacksonUtils;
@@ -30,25 +32,27 @@ public class DebeziumEventToStarrocksMap extends AbstractDebeziumEventToSinkMap<
     }
 
     /**
-     * 适配更新或新增的后续处理
-     * @param record 变更后的记录
-     * @return 返回转化结果
+     * 转换映射
+     * @param event 数据同步事件
+     * @return 返回转换结果
      */
     @Override
-    protected String adaptUpsert(Map<String, Object> record) {
-        int op = StarRocksSinkOP.UPSERT.ordinal();
-        record.put(StarRocksSinkOP.COLUMN_KEY, op);
-        return toJsonString(record);
-    }
+    protected String map(RdbSyncEvent event) {
+        int op;
+        switch (event.getOp()) {
+            case UPSERT:
+                op = StarRocksSinkOP.UPSERT.ordinal();
+                break;
+            case DELETE:
+                op = StarRocksSinkOP.DELETE.ordinal();
+                break;
+            default:
+                throw new UnsupportedRdbSyncEventOpException(
+                        Starrocks.class.getSimpleName(), event.getOp()
+                );
+        }
 
-    /**
-     * 适配删除的后续处理
-     * @param record 删除前的记录
-     * @return 返回转化结果
-     */
-    @Override
-    protected String adaptDelete(Map<String, Object> record) {
-        int op = StarRocksSinkOP.DELETE.ordinal();
+        Map<String, Object> record = event.getRecord();
         record.put(StarRocksSinkOP.COLUMN_KEY, op);
         return toJsonString(record);
     }

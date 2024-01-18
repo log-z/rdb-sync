@@ -9,14 +9,14 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rdb-sync-connector-starrocks</artifactId>
+    <artifactId>rdb-sync-connector-jdbc</artifactId>
 
     <dependencies>
         <!-- Flink Connector CDC -->
-        <!-- flink-connector-starrocks -->
+        <!-- flink-connector-jdbc -->
         <dependency>
-            <groupId>com.starrocks</groupId>
-            <artifactId>flink-connector-starrocks</artifactId>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-jdbc</artifactId>
         </dependency>
 
         <!-- RdbSync -->

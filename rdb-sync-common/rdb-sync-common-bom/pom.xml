@@ -130,6 +130,12 @@
                 <artifactId>rdb-sync-common-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- rdb-sync-connector-jdbc -->
+            <dependency>
+                <groupId>vip.logz</groupId>
+                <artifactId>rdb-sync-connector-jdbc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- rdb-sync-connector-mysql -->
             <dependency>
                 <groupId>vip.logz</groupId>

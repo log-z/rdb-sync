@@ -2,9 +2,6 @@ package vip.logz.rdbsync.common.job.func.process;
 
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
-import vip.logz.rdbsync.common.enums.DebeziumEventOp;
-import vip.logz.rdbsync.common.enums.SideOutputOp;
-import vip.logz.rdbsync.common.exception.UnsupportedDebeziumEventOpException;
 import vip.logz.rdbsync.common.job.context.SideOutputTag;
 import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.rule.Binding;
@@ -25,17 +22,12 @@ public class DispatcherProcess extends ProcessFunction<DebeziumEvent, DebeziumEv
     /** 管道 */
     private final Pipeline<?> pipeline;
 
-    /** 是否分离“更新或新增”和“删除”操作为两个旁路 */
-    private final boolean separate;
-
     /**
      * 构造器
      * @param pipeline 管道
-     * @param separate 是否分离“更新或新增”和“删除”操作为两个旁路
      */
-    public DispatcherProcess(Pipeline<?> pipeline, boolean separate) {
+    public DispatcherProcess(Pipeline<?> pipeline) {
         this.pipeline = pipeline;
-        this.separate = separate;
 
         // 按匹配器优先级调整绑定顺序
         pipeline.getBindings().sort(
@@ -62,26 +54,8 @@ public class DispatcherProcess extends ProcessFunction<DebeziumEvent, DebeziumEv
                 continue;
             }
 
-            // 确定旁路输出操作
-            SideOutputOp op;
-            switch (DebeziumEventOp.parse(event.getOp())) {
-                case READ:
-                case CREATE:
-                case UPDATE: {
-                    op = separate ? SideOutputOp.UPSERT : SideOutputOp.BOTH;
-                    break;
-                }
-                case DELETE: {
-                    op = separate ? SideOutputOp.DELETE : SideOutputOp.BOTH;
-                    break;
-                }
-                default: {
-                    throw new UnsupportedDebeziumEventOpException(event.getOp());
-                }
-            }
-
             // 构建旁路输出标签
-            SideOutputTag outputTag = new SideOutputTag(binding.getDistTable(), op);
+            SideOutputTag outputTag = new SideOutputTag(binding.getDistTable());
             // 转发到旁路输出
             ctx.output(outputTag, event);
             return;

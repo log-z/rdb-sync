@@ -2,7 +2,9 @@ package vip.logz.rdbsync.common.job.func.map;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import vip.logz.rdbsync.common.enums.DebeziumEventOp;
+import vip.logz.rdbsync.common.enums.RdbSyncEventOp;
 import vip.logz.rdbsync.common.exception.UnsupportedDebeziumEventOpException;
+import vip.logz.rdbsync.common.job.RdbSyncEvent;
 import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.table.Mapping;
@@ -30,15 +32,15 @@ public abstract class AbstractDebeziumEventToSinkMap<DistDB extends Rdb, T> impl
     }
 
     /**
-     * 转化映射
+     * 转换映射
      * @param event Debezium事件
-     * @return 返回转化结果
+     * @return 返回转换结果
      * @throws Exception 参考 {@link MapFunction#map(Object)}
      */
     @Override
     public T map(DebeziumEvent event) throws Exception {
-        // 是否为“更新或删除”的标志
-        boolean isUpsert;
+        // 操作
+        RdbSyncEventOp op;
         // 有意义的记录
         Map<String, Object> record;
 
@@ -47,13 +49,13 @@ public abstract class AbstractDebeziumEventToSinkMap<DistDB extends Rdb, T> impl
             case READ:
             case CREATE:
             case UPDATE: {
-                isUpsert = true;
+                op = RdbSyncEventOp.UPSERT;
                 record = event.getAfter();  // 变更后的记录有意义
                 break;
             }
             // 删除操作
             case DELETE: {
-                isUpsert = false;
+                op = RdbSyncEventOp.DELETE;
                 record = event.getBefore();  // 删除前的记录有意义
                 break;
             }
@@ -70,22 +72,15 @@ public abstract class AbstractDebeziumEventToSinkMap<DistDB extends Rdb, T> impl
             record.put(fieldName, valFinal);
         }
 
-        // 视情况进行后续处理
-        return isUpsert ? adaptUpsert(record) : adaptDelete(record);
+        // 根据不同数据库进行后续处理
+        return map(new RdbSyncEvent(op, record));
     }
 
     /**
-     * 适配更新或新增的后续处理
-     * @param record 变更后的记录
-     * @return 返回转化结果
+     * 转换映射
+     * @param event 数据同步事件
+     * @return 返回转换结果
      */
-    protected abstract T adaptUpsert(Map<String, Object> record);
-
-    /**
-     * 适配删除的后续处理
-     * @param record 删除前的记录
-     * @return 返回转化结果
-     */
-    protected abstract T adaptDelete(Map<String, Object> record);
+    protected abstract T map(RdbSyncEvent event);
 
 }

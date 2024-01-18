@@ -1,5 +1,5 @@
 # RDB Sync
-基于 Apache Flink® `1.18.x` 与 Ververica CDC Connectors 的数据同步解决方案。
+基于 Apache Flink® `1.18.x-java11` 与 Ververica CDC Connectors 的数据同步解决方案。
 
 ## 演练场
 ### 第一阶段（MySQL --> MySQL）
@@ -129,6 +129,9 @@ rdb-sync:
 
 配置文件还支持管理 [Flink 配置](https://nightlies.apache.org/flink/flink-docs-release-1.18/zh/docs/deployment/config/)，这将覆盖 Flink 集群的默认配置。
 ```yaml
+rdb-sync:
+  ...
+
 # 此处演示 state.checkpoints.dir 配置项
 state:
   checkpoints:

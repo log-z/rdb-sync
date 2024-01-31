@@ -1,6 +1,6 @@
 package vip.logz.rdbsync.common.job.context;
 
-import com.mysql.cj.jdbc.Driver;
+import com.microsoft.sqlserver.jdbc.SQLServerDriver;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
@@ -13,25 +13,25 @@ import vip.logz.rdbsync.common.utils.sql.SqlDialectService;
 import vip.logz.rdbsync.connector.jdbc.job.func.DebeziumEventToJdbcMap;
 import vip.logz.rdbsync.connector.jdbc.job.func.RdbSyncJdbcSink;
 import vip.logz.rdbsync.connector.jdbc.utils.GenericDeleteSqlGenerator;
-import vip.logz.rdbsync.connector.mysql.config.MysqlPipelineDistProperties;
-import vip.logz.rdbsync.connector.mysql.rule.Mysql;
-import vip.logz.rdbsync.connector.mysql.utils.MysqlDialectService;
-import vip.logz.rdbsync.connector.mysql.utils.MysqlJdbcStatementBuilder;
-import vip.logz.rdbsync.connector.mysql.utils.MysqlUpsertSqlGenerator;
+import vip.logz.rdbsync.connector.sqlserver.config.SqlserverPipelineDistProperties;
+import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
+import vip.logz.rdbsync.connector.sqlserver.utils.SqlserverDialectService;
+import vip.logz.rdbsync.connector.sqlserver.utils.SqlserverJdbcStatementBuilder;
+import vip.logz.rdbsync.connector.sqlserver.utils.SqlserverUpsertSqlGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Mysql任务上下文目标辅助
+ * SQLServer任务上下文目标辅助
  *
  * @author logz
- * @date 2024-01-09
+ * @date 2024-01-27
  */
 @Scannable
-public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncEvent> {
+public class SqlserverContextDistHelper implements ContextDistHelper<Sqlserver, RdbSyncEvent> {
 
-    private static final String JDBC_MYSQL_DRIVER = Driver.class.getName();
+    private static final String JDBC_SQLSERVER_DRIVER = SQLServerDriver.class.getName();
 
     /**
      * 获取旁路输出上下文映射
@@ -41,13 +41,13 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncE
     @SuppressWarnings("unchecked")
     public Map<SideOutputTag, SideOutputContext<RdbSyncEvent>> getSideOutContexts(ContextMeta contextMeta) {
         // 1. 提取元数据
-        Pipeline<Mysql> pipeline = (Pipeline<Mysql>) contextMeta.getPipeline();
-        MysqlPipelineDistProperties pipelineDistProperties =
-                (MysqlPipelineDistProperties) contextMeta.getPipelineDistProperties();
+        Pipeline<Sqlserver> pipeline = (Pipeline<Sqlserver>) contextMeta.getPipeline();
+        SqlserverPipelineDistProperties pipelineDistProperties =
+                (SqlserverPipelineDistProperties) contextMeta.getPipelineDistProperties();
 
         // 2. 构建所有旁路输出上下文
         Map<SideOutputTag, SideOutputContext<RdbSyncEvent>> sideOutputContextMap = new HashMap<>();
-        for (Binding<Mysql> binding : pipeline.getBindings()) {
+        for (Binding<Sqlserver> binding : pipeline.getBindings()) {
             String distTable = binding.getDistTable();
             // 旁路输出标签
             SideOutputTag sideOutputTag = new SideOutputTag(distTable);
@@ -64,30 +64,31 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncE
             // JDBC连接选项
             JdbcConnectionOptions options = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                     .withUrl(pipelineDistProperties.getJdbcUrl())
-                    .withDriverName(JDBC_MYSQL_DRIVER)
+                    .withDriverName(JDBC_SQLSERVER_DRIVER)
                     .withUsername(pipelineDistProperties.getUsername())
                     .withPassword(pipelineDistProperties.getPassword())
                     .withConnectionCheckTimeoutSeconds(pipelineDistProperties.getConnTimeoutSeconds())
                     .build();
 
-            // MySQL模板生成器
-            SqlDialectService sqlDialectService = new MysqlDialectService();
-            MysqlUpsertSqlGenerator upsertSqlGenerator = new MysqlUpsertSqlGenerator();
-            GenericDeleteSqlGenerator<Mysql> deleteSqlGenerator = new GenericDeleteSqlGenerator<>(sqlDialectService);
+            // SQLServer模板生成器
+            String schema = pipelineDistProperties.getSchema();
+            SqlDialectService sqlDialectService = new SqlserverDialectService();
+            SqlserverUpsertSqlGenerator upsertSqlGenerator = new SqlserverUpsertSqlGenerator(schema);
+            GenericDeleteSqlGenerator<Sqlserver> deleteSqlGenerator = new GenericDeleteSqlGenerator<>(schema, sqlDialectService);
 
             // 旁路输出上下文：初始化Sink
-            Mapping<Mysql> mapping = binding.getMapping();
+            Mapping<Sqlserver> mapping = binding.getMapping();
             SinkFunction<RdbSyncEvent> sink = RdbSyncJdbcSink.sink(
                     upsertSqlGenerator.generate(distTable, mapping),
                     deleteSqlGenerator.generate(distTable, mapping),
-                    new MysqlJdbcStatementBuilder(mapping),
+                    new SqlserverJdbcStatementBuilder(mapping),
                     executionOptions,
                     options
             );
             sideOutputContext.setSink(sink);
 
             // 旁路输出上下文：初始化转换器
-            DebeziumEventToJdbcMap<Mysql> transformer = new DebeziumEventToJdbcMap<>(mapping);
+            DebeziumEventToJdbcMap<Sqlserver> transformer = new DebeziumEventToJdbcMap<>(mapping);
             sideOutputContext.setTransformer(transformer);
         }
 

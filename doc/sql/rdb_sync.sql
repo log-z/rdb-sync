@@ -16,8 +16,28 @@ create table `pipeline_dist_mysql` (
   `jdbc_url` varchar(255) not null comment 'JDBC-URL',
   `username` varchar(255) comment '用户名',
   `password` varchar(255) comment '密码',
+  `exec_batch_interval_ms` bigint comment '执行批次间隔毫秒数',
+  `exec_batch_size` int comment '执行批次最大容量',
+  `exec_max_retries` int comment '执行最大重试次数',
+  `conn_timeout_seconds` int comment '连接超时秒数',
   primary key (`id`) using btree
 ) comment = '管道目标-MySQL扩展';
+
+-- ----------------------------
+-- Table pipeline_dist_sqlserver
+-- ----------------------------
+create table `pipeline_dist_sqlserver` (
+  `id` varchar(32) not null comment 'ID',
+  `jdbc_url` varchar(255) not null comment 'JDBC-URL',
+  `schema` varchar(255) comment '模式名',
+  `username` varchar(255) comment '用户名',
+  `password` varchar(255) not null comment '密码',
+  `exec_batch_interval_ms` bigint comment '执行批次间隔毫秒数',
+  `exec_batch_size` int comment '执行批次最大容量',
+  `exec_max_retries` int comment '执行最大重试次数',
+  `conn_timeout_seconds` int comment '连接超时秒数',
+  primary key (`id`) using btree
+) comment = '管道目标-SQLServer扩展';
 
 -- ----------------------------
 -- Table pipeline_dist_starrocks
@@ -63,3 +83,18 @@ create table `pipeline_source_mysql` (
   `startup_timestamp_millis` bigint(20) comment '启动参数：起始时间戳',
   primary key (`id`) using btree
 ) comment = '管道来源-MySQL扩展';
+
+-- ----------------------------
+-- Table pipeline_source_sqlserver
+-- ----------------------------
+create table `pipeline_source_sqlserver` (
+  `id` varchar(32) not null comment 'id',
+  `host` varchar(255) comment '主机',
+  `port` int(11) comment '端口',
+  `database` varchar(255) comment '数据库名',
+  `schema` varchar(255) comment '模式名',
+  `username` varchar(255) comment '用户名',
+  `password` varchar(255) comment '密码',
+  `startup_mode` varchar(32) comment '启动模式',
+  primary key (`id`) using btree
+) comment = '管道来源-SQLServer扩展';

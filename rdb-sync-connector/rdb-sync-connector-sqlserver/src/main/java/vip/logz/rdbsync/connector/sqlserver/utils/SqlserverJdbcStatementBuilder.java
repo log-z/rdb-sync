@@ -1,28 +1,27 @@
-package vip.logz.rdbsync.connector.mysql.utils;
+package vip.logz.rdbsync.connector.sqlserver.utils;
 
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
 import vip.logz.rdbsync.connector.jdbc.job.RdbSyncJdbcStatementBuilder;
-import vip.logz.rdbsync.connector.mysql.rule.Mysql;
+import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 /**
- * MySQL语句构造器
+ * SQLServer语句构造器
  *
  * @author logz
- * @date 2024-01-18
+ * @date 2024-01-29
  */
-public class MysqlJdbcStatementBuilder extends RdbSyncJdbcStatementBuilder<Mysql> {
+public class SqlserverJdbcStatementBuilder extends RdbSyncJdbcStatementBuilder<Sqlserver> {
 
     /**
      * 构造器
      * @param mapping 表映射
      */
-    public MysqlJdbcStatementBuilder(Mapping<Mysql> mapping) {
+    public SqlserverJdbcStatementBuilder(Mapping<Sqlserver> mapping) {
         super(mapping);
     }
 
@@ -34,17 +33,8 @@ public class MysqlJdbcStatementBuilder extends RdbSyncJdbcStatementBuilder<Mysql
      */
     @Override
     protected void fillingUpsert(PreparedStatement ps, Map<String, Object> record) throws SQLException {
-        List<MappingField<Mysql>> fields = mapping.getFields();
-
-        // 1. 新增操作
         int index = PARAMETER_INDEX_OFFSET;
-        for (MappingField<Mysql> field : fields) {
-            Object val = record.get(field.getName());
-            ps.setObject(index++, val);
-        }
-
-        // 2. 更新操作：键冲突处理（更新字段值）
-        for (MappingField<Mysql> field : fields) {
+        for (MappingField<Sqlserver> field : mapping.getFields()) {
             Object val = record.get(field.getName());
             ps.setObject(index++, val);
         }

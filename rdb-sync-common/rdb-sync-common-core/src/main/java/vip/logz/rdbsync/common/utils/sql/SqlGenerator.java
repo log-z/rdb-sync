@@ -14,6 +14,9 @@ public interface SqlGenerator<DB extends Rdb> {
     /** 空格符 */
     String WHITESPACE = " ";
 
+    /** 标志：引用分隔符（点） */
+    String TOKEN_REF_DELIMITER = ".";
+
     /** 标志：括号头 */
     String TOKEN_BRACKET_BEGIN = "(";
 

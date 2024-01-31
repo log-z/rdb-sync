@@ -3,7 +3,6 @@ package vip.logz.rdbsync.common.job.context;
 import com.starrocks.connector.flink.StarRocksSink;
 import com.starrocks.connector.flink.table.sink.StarRocksSinkOptions;
 import vip.logz.rdbsync.common.annotations.Scannable;
-import vip.logz.rdbsync.common.job.func.process.DispatcherProcess;
 import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Pipeline;
 import vip.logz.rdbsync.connector.starrocks.config.StarrocksPipelineDistProperties;
@@ -62,15 +61,6 @@ public class StarrocksContextDistHelper implements ContextDistHelper<Starrocks, 
         }
 
         return sideOutputContextMap;
-    }
-
-    /**
-     * 获取分发器
-     * @param contextMeta 任务上下文元数据
-     */
-    @Override
-    public DispatcherProcess getDispatcher(ContextMeta contextMeta) {
-        return new DispatcherProcess(contextMeta.getPipeline());
     }
 
 }

@@ -46,6 +46,7 @@
 | 协议 | 连接器 | 管道 |
 |---|---|---|
 | MySQL | [rdb-sync-connector-mysql](rdb-sync-connector/rdb-sync-connector-mysql) | 来源、目标 |
+| SQL Server | [rdb-sync-connector-sqlserver](rdb-sync-connector/rdb-sync-connector-sqlserver) | 来源、目标 |
 | StarRocks | [rdb-sync-connector-starrocks](rdb-sync-connector/rdb-sync-connector-starrocks) | 目标 |
 
 ### 表映射 & 管道

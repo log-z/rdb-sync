@@ -2,7 +2,7 @@ package vip.logz.rdbsync.connector.mysql.rule;
 
 import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.data.*;
-import vip.logz.rdbsync.common.utils.sql.SqlUtils;
+import vip.logz.rdbsync.connector.mysql.utils.MysqlDialectService;
 
 import java.math.BigDecimal;
 
@@ -13,6 +13,9 @@ import java.math.BigDecimal;
  * @date 2024-01-10
  */
 public final class Mysql implements Rdb {
+
+    /** MySQL方言服务 */
+    private static final MysqlDialectService mysqlDialectService = new MysqlDialectService();
 
     private Mysql() {
     }
@@ -134,12 +137,12 @@ public final class Mysql implements Rdb {
 
     /** 字段类型：ENUM(...) */
     public static FieldType<Mysql, String> ENUM(String... elements) {
-        return new TextFieldType<>("ENUM", (Object[]) SqlUtils.stringLiteral(elements));
+        return new TextFieldType<>("ENUM", (Object[]) mysqlDialectService.stringLiteral(elements));
     }
 
     /** 字段类型：SET(...) */
     public static FieldType<Mysql, String> SET(String... elements) {
-        return new TextFieldType<>("SET", (Object[]) SqlUtils.stringLiteral(elements));
+        return new TextFieldType<>("SET", (Object[]) mysqlDialectService.stringLiteral(elements));
     }
 
 }

@@ -43,6 +43,13 @@ public class EqualTableMatcher implements TableMatcher {
     }
 
     /**
+     * 获取有效表名
+     */
+    public String getTable() {
+        return table;
+    }
+
+    /**
      * 获取优先级
      * @see #HIGHEST_PRECEDENCE
      * @see #LOWEST_PRECEDENCE

@@ -3,8 +3,8 @@ package vip.logz.rdbsync.connector.mysql.utils;
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
 import vip.logz.rdbsync.common.utils.StringUtils;
-import vip.logz.rdbsync.common.utils.sql.DMLGenerator;
-import vip.logz.rdbsync.common.utils.sql.SqlUtils;
+import vip.logz.rdbsync.common.utils.sql.SqlDialectService;
+import vip.logz.rdbsync.connector.jdbc.utils.DMLGenerator;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 /**
@@ -18,6 +18,9 @@ public class MysqlUpsertSqlGenerator implements DMLGenerator<Mysql> {
     /** 标志：当键重复时 */
     private static final String TOKEN_ON_DUPLICATE_KEY = "ON DUPLICATE KEY";
 
+    /** MySQL方言服务 */
+    private final SqlDialectService sqlDialectService = new MysqlDialectService();
+
     /**
      * 生成MySQL更新或新增语句
      * @param table 表名
@@ -27,7 +30,7 @@ public class MysqlUpsertSqlGenerator implements DMLGenerator<Mysql> {
     @Override
     public String generate(String table, Mapping<Mysql> mapping) {
         // 1. 表名
-        String tableName = SqlUtils.identifierLiteral(table);
+        String tableName = sqlDialectService.identifierLiteral(table);
         StringBuilder sb = new StringBuilder(TOKEN_INSERT_INTO)
                 .append(WHITESPACE)
                 .append(tableName)
@@ -36,7 +39,7 @@ public class MysqlUpsertSqlGenerator implements DMLGenerator<Mysql> {
 
         // 2. 字段信息
         for (MappingField<Mysql> field : mapping.getFields()) {
-            String fieldName = SqlUtils.identifierLiteral(field.getName());
+            String fieldName = sqlDialectService.identifierLiteral(field.getName());
             sb.append(fieldName).append(TOKEN_COMMA);
         }
 
@@ -62,7 +65,7 @@ public class MysqlUpsertSqlGenerator implements DMLGenerator<Mysql> {
                 .append(TOKEN_UPDATE)
                 .append(WHITESPACE);
         for (MappingField<Mysql> field : mapping.getFields()) {
-            String fieldName = SqlUtils.identifierLiteral(field.getName());
+            String fieldName = sqlDialectService.identifierLiteral(field.getName());
             sb.append(fieldName)
                     .append(TOKEN_EQUAL)
                     .append(JDBC_PARAMETER)

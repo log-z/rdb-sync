@@ -5,9 +5,11 @@ import vip.logz.rdbsync.common.exception.UnsupportedRdbSyncEventOpException;
 import vip.logz.rdbsync.common.job.RdbSyncEvent;
 import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.table.Mapping;
+import vip.logz.rdbsync.common.rule.table.MappingField;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,10 +67,28 @@ public abstract class RdbSyncJdbcStatementBuilder<DistDB extends Rdb> implements
 
     /**
      * 填充删除语句的参数
+     *
+     * <p>此默认实现面向于通用删除语句
+     *
      * @param ps 预编译的语句
      * @param record 数据同步事件
      * @throws SQLException 当设置出错时抛出此异常
+     * @see vip.logz.rdbsync.connector.jdbc.utils.GenericDeleteSqlGenerator
      */
-    protected abstract void fillingDelete(PreparedStatement ps, Map<String, Object> record) throws SQLException;
+    protected void fillingDelete(PreparedStatement ps, Map<String, Object> record) throws SQLException {
+        List<MappingField<DistDB>> fields = mapping.getFields();
+
+        // 删除操作
+        int index = PARAMETER_INDEX_OFFSET;
+        for (MappingField<DistDB> field : fields) {
+            // 作为条件，只需填充主键值
+            if (!field.isPrimaryKey()) {
+                continue;
+            }
+
+            Object val = record.get(field.getName());
+            ps.setObject(index++ , val);
+        }
+    }
 
 }

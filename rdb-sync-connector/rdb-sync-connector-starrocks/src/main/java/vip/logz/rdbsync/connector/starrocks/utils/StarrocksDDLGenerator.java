@@ -4,7 +4,7 @@ import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
 import vip.logz.rdbsync.common.utils.StringUtils;
 import vip.logz.rdbsync.common.utils.sql.DDLGenerator;
-import vip.logz.rdbsync.common.utils.sql.SqlUtils;
+import vip.logz.rdbsync.common.utils.sql.SqlDialectService;
 import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Starrocks建表语句生成器
+ * StarRocks建表语句生成器
  *
  * @author logz
  * @date 2024-01-10
@@ -28,6 +28,9 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
 
     /** 函数：散列 */
     public static final String FUNC_HASH = "HASH";
+
+    /** StarRocks方言服务 */
+    private final SqlDialectService sqlDialectService = new StarrocksDialectService();
 
     /** 建表属性 */
     private final Map<String, String> properties;
@@ -59,7 +62,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
     @Override
     public String generate(String table, Mapping<Starrocks> mapping) {
         // 1. 表名
-        String tableName = SqlUtils.identifierLiteral(table);
+        String tableName = sqlDialectService.identifierLiteral(table);
         StringBuilder sb = new StringBuilder(TOKEN_CREATE_TABLE)
                 .append(WHITESPACE)
                 .append(tableName)
@@ -69,7 +72,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
 
         // 2. 字段信息
         for (MappingField<Starrocks> field : mapping.getFields()) {
-            String fieldName = SqlUtils.identifierLiteral(field.getName());
+            String fieldName = sqlDialectService.identifierLiteral(field.getName());
             sb.append(fieldName)
                     .append(WHITESPACE)
                     .append(field.getType());
@@ -81,7 +84,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
                 primaryKeys.add(fieldName);
             }
             if (field.getComment() != null) {
-                String comment = SqlUtils.stringLiteral(field.getComment());
+                String comment = sqlDialectService.stringLiteral(field.getComment());
                 sb.append(WHITESPACE)
                         .append(TOKEN_COMMENT)
                         .append(WHITESPACE)
@@ -129,9 +132,9 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
                     .append(WHITESPACE)
                     .append(TOKEN_BRACKET_BEGIN);
             properties.forEach((key, val) ->
-                    sb.append(SqlUtils.stringLiteral(key))
+                    sb.append(sqlDialectService.stringLiteral(key))
                             .append(TOKEN_EQUAL)
-                            .append(SqlUtils.stringLiteral(val))
+                            .append(sqlDialectService.stringLiteral(val))
                             .append(TOKEN_COMMA)
             );
 

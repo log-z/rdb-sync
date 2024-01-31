@@ -1,7 +1,8 @@
-package vip.logz.rdbsync.common.utils.sql;
+package vip.logz.rdbsync.connector.jdbc.utils;
 
 import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.table.Mapping;
+import vip.logz.rdbsync.common.utils.sql.SqlGenerator;
 
 /**
  * SQL操作语句生成器
@@ -13,6 +14,9 @@ import vip.logz.rdbsync.common.rule.table.Mapping;
 public interface DMLGenerator<DB extends Rdb> extends SqlGenerator<DB> {
 
     /** 标志：插入 */
+    String TOKEN_INSERT = "INSERT";
+
+    /** 标志：插入到 */
     String TOKEN_INSERT_INTO = "INSERT INTO";
 
     /** 标志：值 */
@@ -30,7 +34,7 @@ public interface DMLGenerator<DB extends Rdb> extends SqlGenerator<DB> {
     /** 标志：条件 */
     String TOKEN_WHERE = "WHERE";
 
-    /** 标志：JDBC占位符 */
+    /** 标志：JDBC参数占位符 */
     String JDBC_PARAMETER = "?";
 
     /**

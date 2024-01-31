@@ -25,6 +25,8 @@ public interface ContextDistHelper<DistDB extends Rdb, Mid> {
      * 获取分发器
      * @param contextMeta 任务上下文元数据
      */
-    DispatcherProcess getDispatcher(ContextMeta contextMeta);
+    default DispatcherProcess getDispatcher(ContextMeta contextMeta) {
+        return new DispatcherProcess(contextMeta.getPipeline());
+    }
 
 }

@@ -1,6 +1,6 @@
 package vip.logz.rdbsync.connector.mysql.config;
 
-import vip.logz.rdbsync.common.config.PipelineDistProperties;
+import vip.logz.rdbsync.connector.jdbc.config.JdbcPipelineDistProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 /**
@@ -9,7 +9,7 @@ import vip.logz.rdbsync.connector.mysql.rule.Mysql;
  * @author logz
  * @date 2024-01-09
  */
-public class MysqlPipelineDistProperties extends PipelineDistProperties {
+public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
 
     /** 默认值：JDBC-URL */
     private static final String DEFAULT_JDBC_URL = "jdbc:mysql://localhost:3306";
@@ -20,28 +20,11 @@ public class MysqlPipelineDistProperties extends PipelineDistProperties {
     /** 默认值：密码 */
     private static final String DEFAULT_PASSWORD = "root";
 
-    /** JDBC-URL */
-    private String jdbcUrl;
-
-    /** 用户名 */
-    private String username;
-
-    /** 密码 */
-    private String password;
-
     /**
      * 获取JDBC-URL
      */
-    public String getUrl() {
+    public String getJdbcUrl() {
         return jdbcUrl != null ? jdbcUrl : DEFAULT_JDBC_URL;
-    }
-
-    /**
-     * 设置JDBC-URL
-     * @param jdbcUrl JDBC-URL
-     */
-    public void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
     }
 
     /**
@@ -52,26 +35,10 @@ public class MysqlPipelineDistProperties extends PipelineDistProperties {
     }
 
     /**
-     * 设置用户名
-     * @param username 用户名
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
      * 获取密码
      */
     public String getPassword() {
         return password != null ? password : DEFAULT_PASSWORD;
-    }
-
-    /**
-     * 设置密码
-     * @param password 密码
-     */
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     /**

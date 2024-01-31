@@ -1,56 +1,34 @@
-package vip.logz.rdbsync.connector.mysql.utils;
+package vip.logz.rdbsync.connector.sqlserver.utils;
 
 import vip.logz.rdbsync.common.rule.table.Mapping;
 import vip.logz.rdbsync.common.rule.table.MappingField;
 import vip.logz.rdbsync.common.utils.StringUtils;
 import vip.logz.rdbsync.common.utils.sql.DDLGenerator;
 import vip.logz.rdbsync.common.utils.sql.SqlDialectService;
-import vip.logz.rdbsync.connector.mysql.enums.MysqlEngine;
-import vip.logz.rdbsync.connector.mysql.rule.Mysql;
+import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * MySQL建表语句生成器
+ * SQLServer建表语句生成器
  *
  * @author logz
- * @date 2024-01-10
+ * @date 2024-01-29
  */
-public class MysqlDDLGenerator implements DDLGenerator<Mysql> {
+public class SqlserverDDLGenerator implements DDLGenerator<Sqlserver> {
 
-    /** 标志：引擎 */
-    public static final String TOKEN_ENGINE = "ENGINE";
-
-    /** MySQL方言服务 */
-    private final SqlDialectService sqlDialectService = new MysqlDialectService();
-
-    /** 引擎 */
-    private final MysqlEngine engine;
+    /** SQLServer方言服务 */
+    private final SqlDialectService sqlDialectService = new SqlserverDialectService();
 
     /**
-     * 构造器，默认使用InnoDB引擎
-     */
-    public MysqlDDLGenerator() {
-        this(MysqlEngine.INNO_DB);
-    }
-
-    /**
-     * 构造器
-     * @param engine 引擎
-     */
-    public MysqlDDLGenerator(MysqlEngine engine) {
-        this.engine = engine;
-    }
-
-    /**
-     * 生成MySQL建表语句
+     * 生成SQLServer建表语句
      * @param table 表名
      * @param mapping 表映射
-     * @return 返回MySQL建表语句
+     * @return 返回SQLServer建表语句
      */
     @Override
-    public String generate(String table, Mapping<Mysql> mapping) {
+    public String generate(String table, Mapping<Sqlserver> mapping) {
         // 1. 表名
         String tableName = sqlDialectService.identifierLiteral(table);
         StringBuilder sb = new StringBuilder(TOKEN_CREATE_TABLE)
@@ -61,7 +39,7 @@ public class MysqlDDLGenerator implements DDLGenerator<Mysql> {
         List<String> primaryKeys = new ArrayList<>();
 
         // 2. 字段信息
-        for (MappingField<Mysql> field : mapping.getFields()) {
+        for (MappingField<Sqlserver> field : mapping.getFields()) {
             String fieldName = sqlDialectService.identifierLiteral(field.getName());
             sb.append(fieldName)
                     .append(WHITESPACE)
@@ -72,13 +50,6 @@ public class MysqlDDLGenerator implements DDLGenerator<Mysql> {
             }
             if (field.isPrimaryKey()) {
                 primaryKeys.add(fieldName);
-            }
-            if (field.getComment() != null) {
-                String comment = sqlDialectService.stringLiteral(field.getComment());
-                sb.append(WHITESPACE)
-                        .append(TOKEN_COMMENT)
-                        .append(WHITESPACE)
-                        .append(comment);
             }
 
             sb.append(TOKEN_COMMA);
@@ -104,13 +75,9 @@ public class MysqlDDLGenerator implements DDLGenerator<Mysql> {
         // 去除末尾逗号，然后闭合括号
         StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
 
-        // 4. 指定引擎
-        sb.append(WHITESPACE)
-                .append(TOKEN_ENGINE)
-                .append(TOKEN_EQUAL)
-                .append(engine);
-
         return sb.append(TOKEN_TERMINATOR).toString();
+
+        // TODO：注释信息
     }
 
 }

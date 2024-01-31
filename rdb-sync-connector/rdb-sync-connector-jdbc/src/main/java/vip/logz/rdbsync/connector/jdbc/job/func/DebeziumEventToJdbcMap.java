@@ -1,23 +1,23 @@
-package vip.logz.rdbsync.connector.mysql.job.func;
+package vip.logz.rdbsync.connector.jdbc.job.func;
 
 import vip.logz.rdbsync.common.job.RdbSyncEvent;
 import vip.logz.rdbsync.common.job.func.map.AbstractDebeziumEventToSinkMap;
+import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.table.Mapping;
-import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 /**
- * Debezium事件同步到MySQL的转换映射
+ * Debezium事件同步到JDBC的转换映射
  *
  * @author logz
  * @date 2024-01-09
  */
-public class DebeziumEventToMysqlMap extends AbstractDebeziumEventToSinkMap<Mysql, RdbSyncEvent> {
+public class DebeziumEventToJdbcMap<DistDB extends Rdb> extends AbstractDebeziumEventToSinkMap<DistDB, RdbSyncEvent> {
 
     /**
      * 构造器
      * @param mapping 表映射
      */
-    public DebeziumEventToMysqlMap(Mapping<Mysql> mapping) {
+    public DebeziumEventToJdbcMap(Mapping<DistDB> mapping) {
         super(mapping);
     }
 

@@ -15,6 +15,7 @@
     <modules>
         <module>rdb-sync-connector-jdbc</module>
         <module>rdb-sync-connector-mysql</module>
+        <module>rdb-sync-connector-sqlserver</module>
         <module>rdb-sync-connector-starrocks</module>
     </modules>
 

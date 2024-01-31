@@ -25,9 +25,10 @@ public class DatetimeFieldType<DB extends Rdb> extends AbstractFieldType<DB, Str
     /**
      * 构造器
      * @param name 具体名称
+     * @param args 参数列表
      */
-    public DatetimeFieldType(String name) {
-        super();
+    public DatetimeFieldType(String name, Object... args) {
+        super(args);
         this.name = name;
     }
 

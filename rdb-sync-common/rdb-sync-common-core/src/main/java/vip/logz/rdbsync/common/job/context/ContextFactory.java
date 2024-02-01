@@ -55,11 +55,9 @@ public abstract class ContextFactory {
         }
 
         PipelineSourceProperties pipelineSourceProperties = getPipelineSourcePropertiesLoader()
-                .loadAll()
-                .get(pipeline.getSourceId());
+                .load(pipeline.getSourceId());
         PipelineDistProperties pipelineDistProperties = getPipelineDistPropertiesLoader()
-                .loadAll()
-                .get(pipeline.getDistId());
+                .load(pipeline.getDistId());
         if (pipelineSourceProperties == null) {
             throw new RuntimeException("pipeline source [" + pipeline.getSourceId() +  "] properties not found.");
         }

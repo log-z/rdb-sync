@@ -3,8 +3,8 @@ package vip.logz.rdbsync.common.config.impl;
 import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 import vip.logz.rdbsync.common.persistence.SqlSessionProxy;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,18 +33,29 @@ public class PersistPipelineSourcePropertiesLoaderProxy extends PersistPipelineS
     }
 
     /**
-     * 加载所有
-     * @return [id -> properties]
+     * 加载
+     * @param id ID
+     * @return 管道来源属性
      */
     @Override
-    public Map<String, PipelineSourceProperties> loadAll() {
-        // 将所有原生加载器的结果合并
-        Map<String, PipelineSourceProperties> map = new HashMap<>();
+    public PipelineSourceProperties load(String id) {
+        // 收集所有原生加载器的结果
+        List<PipelineSourceProperties> list = new ArrayList<>();
         for (PersistPipelineSourcePropertiesLoader loader : rawLoaderSet) {
-            map.putAll(loader.loadAll());
+            PipelineSourceProperties properties = loader.load(id);
+            if (properties != null) {
+                list.add(properties);
+            }
         }
 
-        return map;
+        // 仅返回一个
+        if (list.isEmpty()) {
+            return null;
+        } else if (list.size() == 1) {
+            return list.get(0);
+        }
+
+        throw new RuntimeException("pipeline source [" + id +  "] properties found " + list.size() + " duplicated.");
     }
 
 }

@@ -5,10 +5,8 @@ import org.apache.ibatis.annotations.Select;
 import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.connector.mysql.config.MysqlPipelineSourceProperties;
 
-import java.util.List;
-
 /**
- * Mysql管道来源持久化映射
+ * MySQL管道来源持久化映射
  *
  * @author logz
  * @date 2024-01-09
@@ -39,7 +37,8 @@ public interface MysqlPipelineSourceMapper {
             ", psm.startup_timestamp_millis " +
             "from pipeline_source as ps " +
             "inner join pipeline_source_mysql as psm " +
-            "on ps.id = psm.id")
-    List<MysqlPipelineSourceProperties> listAll();
+            "on ps.id = psm.id " +
+            "and ps.id = #{id}")
+    MysqlPipelineSourceProperties get(String id);
 
 }

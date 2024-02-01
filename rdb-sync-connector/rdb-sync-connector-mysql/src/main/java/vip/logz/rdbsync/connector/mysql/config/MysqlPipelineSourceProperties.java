@@ -4,7 +4,7 @@ import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 /**
- * Mysql管道来源属性
+ * MySQL管道来源属性
  *
  * @author logz
  * @date 2024-01-09
@@ -16,9 +16,6 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
 
     /** 默认值：端口 */
     private static final int DEFAULT_PORT = 3306;
-
-    /** 默认值：数据库名 */
-    private static final String DEFAULT_DATABASE = "mysql";
 
     /** 默认值：用户名 */
     private static final String DEFAULT_USERNAME = "root";
@@ -62,7 +59,7 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
     /** 连接超时秒数 */
     private Long connectTimeoutSeconds;
 
-    /** JDBC属性 */
+    /** JDBC属性（JSON） */
     private String jdbcProperties;
 
     /** 模拟服务端ID */
@@ -117,7 +114,7 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
      * 获取数据库名
      */
     public String getDatabase() {
-        return database != null ? database : DEFAULT_DATABASE;
+        return database;
     }
 
     /**
@@ -174,15 +171,15 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
     }
 
     /**
-     * 获取JDBC属性
+     * 获取JDBC属性（JSON）
      */
     public String getJdbcProperties() {
         return jdbcProperties;
     }
 
     /**
-     * 设置JDBC属性
-     * @param jdbcProperties JDBC属性
+     * 设置JDBC属性（JSON）
+     * @param jdbcProperties JDBC属性（JSON）
      */
     public void setJdbcProperties(String jdbcProperties) {
         this.jdbcProperties = jdbcProperties;

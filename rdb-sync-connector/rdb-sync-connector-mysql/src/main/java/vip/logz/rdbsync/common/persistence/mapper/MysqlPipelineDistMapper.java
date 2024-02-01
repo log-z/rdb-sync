@@ -5,10 +5,8 @@ import org.apache.ibatis.annotations.Select;
 import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.connector.mysql.config.MysqlPipelineDistProperties;
 
-import java.util.List;
-
 /**
- * Mysql管道目标持久化映射
+ * MySQL管道目标持久化映射
  *
  * @author logz
  * @date 2024-01-09
@@ -23,7 +21,9 @@ public interface MysqlPipelineDistMapper {
     @Select("select pd.id" +
             ", pd.name" +
             ", pd.protocol" +
-            ", pdm.jdbc_url" +
+            ", pdm.host" +
+            ", pdm.port" +
+            ", pdm.database" +
             ", pdm.username" +
             ", pdm.password" +
             ", pdm.exec_batch_interval_ms" +
@@ -32,7 +32,8 @@ public interface MysqlPipelineDistMapper {
             ", pdm.conn_timeout_seconds " +
             "from pipeline_dist as pd " +
             "inner join pipeline_dist_mysql as pdm " +
-            "on pd.id = pdm.id")
-    List<MysqlPipelineDistProperties> listAll();
+            "on pd.id = pdm.id " +
+            "and pd.id = #{id}")
+    MysqlPipelineDistProperties get(String id);
 
 }

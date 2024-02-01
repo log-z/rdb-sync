@@ -4,15 +4,18 @@ import vip.logz.rdbsync.connector.jdbc.config.JdbcPipelineDistProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 /**
- * Mysql管道目标属性
+ * MySQL管道目标属性
  *
  * @author logz
  * @date 2024-01-09
  */
 public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
 
-    /** 默认值：JDBC-URL */
-    private static final String DEFAULT_JDBC_URL = "jdbc:mysql://localhost:3306";
+    /** 前缀：JDBC-URL */
+    private static final String PREFIX_JDBC_URL = "jdbc:mysql://";
+
+    /** 默认值：端口 */
+    private static final int DEFAULT_PORT = 3306;
 
     /** 默认值：用户名 */
     private static final String DEFAULT_USERNAME = "root";
@@ -24,12 +27,22 @@ public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
      * 获取JDBC-URL
      */
     public String getJdbcUrl() {
-        return jdbcUrl != null ? jdbcUrl : DEFAULT_JDBC_URL;
+        return PREFIX_JDBC_URL + getHost() + ":" + getPort() + "/" + getDatabase();
+    }
+
+    /**
+     * 获取端口
+     */
+    @Override
+    public Integer getPort() {
+        Integer port = super.getPort();
+        return port != null ? port : DEFAULT_PORT;
     }
 
     /**
      * 获取用户名
      */
+    @Override
     public String getUsername() {
         return username != null ? username : DEFAULT_USERNAME;
     }
@@ -37,6 +50,7 @@ public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
     /**
      * 获取密码
      */
+    @Override
     public String getPassword() {
         return password != null ? password : DEFAULT_PASSWORD;
     }

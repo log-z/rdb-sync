@@ -5,8 +5,6 @@ import org.apache.ibatis.annotations.Select;
 import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.connector.sqlserver.config.SqlserverPipelineDistProperties;
 
-import java.util.List;
-
 /**
  * SQLServer管道目标持久化映射
  *
@@ -23,17 +21,20 @@ public interface SqlserverPipelineDistMapper {
     @Select("select pd.id" +
             ", pd.name" +
             ", pd.protocol" +
-            ", pdm.jdbc_url" +
-            ", pdm.schema" +
-            ", pdm.username" +
-            ", pdm.password" +
-            ", pdm.exec_batch_interval_ms" +
-            ", pdm.exec_batch_size" +
-            ", pdm.exec_max_retries" +
-            ", pdm.conn_timeout_seconds " +
+            ", pds.host" +
+            ", pds.port" +
+            ", pds.database" +
+            ", pds.schema" +
+            ", pds.username" +
+            ", pds.password" +
+            ", pds.exec_batch_interval_ms" +
+            ", pds.exec_batch_size" +
+            ", pds.exec_max_retries" +
+            ", pds.conn_timeout_seconds " +
             "from pipeline_dist as pd " +
-            "inner join pipeline_dist_sqlserver as pdm " +
-            "on pd.id = pdm.id")
-    List<SqlserverPipelineDistProperties> listAll();
+            "inner join pipeline_dist_sqlserver as pds " +
+            "on pd.id = pds.id " +
+            "and pd.id = #{id}")
+    SqlserverPipelineDistProperties get(String id);
 
 }

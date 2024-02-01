@@ -4,18 +4,24 @@ import vip.logz.rdbsync.common.config.PipelineDistProperties;
 import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 
 /**
- * Starrocks管道目标属性
+ * StarRocks管道目标属性
  *
  * @author logz
  * @date 2024-01-09
  */
 public class StarrocksPipelineDistProperties extends PipelineDistProperties {
 
-    /** 默认值：JDBC-URL */
-    private static final String DEFAULT_JDBC_URL = "jdbc:mysql://localhost:9030";
+    /** 前缀：JDBC-URL */
+    private static final String PREFIX_JDBC_URL = "jdbc:mysql://";
 
-    /** 默认值：FE-HTTP服务器 */
-    private static final String DEFAULT_LOAD_URL = "localhost:8030";
+    /** 默认值：主机 */
+    private static final String DEFAULT_HOST = "localhost";
+
+    /** 默认值：BE-MySQL服务端口 */
+    private static final int DEFAULT_PORT = 9030;
+
+    /** 默认值：FE-HTTP服务端口 */
+    private static final int DEFAULT_LOAD_PORT = 8030;
 
     /** 默认值：用户名 */
     private static final String DEFAULT_USERNAME = "root";
@@ -23,11 +29,17 @@ public class StarrocksPipelineDistProperties extends PipelineDistProperties {
     /** 默认值：密码 */
     private static final String DEFAULT_PASSWORD = "";
 
-    /** JDBC-URL */
-    private String jdbcUrl;
+    /** BE-MySQL服务主机 */
+    private String host;
 
-    /** FE-HTTP服务器 */
-    private String loadUrl;
+    /** BE-MySQL服务端口 */
+    private Integer port;
+
+    /** FE-HTTP服务主机 */
+    private String loadHost;
+
+    /** FE-HTTP服务端口 */
+    private Integer loadPort;
 
     /** 数据库名 */
     private String database;
@@ -42,30 +54,74 @@ public class StarrocksPipelineDistProperties extends PipelineDistProperties {
      * 读取JDBC-URL
      */
     public String getJdbcUrl() {
-        return jdbcUrl != null ? jdbcUrl : DEFAULT_JDBC_URL;
+        return PREFIX_JDBC_URL + getHost() + ":" + getPort();
     }
 
     /**
-     * 设置JDBC-URL
-     * @param jdbcUrl JDBC-URL
+     * 获取BE-MySQL服务主机
      */
-    public void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
+    public String getHost() {
+        return host != null ? host : DEFAULT_HOST;
+    }
+
+    /**
+     * 设置BE-MySQL服务主机
+     * @param host BE-MySQL服务主机
+     */
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    /**
+     * 获取BE-MySQL服务端口
+     */
+    public Integer getPort() {
+        return port != null ? port : DEFAULT_PORT;
+    }
+
+    /**
+     * 设置BE-MySQL服务端口
+     * @param port BE-MySQL服务端口
+     */
+    public void setPort(Integer port) {
+        this.port = port;
     }
 
     /**
      * 读取FE-HTTP服务器
      */
     public String getLoadUrl() {
-        return loadUrl != null ? loadUrl : DEFAULT_LOAD_URL;
+        return getLoadHost() + ":" + getLoadPort();
     }
 
     /**
-     * 设置FE-HTTP服务器
-     * @param loadUrl FE-HTTP服务器
+     * 获取FE-HTTP服务主机
      */
-    public void setLoadUrl(String loadUrl) {
-        this.loadUrl = loadUrl;
+    public String getLoadHost() {
+        return loadHost != null ? loadHost : DEFAULT_HOST;
+    }
+
+    /**
+     * 设置FE-HTTP服务主机
+     * @param loadHost FE-HTTP服务主机
+     */
+    public void setLoadHost(String loadHost) {
+        this.loadHost = loadHost;
+    }
+
+    /**
+     * 获取FE-HTTP服务端口
+     */
+    public Integer getLoadPort() {
+        return loadPort != null ? loadPort : DEFAULT_LOAD_PORT;
+    }
+
+    /**
+     * 设置FE-HTTP服务端口
+     * @param loadPort FE-HTTP服务端口
+     */
+    public void setLoadPort(Integer loadPort) {
+        this.loadPort = loadPort;
     }
 
     /**

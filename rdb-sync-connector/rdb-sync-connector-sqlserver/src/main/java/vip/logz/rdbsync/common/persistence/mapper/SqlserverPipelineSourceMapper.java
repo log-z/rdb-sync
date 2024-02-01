@@ -5,8 +5,6 @@ import org.apache.ibatis.annotations.Select;
 import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.connector.sqlserver.config.SqlserverPipelineSourceProperties;
 
-import java.util.List;
-
 /**
  * SQLServer管道来源持久化映射
  *
@@ -24,16 +22,17 @@ public interface SqlserverPipelineSourceMapper {
             ", ps.name" +
             ", ps.protocol" +
             ", ps.parallelism" +
-            ", psm.host" +
-            ", psm.port" +
-            ", psm.database" +
-            ", psm.schema" +
-            ", psm.username" +
-            ", psm.password" +
-            ", psm.startup_mode " +
+            ", pss.host" +
+            ", pss.port" +
+            ", pss.database" +
+            ", pss.schema" +
+            ", pss.username" +
+            ", pss.password" +
+            ", pss.startup_mode " +
             "from pipeline_source as ps " +
-            "inner join pipeline_source_sqlserver as psm " +
-            "on ps.id = psm.id")
-    List<SqlserverPipelineSourceProperties> listAll();
+            "inner join pipeline_source_sqlserver as pss " +
+            "on ps.id = pss.id " +
+            "and ps.id = #{id}")
+    SqlserverPipelineSourceProperties get(String id);
 
 }

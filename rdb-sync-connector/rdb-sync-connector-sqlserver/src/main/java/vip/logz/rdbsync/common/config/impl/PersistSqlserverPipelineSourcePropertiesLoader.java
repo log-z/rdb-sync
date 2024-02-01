@@ -3,11 +3,6 @@ package vip.logz.rdbsync.common.config.impl;
 import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 import vip.logz.rdbsync.common.persistence.mapper.SqlserverPipelineSourceMapper;
-import vip.logz.rdbsync.connector.sqlserver.config.SqlserverPipelineSourceProperties;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 持久化的SQLServer管道来源属性加载器
@@ -19,16 +14,14 @@ import java.util.stream.Collectors;
 public class PersistSqlserverPipelineSourcePropertiesLoader extends PersistPipelineSourcePropertiesLoader {
 
     /**
-     * 加载所有
-     * @return [id -> properties]
+     * 加载
+     * @param id ID
+     * @return 管道来源属性
      */
     @Override
-    public Map<String, PipelineSourceProperties> loadAll() {
-        List<SqlserverPipelineSourceProperties> list = sqlSessionProxy.execute(
-                SqlserverPipelineSourceMapper.class, SqlserverPipelineSourceMapper::listAll
-        );
-        return list.stream().collect(
-                Collectors.toMap(SqlserverPipelineSourceProperties::getId, p -> p)
+    public PipelineSourceProperties load(String id) {
+        return sqlSessionProxy.execute(
+                SqlserverPipelineSourceMapper.class, mapper -> mapper.get(id)
         );
     }
 

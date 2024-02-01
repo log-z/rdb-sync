@@ -11,8 +11,11 @@ import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
  */
 public class SqlserverPipelineDistProperties extends JdbcPipelineDistProperties {
 
-    /** 默认值：JDBC-URL */
-    private static final String DEFAULT_JDBC_URL = "jdbc:sqlserver://localhost:1433";
+    /** 前缀：JDBC-URL */
+    private static final String PREFIX_JDBC_URL = "jdbc:sqlserver://";
+
+    /** 默认值：端口 */
+    private static final int DEFAULT_PORT = 1433;
 
     /** 默认值：模式名 */
     private static final String DEFAULT_SCHEMA = "dbo";
@@ -27,7 +30,17 @@ public class SqlserverPipelineDistProperties extends JdbcPipelineDistProperties 
      * 获取JDBC-URL
      */
     public String getJdbcUrl() {
-        return jdbcUrl != null ? jdbcUrl : DEFAULT_JDBC_URL;
+        return PREFIX_JDBC_URL + getHost() + ":" + getPort() +
+                ";databaseName=" + getDatabase();
+    }
+
+    /**
+     * 获取端口
+     */
+    @Override
+    public Integer getPort() {
+        Integer port = super.getPort();
+        return port != null ? port : DEFAULT_PORT;
     }
 
     /**
@@ -48,6 +61,7 @@ public class SqlserverPipelineDistProperties extends JdbcPipelineDistProperties 
     /**
      * 获取用户名
      */
+    @Override
     public String getUsername() {
         return username != null ? username : DEFAULT_USERNAME;
     }

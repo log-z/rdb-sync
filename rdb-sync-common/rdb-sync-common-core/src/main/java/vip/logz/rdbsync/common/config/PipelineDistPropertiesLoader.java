@@ -1,7 +1,5 @@
 package vip.logz.rdbsync.common.config;
 
-import java.util.Map;
-
 /**
  * 管道目标属性加载器
  *
@@ -11,9 +9,10 @@ import java.util.Map;
 public interface PipelineDistPropertiesLoader {
 
     /**
-     * 加载所有
-     * @return [id -> properties]
+     * 加载
+     * @param id ID
+     * @return 管道目标属性
      */
-    Map<String, PipelineDistProperties> loadAll();
+    PipelineDistProperties load(String id);
 
 }

@@ -10,6 +10,9 @@ import vip.logz.rdbsync.common.config.PipelineDistProperties;
  */
 public abstract class JdbcPipelineDistProperties extends PipelineDistProperties {
 
+    /** 默认值：主机 */
+    private static final String DEFAULT_HOST = "localhost";
+
     /** 默认值：执行批次间隔毫秒数 */
     private static final long DEFAULT_EXEC_BATCH_INTERVAL_MS = 0L;
 
@@ -22,8 +25,14 @@ public abstract class JdbcPipelineDistProperties extends PipelineDistProperties 
     /** 默认值：连接超时秒数 */
     private static final int DEFAULT_CONN_TIMEOUT_SECONDS = 30;
 
-    /** JDBC-URL */
-    protected String jdbcUrl;
+    /** 主机 */
+    private String host;
+
+    /** 端口 */
+    private Integer port;
+
+    /** 数据库名 */
+    private String database;
 
     /** 用户名 */
     protected String username;
@@ -44,18 +53,48 @@ public abstract class JdbcPipelineDistProperties extends PipelineDistProperties 
     protected Integer connTimeoutSeconds;
 
     /**
-     * 获取JDBC-URL
+     * 获取主机
      */
-    public String getJdbcUrl() {
-        return jdbcUrl;
+    public String getHost() {
+        return host != null ? host : DEFAULT_HOST;
     }
 
     /**
-     * 设置JDBC-URL
-     * @param jdbcUrl JDBC-URL
+     * 设置主机
+     * @param host 主机
      */
-    public void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    /**
+     * 获取端口
+     */
+    public Integer getPort() {
+        return port;
+    }
+
+    /**
+     * 设置端口
+     * @param port 端口
+     */
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    /**
+     * 获取数据库名
+     */
+    public String getDatabase() {
+        return database;
+    }
+
+    /**
+     * 设置数据库名
+     * @param database 数据库名
+     */
+    public void setDatabase(String database) {
+        this.database = database;
     }
 
     /**

@@ -25,9 +25,6 @@ public interface DDLGenerator<DB extends Rdb> extends SqlGenerator<DB> {
     /** 标志：主键 */
     String TOKEN_PRIMARY_KEY = "PRIMARY KEY";
 
-    /** 标志：注释 */
-    String TOKEN_COMMENT = "COMMENT";
-
     /**
      * 生成SQL建表语句
      * @param table 表名

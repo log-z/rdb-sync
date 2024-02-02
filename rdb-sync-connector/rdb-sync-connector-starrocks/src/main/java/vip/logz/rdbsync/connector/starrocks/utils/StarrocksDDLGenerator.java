@@ -20,6 +20,9 @@ import java.util.Map;
  */
 public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
 
+    /** 标志：注释 */
+    public static final String TOKEN_COMMENT = "COMMENT";
+
     /** 标志：分桶依据 */
     public static final String TOKEN_DISTRIBUTED_BY = "DISTRIBUTED BY";
 
@@ -99,7 +102,6 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
 
         // 3. 主键信息
         if (!primaryKeys.isEmpty()) {
-            // 3.1. 主键
             sb.append(WHITESPACE)
                     .append(TOKEN_PRIMARY_KEY)
                     .append(WHITESPACE)
@@ -110,8 +112,19 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
 
             // 去除末尾逗号，然后闭合括号
             StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
+        }
 
-            // 3.1. 分桶键
+        // 4. 表注释信息
+        String comment = mapping.getComment();
+        if (comment != null) {
+            sb.append(WHITESPACE)
+                    .append(TOKEN_COMMENT)
+                    .append(WHITESPACE)
+                    .append(sqlDialectService.stringLiteral(comment));
+        }
+
+        // 5. 分桶信息
+        if (!primaryKeys.isEmpty()) {
             sb.append(WHITESPACE)
                     .append(TOKEN_DISTRIBUTED_BY)
                     .append(WHITESPACE)
@@ -125,7 +138,7 @@ public class StarrocksDDLGenerator implements DDLGenerator<Starrocks> {
             StringUtils.removeEnd(sb, TOKEN_COMMA).append(TOKEN_BRACKET_END);
         }
 
-        // 4. 属性信息
+        // 6. 属性信息
         if (!properties.isEmpty()) {
             sb.append(WHITESPACE)
                     .append(TOKEN_PROPERTIES)

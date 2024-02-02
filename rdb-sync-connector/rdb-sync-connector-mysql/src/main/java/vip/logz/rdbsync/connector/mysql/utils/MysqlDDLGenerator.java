@@ -22,6 +22,9 @@ public class MysqlDDLGenerator implements DDLGenerator<Mysql> {
     /** 标志：引擎 */
     public static final String TOKEN_ENGINE = "ENGINE";
 
+    /** 标志：注释 */
+    public static final String TOKEN_COMMENT = "COMMENT";
+
     /** MySQL方言服务 */
     private final SqlDialectService sqlDialectService = new MysqlDialectService();
 
@@ -109,6 +112,15 @@ public class MysqlDDLGenerator implements DDLGenerator<Mysql> {
                 .append(TOKEN_ENGINE)
                 .append(TOKEN_EQUAL)
                 .append(engine);
+
+        // 5. 表注释信息
+        String comment = mapping.getComment();
+        if (comment != null) {
+            sb.append(WHITESPACE)
+                    .append(TOKEN_COMMENT)
+                    .append(TOKEN_EQUAL)
+                    .append(sqlDialectService.stringLiteral(comment));
+        }
 
         return sb.append(TOKEN_TERMINATOR).toString();
     }

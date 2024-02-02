@@ -9,6 +9,7 @@ services:
       - ./mysql/initdb.d:/docker-entrypoint-initdb.d
     environment:
       - TZ=Asia/Shanghai
+      - LANG=C.UTF-8
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_USER=rdb_sync
       - MYSQL_PASSWORD=rdb_sync

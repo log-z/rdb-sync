@@ -30,6 +30,7 @@ public class Pipelines {
             .field("price").type(Starrocks.DECIMAL(10, 5)).comment("价格").and()
             .field("product_id").type(Starrocks.INT()).comment("商品ID").and()
             .field("order_status").type(Starrocks.INT()).comment("订单状态").and()
+            .comment("订单")
             .build();
 
     /** 管道：Mysql同步到Starrocks */
@@ -52,6 +53,7 @@ public class Pipelines {
             .field("price").type(Mysql.DECIMAL(10, 5)).comment("价格").and()
             .field("product_id").type(Mysql.INTEGER()).comment("商品ID").and()
             .field("order_status").type(Mysql.TINYINT()).comment("订单状态").and()
+            .comment("订单")
             .build();
 
     /** 管道：Mysql同步到Mysql */

@@ -33,6 +33,16 @@ public class MappingBuilder<DistDB extends Rdb> implements Builder<MappingBuilde
     }
 
     /**
+     * 设置注释
+     * @param name 设置注释
+     * @return 返回当前对象
+     */
+    public MappingBuilder<DistDB> comment(String name) {
+        mapping.setComment(name);
+        return this;
+    }
+
+    /**
      * 退出当前构建器，回到外围构建器
      * @return 当前构建器已经是最外围，将返回它本身
      */

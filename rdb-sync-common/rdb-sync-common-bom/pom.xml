@@ -78,6 +78,12 @@
                 <artifactId>flink-connector-mysql-cdc</artifactId>
                 <version>${flink.connector.cdc.version}</version>
             </dependency>
+            <!-- flink-connector-postgres-cdc -->
+            <dependency>
+                <groupId>com.ververica</groupId>
+                <artifactId>flink-connector-postgres-cdc</artifactId>
+                <version>${flink.connector.cdc.version}</version>
+            </dependency>
             <!-- flink-connector-sqlserver-cdc -->
             <dependency>
                 <groupId>com.ververica</groupId>
@@ -146,6 +152,12 @@
             <dependency>
                 <groupId>vip.logz</groupId>
                 <artifactId>rdb-sync-connector-mysql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- rdb-sync-connector-postgres -->
+            <dependency>
+                <groupId>vip.logz</groupId>
+                <artifactId>rdb-sync-connector-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- rdb-sync-connector-sqlserver -->

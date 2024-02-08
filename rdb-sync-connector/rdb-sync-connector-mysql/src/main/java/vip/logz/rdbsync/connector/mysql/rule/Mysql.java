@@ -95,14 +95,29 @@ public final class Mysql implements Rdb {
         return new TimeFieldType<>("TIME");
     }
 
+    /** 字段类型：TIME(fsp) */
+    public static FieldType<Mysql, String> TIME(int fsp) {
+        return new TimeFieldType<>("TIME", fsp);
+    }
+
     /** 字段类型：DATETIME */
     public static FieldType<Mysql, String> DATETIME() {
         return new DatetimeFieldType<>("DATETIME");
     }
 
+    /** 字段类型：DATETIME(fsp) */
+    public static FieldType<Mysql, String> DATETIME(int fsp) {
+        return new DatetimeFieldType<>("DATETIME", fsp);
+    }
+
     /** 字段类型：TIMESTAMP */
     public static FieldType<Mysql, String> TIMESTAMP() {
         return new DatetimeFieldType<>("TIMESTAMP");
+    }
+
+    /** 字段类型：TIMESTAMP(fsp) */
+    public static FieldType<Mysql, String> TIMESTAMP(int fsp) {
+        return new DatetimeFieldType<>("TIMESTAMP", fsp);
     }
 
     /** 字段类型：CHAR(n) */

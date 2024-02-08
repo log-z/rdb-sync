@@ -8,7 +8,12 @@ import vip.logz.rdbsync.common.exception.SourceException;
 import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.job.debezium.SimpleDebeziumDeserializationSchema;
 import vip.logz.rdbsync.connector.sqlserver.config.SqlserverPipelineSourceProperties;
+import vip.logz.rdbsync.connector.sqlserver.job.debezium.DateFormatConverter;
+import vip.logz.rdbsync.connector.sqlserver.job.debezium.DatetimeFormatConverter;
+import vip.logz.rdbsync.connector.sqlserver.job.debezium.TimeFormatConverter;
 import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
+
+import java.util.Properties;
 
 /**
  * SQLServer任务上下文来源辅助
@@ -24,7 +29,6 @@ public class SqlserverContextSourceHelper implements ContextSourceHelper<Sqlserv
      * @param contextMeta 任务上下文元数据
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Source<DebeziumEvent, ?, ?> getSource(ContextMeta contextMeta) {
         // 1. 获取配置
         SqlserverPipelineSourceProperties pipelineProperties =
@@ -54,9 +58,24 @@ public class SqlserverContextSourceHelper implements ContextSourceHelper<Sqlserv
                 .username(pipelineProperties.getUsername())
                 .password(pipelineProperties.getPassword())
                 .startupOptions(startupOptions)
-                .tableList(pipelineProperties.getSchema() + ".*")
+                .tableList(pipelineProperties.getSchema() + "\\..*")
                 .deserializer(new SimpleDebeziumDeserializationSchema())
+                .debeziumProperties(buildDebeziumProps())
                 .build();
+    }
+
+    /**
+     * 构建Debezium属性
+     * @return 返回Debezium属性
+     */
+    private Properties buildDebeziumProps() {
+        Properties props = new Properties();
+        props.put("converters", "date, time, datetime");
+        props.put("date.type", DateFormatConverter.class.getName());
+        props.put("time.type", TimeFormatConverter.class.getName());
+        props.put("datetime.type", DatetimeFormatConverter.class.getName());
+
+        return props;
     }
 
 }

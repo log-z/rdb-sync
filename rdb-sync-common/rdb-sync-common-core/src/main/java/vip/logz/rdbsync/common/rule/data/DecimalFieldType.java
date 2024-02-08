@@ -14,27 +14,13 @@ import java.math.BigDecimal;
  */
 public class DecimalFieldType<DB extends Rdb> extends AbstractFieldType<DB, BigDecimal> {
 
-    private static final long serialVersionUID = 1L;
-
-    /** 具体名称 */
-    private final String name;
-
     /**
      * 构造器
      * @param name 具体名称
      * @param args 参数列表
      */
     public DecimalFieldType(String name, Object... args) {
-        super(args);
-        this.name = name;
-    }
-
-    /**
-     * 返回具体名称
-     */
-    @Override
-    public String getName() {
-        return name;
+        super(name, args);
     }
 
     /**

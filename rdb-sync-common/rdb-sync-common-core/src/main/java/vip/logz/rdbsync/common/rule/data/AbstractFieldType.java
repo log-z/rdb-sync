@@ -20,7 +20,12 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<DB, T> {
 
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFieldType.class);
+
+    /** 具体名称 */
+    private final String name;
 
     /** 参数列表 */
     private final Object[] args;
@@ -30,9 +35,11 @@ public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<
 
     /**
      * 构造器
+     * @param name 具体名称
      * @param args 参数列表
      */
-    public AbstractFieldType(Object... args) {
+    public AbstractFieldType(String name, Object... args) {
+        this.name = name;
         this.args = args;
 
         // 获取字段的所有转换器，并记录
@@ -74,7 +81,7 @@ public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<
      * 获取名称
      */
     public String getName() {
-        return getClass().getSimpleName();
+        return name;
     }
 
     /**

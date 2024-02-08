@@ -11,6 +11,9 @@ import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.job.debezium.SimpleDebeziumDeserializationSchema;
 import vip.logz.rdbsync.common.utils.JacksonUtils;
 import vip.logz.rdbsync.connector.mysql.config.MysqlPipelineSourceProperties;
+import vip.logz.rdbsync.connector.mysql.job.debezium.DateFormatConverter;
+import vip.logz.rdbsync.connector.mysql.job.debezium.DatetimeFormatConverter;
+import vip.logz.rdbsync.connector.mysql.job.debezium.TimeFormatConverter;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
 import java.time.Duration;
@@ -90,6 +93,7 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
                 .startupOptions(startupOptions)
                 .tableList(".*")
                 .deserializer(new SimpleDebeziumDeserializationSchema())
+                .debeziumProperties(buildDebeziumProps())
                 .build();
     }
 
@@ -107,6 +111,20 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 构建Debezium属性
+     * @return 返回Debezium属性
+     */
+    private Properties buildDebeziumProps() {
+        Properties props = new Properties();
+        props.put("converters", "date, time, datetime");
+        props.put("date.type", DateFormatConverter.class.getName());
+        props.put("time.type", TimeFormatConverter.class.getName());
+        props.put("datetime.type", DatetimeFormatConverter.class.getName());
+
+        return props;
     }
 
 }

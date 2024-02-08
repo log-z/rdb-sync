@@ -10,9 +10,13 @@ import vip.logz.rdbsync.common.job.debezium.SimpleDebeziumDeserializationSchema;
 import vip.logz.rdbsync.common.utils.BuildHelper;
 import vip.logz.rdbsync.connector.postgres.config.PostgresOptions;
 import vip.logz.rdbsync.connector.postgres.config.PostgresPipelineSourceProperties;
+import vip.logz.rdbsync.connector.postgres.job.debezium.DateFormatConverter;
+import vip.logz.rdbsync.connector.postgres.job.debezium.TimeFormatConverter;
+import vip.logz.rdbsync.connector.postgres.job.debezium.TimestampFormatConverter;
 import vip.logz.rdbsync.connector.postgres.rule.Postgres;
 
 import java.time.Duration;
+import java.util.Properties;
 import java.util.function.Function;
 
 /**
@@ -56,7 +60,7 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
                 // 槽名称【必须】
                 .set(builder::slotName, pipelineProperties.getSlotName())
                 // 启动模式
-                .setIfNotNull(builder::startupOptions, getStartupOptions(pipelineProperties))
+                .setIfNotNull(builder::startupOptions, buildStartupOptions(pipelineProperties))
                 // 模式名列表
                 .set(
                         (Function<? super String[], ?>) builder::schemaList,
@@ -73,6 +77,8 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
                 )
                 // 反序列化器
                 .set(builder::deserializer, new SimpleDebeziumDeserializationSchema())
+                // Debezium属性
+                .set(builder::debeziumProperties, buildDebeziumProps())
                 // 逻辑解码插件名称
                 .set(builder::decodingPluginName, pipelineProperties.getDecodingPluginName(), DEFAULT_DECODING_PLUGIN_NAME)
                 // 快照属性：表快照的分块大小（行数）
@@ -106,11 +112,11 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
     }
 
     /**
-     * 获取启动选项
+     * 构建启动选项
      * @param pipelineProperties Postgres管道来源属性
      * @return 返回启动选项，若启动模式为null则返回null
      */
-    private static StartupOptions getStartupOptions(PostgresPipelineSourceProperties pipelineProperties) {
+    private static StartupOptions buildStartupOptions(PostgresPipelineSourceProperties pipelineProperties) {
         String startupMode = pipelineProperties.getStartupMode();
         if (startupMode == null) {
             return null;
@@ -127,6 +133,20 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
             default:
                 throw new SourceException("Unknown StartupMode: " + startupMode);
         }
+    }
+
+    /**
+     * 构建Debezium属性
+     * @return 返回Debezium属性
+     */
+    private Properties buildDebeziumProps() {
+        Properties props = new Properties();
+        props.put("converters", "date, time, timestamp");
+        props.put("date.type", DateFormatConverter.class.getName());
+        props.put("time.type", TimeFormatConverter.class.getName());
+        props.put("timestamp.type", TimestampFormatConverter.class.getName());
+
+        return props;
     }
 
 }

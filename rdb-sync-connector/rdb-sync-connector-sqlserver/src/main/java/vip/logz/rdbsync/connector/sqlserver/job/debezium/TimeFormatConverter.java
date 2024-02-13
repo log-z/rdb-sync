@@ -5,6 +5,7 @@ import io.debezium.spi.converter.RelationalColumn;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import vip.logz.rdbsync.common.job.debezium.DebeziumConverterFallback;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -51,10 +52,16 @@ public class TimeFormatConverter implements CustomConverter<SchemaBuilder, Relat
 
         // 转换逻辑
         registration.register(schemaBuilder, x -> {
+            // 情形1：读取快照
             if (x instanceof Timestamp) {
                 Timestamp timestamp = (Timestamp) x;
                 ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(timestamp.toInstant(), zoneId);
                 return FORMATTER_TIME.format(zonedDateTime);
+            }
+
+            // 情形2：读取日志
+            if (x instanceof Time) {
+                return x.toString();
             }
 
             return field.isOptional() ? null : DebeziumConverterFallback.TIME;

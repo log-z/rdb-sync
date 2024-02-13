@@ -21,7 +21,7 @@ public class DatetimeFormatConverter implements CustomConverter<SchemaBuilder, R
 
     /** 支持的类型 */
     private static final List<String> SUPPORTED_TYPES = List.of(
-            "TYPE_DATETIME", "TYPE_DATETIME2", "TYPE_SMALLDATETIME", "TYPE_DATETIMEOFFSET"
+            "DATETIME", "DATETIME2", "SMALLDATETIME", "DATETIMEOFFSET"
     );
 
     /** 用于匹配 {@link DateTimeOffset#toString()} 输出的时间与时区偏移之间多余的空格 */

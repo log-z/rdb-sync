@@ -7,7 +7,12 @@ import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.common.exception.SourceException;
 import vip.logz.rdbsync.common.job.debezium.DebeziumEvent;
 import vip.logz.rdbsync.common.job.debezium.SimpleDebeziumDeserializationSchema;
+import vip.logz.rdbsync.common.rule.Binding;
+import vip.logz.rdbsync.common.rule.Pipeline;
+import vip.logz.rdbsync.common.rule.table.EqualTableMatcher;
+import vip.logz.rdbsync.common.rule.table.TableMatcher;
 import vip.logz.rdbsync.common.utils.BuildHelper;
+import vip.logz.rdbsync.common.utils.sql.SqlGenerator;
 import vip.logz.rdbsync.connector.postgres.config.PostgresOptions;
 import vip.logz.rdbsync.connector.postgres.config.PostgresPipelineSourceProperties;
 import vip.logz.rdbsync.connector.postgres.job.debezium.DateFormatConverter;
@@ -16,6 +21,8 @@ import vip.logz.rdbsync.connector.postgres.job.debezium.TimestampFormatConverter
 import vip.logz.rdbsync.connector.postgres.rule.Postgres;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
 
@@ -39,8 +46,10 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
      * @param contextMeta 任务上下文元数据
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Source<DebeziumEvent, ?, ?> getSource(ContextMeta contextMeta) {
         // 1. 获取配置
+        Pipeline<Postgres> pipeline = (Pipeline<Postgres>) contextMeta.getPipeline();
         PostgresPipelineSourceProperties pipelineProperties =
                 (PostgresPipelineSourceProperties) contextMeta.getPipelineSourceProperties();
 
@@ -72,8 +81,8 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
                 .set(
                         (Function<? super String[], ?>) builder::tableList,
                         pipelineProperties.getSchema(),
-                        schema -> new String[] {schema + "\\..*"},
-                        new String[] {PostgresOptions.DEFAULT_SCHEMA + "\\..*"}
+                        schema -> buildTableList(schema, pipeline),
+                        buildTableList(PostgresOptions.DEFAULT_SCHEMA, pipeline)
                 )
                 // 反序列化器
                 .set(builder::deserializer, new SimpleDebeziumDeserializationSchema())
@@ -136,10 +145,44 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
     }
 
     /**
+     * 构建表名列表
+     * @param schema 模式名
+     * @param pipeline 管道
+     * @return 返回表名数组。当所有绑定的来源表都是“等值表匹配”时，将返回切确的表名数组，否则匹配该模式下所有的表。
+     */
+    private static String[] buildTableList(String schema, Pipeline<Postgres> pipeline) {
+        // 提前退出
+        List<Binding<Postgres>> bindings = pipeline.getBindings();
+        if (bindings.isEmpty()) {
+            return new String[0];
+        }
+
+        // 切确的表名列表
+        List<String> preciseTables = new ArrayList<>();
+
+        for (Binding<Postgres> binding : bindings) {
+            TableMatcher sourceTableMatcher = binding.getSourceTableMatcher();
+            if (sourceTableMatcher instanceof EqualTableMatcher) {
+                String table = ((EqualTableMatcher) sourceTableMatcher).getTable();
+                preciseTables.add(schema + SqlGenerator.TOKEN_REF_DELIMITER + table);
+                continue;
+            }
+
+            // 使用了其它来源表匹配器
+            preciseTables.clear();
+            break;
+        }
+
+        return preciseTables.isEmpty() ?
+                new String[] {schema + "\\..*"} :  // 匹配该模式下所有的表
+                preciseTables.toArray(String[]::new);  // 切确的表名数组
+    }
+
+    /**
      * 构建Debezium属性
      * @return 返回Debezium属性
      */
-    private Properties buildDebeziumProps() {
+    private static Properties buildDebeziumProps() {
         Properties props = new Properties();
         props.put("converters", "date, time, timestamp");
         props.put("date.type", DateFormatConverter.class.getName());

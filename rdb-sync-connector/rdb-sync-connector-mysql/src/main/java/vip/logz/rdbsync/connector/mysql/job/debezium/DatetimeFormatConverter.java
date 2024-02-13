@@ -7,6 +7,8 @@ import vip.logz.rdbsync.common.job.debezium.DebeziumConverterFallback;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
@@ -31,6 +33,9 @@ public class DatetimeFormatConverter implements CustomConverter<SchemaBuilder, R
             .append(DateTimeFormatter.ISO_LOCAL_TIME)
             .toFormatter();
 
+    /** 时区ID */
+    private final ZoneId zoneId = ZoneId.systemDefault();
+
     @Override
     public void configure(Properties properties) {
     }
@@ -50,16 +55,22 @@ public class DatetimeFormatConverter implements CustomConverter<SchemaBuilder, R
 
         // 转换逻辑
         registration.register(schemaBuilder, x -> {
-            // 情形1：DATETIME，TIMESTAMP，TIMESTAMP(fsp)
+            // 情形1：DATETIME【快照】，TIMESTAMP【快照】，TIMESTAMP(fsp)【快照】
             if (x instanceof Timestamp) {
                 Timestamp timestamp = (Timestamp) x;
                 return timestamp.toString();
             }
 
-            // 情形2：DATETIME(fsp)
+            // 情形2：DATETIME【日志】，DATETIME(fsp)【快照/日志】
             if (x instanceof LocalDateTime) {
                 LocalDateTime localDateTime = (LocalDateTime) x;
                 return FORMATTER_DATETIME.format(localDateTime);
+            }
+
+            // 情形3：TIMESTAMP【日志】，TIMESTAMP(fsp)【日志】
+            if (x instanceof ZonedDateTime) {
+                ZonedDateTime zonedDateTime = ((ZonedDateTime) x).withZoneSameInstant(zoneId);
+                return FORMATTER_DATETIME.format(zonedDateTime);
             }
 
             return field.isOptional() ? null : DebeziumConverterFallback.DATETIME;

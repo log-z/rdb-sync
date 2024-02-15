@@ -111,8 +111,12 @@ RDB Sync 的关键配置保存在数据库中，下面以 MySQL 存储为例。
 推荐使用专用数据库 `rdb_sync` 和专用用户，执行 [doc/sql/rdb_sync.sql](doc/sql/rdb_sync.sql) 可生成全部配置表 <sup>①</sup> ：
 * pipeline_source `管道来源`
   * pipeline_source_mysql `管道来源-MySQL扩展`
+  * pipeline_source_postgres `管道来源-Postgres扩展`
+  * pipeline_source_sqlserver `管道来源-SQLServer扩展`
 * pipeline_dist `管道目标`
   * pipeline_dist_mysql `管道目标-MySQL扩展`
+  * pipeline_dist_postgres `管道目标-Postgres扩展`
+  * pipeline_dist_sqlserver `管道目标-SQLServer扩展`
   * pipeline_dist_starrocks `管道目标-StarRocks扩展`
 
 ```

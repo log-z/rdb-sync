@@ -14,15 +14,6 @@ public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
     /** 前缀：JDBC-URL */
     private static final String PREFIX_JDBC_URL = "jdbc:mysql://";
 
-    /** 默认值：端口 */
-    private static final int DEFAULT_PORT = 3306;
-
-    /** 默认值：用户名 */
-    private static final String DEFAULT_USERNAME = "root";
-
-    /** 默认值：密码 */
-    private static final String DEFAULT_PASSWORD = "root";
-
     /**
      * 获取JDBC-URL
      */
@@ -36,7 +27,7 @@ public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
     @Override
     public Integer getPort() {
         Integer port = super.getPort();
-        return port != null ? port : DEFAULT_PORT;
+        return port != null ? port : MysqlOptions.DEFAULT_PORT;
     }
 
     /**
@@ -44,7 +35,7 @@ public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
      */
     @Override
     public String getUsername() {
-        return username != null ? username : DEFAULT_USERNAME;
+        return username != null ? username : MysqlOptions.DEFAULT_USERNAME;
     }
 
     /**
@@ -52,7 +43,7 @@ public class MysqlPipelineDistProperties extends JdbcPipelineDistProperties {
      */
     @Override
     public String getPassword() {
-        return password != null ? password : DEFAULT_PASSWORD;
+        return password != null ? password : MysqlOptions.DEFAULT_PASSWORD;
     }
 
     /**

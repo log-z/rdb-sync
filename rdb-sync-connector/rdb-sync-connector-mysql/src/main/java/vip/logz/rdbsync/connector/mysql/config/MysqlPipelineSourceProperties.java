@@ -1,7 +1,12 @@
 package vip.logz.rdbsync.connector.mysql.config;
 
+import com.ververica.cdc.connectors.mysql.source.MySqlSourceBuilder;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
+
+import java.time.Duration;
+import java.util.Properties;
 
 /**
  * MySQL管道来源属性
@@ -10,21 +15,6 @@ import vip.logz.rdbsync.connector.mysql.rule.Mysql;
  * @date 2024-01-09
  */
 public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
-
-    /** 默认值：主机 */
-    private static final String DEFAULT_HOST = "localhost";
-
-    /** 默认值：端口 */
-    private static final int DEFAULT_PORT = 3306;
-
-    /** 默认值：用户名 */
-    private static final String DEFAULT_USERNAME = "root";
-
-    /** 默认值：密码 */
-    private static final String DEFAULT_PASSWORD = "root";
-
-    /** 默认值：连接超时秒数 */
-    private static final int DEFAULT_CONNECT_TIMEOUT_SECONDS = 10;
 
     /** 启动模式：先做快照，再读取最新日志 */
     public static final String STARTUP_MODE_INITIAL = "initial";
@@ -56,35 +46,121 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
     /** 密码 */
     private String password;
 
-    /** 连接超时秒数 */
-    private Long connectTimeoutSeconds;
-
-    /** JDBC属性（JSON） */
-    private String jdbcProperties;
-
-    /** 模拟服务端ID */
+    /**
+     * 模拟服务端ID
+     * @see MySqlSourceBuilder#serverId(String)
+     */
     private String serverId;
 
-    /** 启动模式 */
+    /**
+     * 数据库的会话时区
+     * @see MySqlSourceBuilder#serverTimeZone(String)
+     */
+    private String serverTimeZone;
+
+    /**
+     * 启动模式
+     * @see #STARTUP_MODE_INITIAL
+     * @see #STARTUP_MODE_EARLIEST
+     * @see #STARTUP_MODE_LATEST
+     * @see #STARTUP_MODE_SPECIFIC_OFFSET
+     * @see #STARTUP_MODE_TIMESTAMP
+     */
     private String startupMode;
 
-    /** 启动参数：起始日志文件 */
+    /**
+     * 启动参数：起始日志文件
+     * @see #STARTUP_MODE_SPECIFIC_OFFSET
+     * @see StartupOptions#specificOffset(String, long)
+     */
     private String startupSpecificOffsetFile;
 
-    /** 启动参数：起始日志文件内位置 */
+    /**
+     * 启动参数：起始日志文件内位置
+     * @see #STARTUP_MODE_SPECIFIC_OFFSET
+     * @see StartupOptions#specificOffset(String, long)
+     */
     private Long startupSpecificOffsetPos;
 
-    /** 启动参数：起始事务编码 */
+    /**
+     * 启动参数：起始事务编码
+     * @see #STARTUP_MODE_SPECIFIC_OFFSET
+     * @see StartupOptions#specificOffset(String)
+     */
     private String startupSpecificOffsetGtidSet;
 
-    /** 启动参数：起始时间戳 */
+    /**
+     * 启动参数：起始时间戳
+     * @see #STARTUP_MODE_TIMESTAMP
+     * @see StartupOptions#timestamp(long)
+     */
     private Long startupTimestampMillis;
+
+    /**
+     * 快照属性：表快照的分块大小（行数）
+     * @see MySqlSourceBuilder#splitSize(int)
+     */
+    private Integer splitSize;
+
+    /**
+     * 快照属性：拆分元数据的分组大小
+     * @see MySqlSourceBuilder#splitMetaGroupSize(int)
+     */
+    private Integer splitMetaGroupSize;
+
+    /**
+     * 快照属性：均匀分布因子的上限
+     * @see MySqlSourceBuilder#distributionFactorUpper(double)
+     */
+    private Double distributionFactorUpper;
+
+    /**
+     * 快照属性：均匀分布因子的下限
+     * @see MySqlSourceBuilder#distributionFactorLower(double)
+     */
+    private Double distributionFactorLower;
+
+    /**
+     * 快照属性：每次轮询所能获取的最大行数
+     * @see MySqlSourceBuilder#fetchSize(int)
+     */
+    private Integer fetchSize;
+
+    /**
+     * 连接超时秒数
+     * @see MySqlSourceBuilder#connectTimeout(Duration)
+     */
+    private Long connectTimeoutSeconds;
+
+    /**
+     * 连接最大重试次数
+     * @see MySqlSourceBuilder#connectMaxRetries(int)
+     */
+    private Integer connectMaxRetries;
+
+    /**
+     * 连接池大小
+     * @see MySqlSourceBuilder#connectionPoolSize(int)
+     */
+    private Integer connectionPoolSize;
+
+    /**
+     * 心跳检测间隔秒数
+     * @see MySqlSourceBuilder#heartbeatInterval(Duration)
+     */
+    private Long heartbeatIntervalSeconds;
+
+    /**
+     * JDBC属性（JSON）
+     * @see MySqlSourceBuilder#jdbcProperties(Properties)
+     */
+    private String jdbcProperties;
 
     /**
      * 获取主机
      */
     public String getHost() {
-        return host != null ? host : DEFAULT_HOST;
+        return host;
     }
 
     /**
@@ -99,7 +175,7 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
      * 获取端口
      */
     public Integer getPort() {
-        return port != null ? port : DEFAULT_PORT;
+        return port;
     }
 
     /**
@@ -129,7 +205,7 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
      * 获取用户名
      */
     public String getUsername() {
-        return username != null ? username : DEFAULT_USERNAME;
+        return username;
     }
 
     /**
@@ -144,7 +220,7 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
      * 获取密码
      */
     public String getPassword() {
-        return password != null ? password : DEFAULT_PASSWORD;
+        return password;
     }
 
     /**
@@ -153,36 +229,6 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
      */
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    /**
-     * 获取连接超时秒数
-     */
-    public Long getConnectTimeoutSeconds() {
-        return connectTimeoutSeconds != null ? connectTimeoutSeconds : DEFAULT_CONNECT_TIMEOUT_SECONDS;
-    }
-
-    /**
-     * 设置连接超时秒数
-     * @param connectTimeoutSeconds 连接超时秒数
-     */
-    public void setConnectTimeoutSeconds(Long connectTimeoutSeconds) {
-        this.connectTimeoutSeconds = connectTimeoutSeconds;
-    }
-
-    /**
-     * 获取JDBC属性（JSON）
-     */
-    public String getJdbcProperties() {
-        return jdbcProperties;
-    }
-
-    /**
-     * 设置JDBC属性（JSON）
-     * @param jdbcProperties JDBC属性（JSON）
-     */
-    public void setJdbcProperties(String jdbcProperties) {
-        this.jdbcProperties = jdbcProperties;
     }
 
     /**
@@ -198,6 +244,21 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
      */
     public void setServerId(String serverId) {
         this.serverId = serverId;
+    }
+
+    /**
+     * 获取数据库的会话时区
+     */
+    public String getServerTimeZone() {
+        return serverTimeZone;
+    }
+
+    /**
+     * 设置数据库的会话时区
+     * @param serverTimeZone 数据库的会话时区
+     */
+    public void setServerTimeZone(String serverTimeZone) {
+        this.serverTimeZone = serverTimeZone;
     }
 
     /**
@@ -246,15 +307,15 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
     }
 
     /**
-     * 获取启动参数：起始GTID
+     * 获取启动参数：起始事务编码
      */
     public String getStartupSpecificOffsetGtidSet() {
         return startupSpecificOffsetGtidSet;
     }
 
     /**
-     * 设置启动参数：起始GTID
-     * @param startupSpecificOffsetGtidSet 启动参数：起始GTID
+     * 设置启动参数：起始事务编码
+     * @param startupSpecificOffsetGtidSet 启动参数：起始事务编码
      */
     public void setStartupSpecificOffsetGtidSet(String startupSpecificOffsetGtidSet) {
         this.startupSpecificOffsetGtidSet = startupSpecificOffsetGtidSet;
@@ -273,6 +334,156 @@ public class MysqlPipelineSourceProperties extends PipelineSourceProperties {
      */
     public void setStartupTimestampMillis(Long startupTimestampMillis) {
         this.startupTimestampMillis = startupTimestampMillis;
+    }
+
+    /**
+     * 获取快照属性：表快照的分块大小（行数）
+     */
+    public Integer getSplitSize() {
+        return splitSize;
+    }
+
+    /**
+     * 设置快照属性：表快照的分块大小（行数）
+     * @param splitSize 快照属性：表快照的分块大小（行数）
+     */
+    public void setSplitSize(Integer splitSize) {
+        this.splitSize = splitSize;
+    }
+
+    /**
+     * 获取快照属性：拆分元数据的分组大小
+     */
+    public Integer getSplitMetaGroupSize() {
+        return splitMetaGroupSize;
+    }
+
+    /**
+     * 设置快照属性：拆分元数据的分组大小
+     * @param splitMetaGroupSize 快照属性：拆分元数据的分组大小
+     */
+    public void setSplitMetaGroupSize(Integer splitMetaGroupSize) {
+        this.splitMetaGroupSize = splitMetaGroupSize;
+    }
+
+    /**
+     * 获取快照属性：均匀分布因子的上限
+     */
+    public Double getDistributionFactorUpper() {
+        return distributionFactorUpper;
+    }
+
+    /**
+     * 设置快照属性：均匀分布因子的上限
+     * @param distributionFactorUpper 快照属性：均匀分布因子的上限
+     */
+    public void setDistributionFactorUpper(Double distributionFactorUpper) {
+        this.distributionFactorUpper = distributionFactorUpper;
+    }
+
+    /**
+     * 获取快照属性：均匀分布因子的下限
+     */
+    public Double getDistributionFactorLower() {
+        return distributionFactorLower;
+    }
+
+    /**
+     * 设置快照属性：均匀分布因子的下限
+     * @param distributionFactorLower 快照属性：均匀分布因子的下限
+     */
+    public void setDistributionFactorLower(Double distributionFactorLower) {
+        this.distributionFactorLower = distributionFactorLower;
+    }
+
+    /**
+     * 获取快照属性：每次轮询所能获取的最大行数
+     */
+    public Integer getFetchSize() {
+        return fetchSize;
+    }
+
+    /**
+     * 设置快照属性：每次轮询所能获取的最大行数
+     * @param fetchSize 快照属性：每次轮询所能获取的最大行数
+     */
+    public void setFetchSize(Integer fetchSize) {
+        this.fetchSize = fetchSize;
+    }
+
+    /**
+     * 获取连接超时秒数
+     */
+    public Long getConnectTimeoutSeconds() {
+        return connectTimeoutSeconds;
+    }
+
+    /**
+     * 设置连接超时秒数
+     * @param connectTimeoutSeconds 连接超时秒数
+     */
+    public void setConnectTimeoutSeconds(Long connectTimeoutSeconds) {
+        this.connectTimeoutSeconds = connectTimeoutSeconds;
+    }
+
+    /**
+     * 获取连接最大重试次数
+     */
+    public Integer getConnectMaxRetries() {
+        return connectMaxRetries;
+    }
+
+    /**
+     * 设置连接最大重试次数
+     * @param connectMaxRetries 连接最大重试次数
+     */
+    public void setConnectMaxRetries(Integer connectMaxRetries) {
+        this.connectMaxRetries = connectMaxRetries;
+    }
+
+    /**
+     * 获取连接池大小
+     */
+    public Integer getConnectionPoolSize() {
+        return connectionPoolSize;
+    }
+
+    /**
+     * 设置连接池大小
+     * @param connectionPoolSize 连接池大小
+     */
+    public void setConnectionPoolSize(Integer connectionPoolSize) {
+        this.connectionPoolSize = connectionPoolSize;
+    }
+
+    /**
+     * 获取心跳检测间隔秒数
+     */
+    public Long getHeartbeatIntervalSeconds() {
+        return heartbeatIntervalSeconds;
+    }
+
+    /**
+     * 设置心跳检测间隔秒数
+     * @param heartbeatIntervalSeconds 心跳检测间隔秒数
+     */
+    public void setHeartbeatIntervalSeconds(Long heartbeatIntervalSeconds) {
+        this.heartbeatIntervalSeconds = heartbeatIntervalSeconds;
+    }
+
+    /**
+     * 获取JDBC属性（JSON）
+     */
+    public String getJdbcProperties() {
+        return jdbcProperties;
+    }
+
+    /**
+     * 设置JDBC属性（JSON）
+     * @param jdbcProperties JDBC属性（JSON）
+     */
+    public void setJdbcProperties(String jdbcProperties) {
+        this.jdbcProperties = jdbcProperties;
     }
 
     /**

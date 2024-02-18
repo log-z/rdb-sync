@@ -27,14 +27,23 @@ public interface MysqlPipelineSourceMapper {
             ", psm.database" +
             ", psm.username" +
             ", psm.password" +
-            ", psm.connect_timeout_seconds" +
-            ", psm.jdbc_properties" +
             ", psm.server_id" +
+            ", psm.server_time_zone" +
             ", psm.startup_mode" +
             ", psm.startup_specific_offset_file" +
             ", psm.startup_specific_offset_pos" +
             ", psm.startup_specific_offset_gtid_set" +
-            ", psm.startup_timestamp_millis " +
+            ", psm.startup_timestamp_millis" +
+            ", psm.split_size" +
+            ", psm.split_meta_group_size" +
+            ", psm.distribution_factor_upper" +
+            ", psm.distribution_factor_lower" +
+            ", psm.fetch_size" +
+            ", psm.connect_timeout_seconds" +
+            ", psm.connect_max_retries" +
+            ", psm.connection_pool_size" +
+            ", psm.heartbeat_interval_seconds" +
+            ", psm.jdbc_properties " +
             "from pipeline_source as ps " +
             "inner join pipeline_source_mysql as psm " +
             "on ps.id = psm.id " +

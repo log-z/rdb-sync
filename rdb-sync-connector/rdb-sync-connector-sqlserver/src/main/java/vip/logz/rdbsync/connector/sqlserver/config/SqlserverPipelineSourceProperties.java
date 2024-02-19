@@ -1,7 +1,10 @@
 package vip.logz.rdbsync.connector.sqlserver.config;
 
+import com.ververica.cdc.connectors.sqlserver.source.SqlServerSourceBuilder;
 import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
+
+import java.time.Duration;
 
 /**
  * SQLServer管道来源属性
@@ -10,18 +13,6 @@ import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
  * @date 2024-01-27
  */
 public class SqlserverPipelineSourceProperties extends PipelineSourceProperties {
-
-    /** 默认值：主机 */
-    private static final String DEFAULT_HOST = "localhost";
-
-    /** 默认值：端口 */
-    private static final int DEFAULT_PORT = 1433;
-
-    /** 默认值：模式名 */
-    private static final String DEFAULT_SCHEMA = "dbo";
-
-    /** 默认值：用户名 */
-    private static final String DEFAULT_USERNAME = "sa";
 
     /** 启动模式：先做快照，再读取最新日志 */
     public static final String STARTUP_MODE_INITIAL = "initial";
@@ -50,14 +41,73 @@ public class SqlserverPipelineSourceProperties extends PipelineSourceProperties 
     /** 密码 */
     private String password;
 
-    /** 启动模式 */
+    /**
+     * 数据库的会话时区
+     * @see SqlServerSourceBuilder#serverTimeZone(String)
+     */
+    private String serverTimeZone;
+
+    /**
+     * 启动模式
+     * @see #STARTUP_MODE_INITIAL
+     * @see #STARTUP_MODE_INITIAL_ONLY
+     * @see #STARTUP_MODE_LATEST
+     */
     private String startupMode;
+
+    /**
+     * 快照属性：表快照的分块大小（行数）
+     * @see SqlServerSourceBuilder#splitSize(int)
+     */
+    private Integer splitSize;
+
+    /**
+     * 快照属性：拆分元数据的分组大小
+     * @see SqlServerSourceBuilder#splitMetaGroupSize(int)
+     */
+    private Integer splitMetaGroupSize;
+
+    /**
+     * 快照属性：均匀分布因子的上限
+     * @see SqlServerSourceBuilder#distributionFactorUpper(double)
+     */
+    private Double distributionFactorUpper;
+
+    /**
+     * 快照属性：均匀分布因子的下限
+     * @see SqlServerSourceBuilder#distributionFactorLower(double)
+     */
+    private Double distributionFactorLower;
+
+    /**
+     * 快照属性：每次轮询所能获取的最大行数
+     * @see SqlServerSourceBuilder#fetchSize(int)
+     */
+    private Integer fetchSize;
+
+    /**
+     * 连接超时秒数
+     * @see SqlServerSourceBuilder#connectTimeout(Duration)
+     */
+    private Long connectTimeoutSeconds;
+
+    /**
+     * 连接最大重试次数
+     * @see SqlServerSourceBuilder#connectMaxRetries(int)
+     */
+    private Integer connectMaxRetries;
+
+    /**
+     * 连接池大小
+     * @see SqlServerSourceBuilder#connectionPoolSize(int)
+     */
+    private Integer connectionPoolSize;
 
     /**
      * 获取主机
      */
     public String getHost() {
-        return host != null ? host : DEFAULT_HOST;
+        return host;
     }
 
     /**
@@ -72,7 +122,7 @@ public class SqlserverPipelineSourceProperties extends PipelineSourceProperties 
      * 获取端口
      */
     public Integer getPort() {
-        return port != null ? port : DEFAULT_PORT;
+        return port;
     }
 
     /**
@@ -102,7 +152,7 @@ public class SqlserverPipelineSourceProperties extends PipelineSourceProperties 
      * 获取模式名
      */
     public String getSchema() {
-        return schema != null ? schema : DEFAULT_SCHEMA;
+        return schema;
     }
 
     /**
@@ -117,7 +167,7 @@ public class SqlserverPipelineSourceProperties extends PipelineSourceProperties 
      * 获取用户名
      */
     public String getUsername() {
-        return username != null ? username : DEFAULT_USERNAME;
+        return username;
     }
 
     /**
@@ -144,6 +194,21 @@ public class SqlserverPipelineSourceProperties extends PipelineSourceProperties 
     }
 
     /**
+     * 获取数据库的会话时区
+     */
+    public String getServerTimeZone() {
+        return serverTimeZone;
+    }
+
+    /**
+     * 设置数据库的会话时区
+     * @param serverTimeZone 数据库的会话时区
+     */
+    public void setServerTimeZone(String serverTimeZone) {
+        this.serverTimeZone = serverTimeZone;
+    }
+
+    /**
      * 获取启动模式
      */
     public String getStartupMode() {
@@ -156,6 +221,126 @@ public class SqlserverPipelineSourceProperties extends PipelineSourceProperties 
      */
     public void setStartupMode(String startupMode) {
         this.startupMode = startupMode;
+    }
+
+    /**
+     * 获取快照属性：表快照的分块大小（行数）
+     */
+    public Integer getSplitSize() {
+        return splitSize;
+    }
+
+    /**
+     * 设置快照属性：表快照的分块大小（行数）
+     * @param splitSize 快照属性：表快照的分块大小（行数）
+     */
+    public void setSplitSize(Integer splitSize) {
+        this.splitSize = splitSize;
+    }
+
+    /**
+     * 获取快照属性：拆分元数据的分组大小
+     */
+    public Integer getSplitMetaGroupSize() {
+        return splitMetaGroupSize;
+    }
+
+    /**
+     * 设置快照属性：拆分元数据的分组大小
+     * @param splitMetaGroupSize 快照属性：拆分元数据的分组大小
+     */
+    public void setSplitMetaGroupSize(Integer splitMetaGroupSize) {
+        this.splitMetaGroupSize = splitMetaGroupSize;
+    }
+
+    /**
+     * 获取快照属性：均匀分布因子的上限
+     */
+    public Double getDistributionFactorUpper() {
+        return distributionFactorUpper;
+    }
+
+    /**
+     * 设置快照属性：均匀分布因子的上限
+     * @param distributionFactorUpper 快照属性：均匀分布因子的上限
+     */
+    public void setDistributionFactorUpper(Double distributionFactorUpper) {
+        this.distributionFactorUpper = distributionFactorUpper;
+    }
+
+    /**
+     * 获取快照属性：均匀分布因子的下限
+     */
+    public Double getDistributionFactorLower() {
+        return distributionFactorLower;
+    }
+
+    /**
+     * 设置快照属性：均匀分布因子的下限
+     * @param distributionFactorLower 快照属性：均匀分布因子的下限
+     */
+    public void setDistributionFactorLower(Double distributionFactorLower) {
+        this.distributionFactorLower = distributionFactorLower;
+    }
+
+    /**
+     * 获取快照属性：每次轮询所能获取的最大行数
+     */
+    public Integer getFetchSize() {
+        return fetchSize;
+    }
+
+    /**
+     * 设置快照属性：每次轮询所能获取的最大行数
+     * @param fetchSize 快照属性：每次轮询所能获取的最大行数
+     */
+    public void setFetchSize(Integer fetchSize) {
+        this.fetchSize = fetchSize;
+    }
+
+    /**
+     * 获取连接超时秒数
+     */
+    public Long getConnectTimeoutSeconds() {
+        return connectTimeoutSeconds;
+    }
+
+    /**
+     * 设置连接超时秒数
+     * @param connectTimeoutSeconds 连接超时秒数
+     */
+    public void setConnectTimeoutSeconds(Long connectTimeoutSeconds) {
+        this.connectTimeoutSeconds = connectTimeoutSeconds;
+    }
+
+    /**
+     * 获取连接最大重试次数
+     */
+    public Integer getConnectMaxRetries() {
+        return connectMaxRetries;
+    }
+
+    /**
+     * 设置连接最大重试次数
+     * @param connectMaxRetries 连接最大重试次数
+     */
+    public void setConnectMaxRetries(Integer connectMaxRetries) {
+        this.connectMaxRetries = connectMaxRetries;
+    }
+
+    /**
+     * 获取连接池大小
+     */
+    public Integer getConnectionPoolSize() {
+        return connectionPoolSize;
+    }
+
+    /**
+     * 设置连接池大小
+     * @param connectionPoolSize 连接池大小
+     */
+    public void setConnectionPoolSize(Integer connectionPoolSize) {
+        this.connectionPoolSize = connectionPoolSize;
     }
 
     /**

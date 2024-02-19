@@ -154,6 +154,15 @@ create table `pipeline_source_sqlserver` (
   `schema` varchar(255) comment '模式名',
   `username` varchar(255) comment '用户名',
   `password` varchar(255) comment '密码',
+  `server_time_zone` varchar(64) comment '数据库的会话时区',
   `startup_mode` varchar(32) comment '启动模式',
+  `split_size` int comment '快照属性：表快照的分块大小（行数）',
+  `split_meta_group_size` int comment '快照属性：拆分元数据的分组大小',
+  `distribution_factor_upper` double comment '快照属性：均匀分布因子的上限',
+  `distribution_factor_lower` double comment '快照属性：均匀分布因子的下限',
+  `fetch_size` int comment '快照属性：每次轮询所能获取的最大行数',
+  `connect_timeout_seconds` bigint comment '连接超时秒数',
+  `connect_max_retries` int comment '连接最大重试次数',
+  `connection_pool_size` int comment '连接池大小',
   primary key (`id`) using btree
 ) comment = '管道来源-SQLServer扩展';

@@ -14,15 +14,6 @@ public class SqlserverPipelineDistProperties extends JdbcPipelineDistProperties 
     /** 前缀：JDBC-URL */
     private static final String PREFIX_JDBC_URL = "jdbc:sqlserver://";
 
-    /** 默认值：端口 */
-    private static final int DEFAULT_PORT = 1433;
-
-    /** 默认值：模式名 */
-    private static final String DEFAULT_SCHEMA = "dbo";
-
-    /** 默认值：用户名 */
-    private static final String DEFAULT_USERNAME = "sa";
-
     /** 模式名 */
     private String schema;
 
@@ -40,14 +31,14 @@ public class SqlserverPipelineDistProperties extends JdbcPipelineDistProperties 
     @Override
     public Integer getPort() {
         Integer port = super.getPort();
-        return port != null ? port : DEFAULT_PORT;
+        return port != null ? port : SqlserverOptions.DEFAULT_PORT;
     }
 
     /**
      * 获取模式名
      */
     public String getSchema() {
-        return schema != null ? schema : DEFAULT_SCHEMA;
+        return schema != null ? schema : SqlserverOptions.DEFAULT_SCHEMA;
     }
 
     /**
@@ -63,7 +54,7 @@ public class SqlserverPipelineDistProperties extends JdbcPipelineDistProperties 
      */
     @Override
     public String getUsername() {
-        return username != null ? username : DEFAULT_USERNAME;
+        return username != null ? username : SqlserverOptions.DEFAULT_USERNAME;
     }
 
     /**

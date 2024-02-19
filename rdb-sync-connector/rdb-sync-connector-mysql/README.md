@@ -40,7 +40,7 @@
 | username | String | root | 用户名 |
 | password | String | root | 密码 |
 | server_id | String | 从 `5400` 到 `6400` 之间随机选择一个 | 模拟服务端ID <br>与其它任务不可重复，强烈推荐设置为明确的值。<li>单个：例如 `5000`；<li>范围：例如 `5000-5004`（共5个）。<br>请注意，需要的个数取决于 `parallelism` 的值。 |
-| server_time_zone | String | | 数据库的会话时区 <br>例如 `Asia/Shanghai`，优先从数据库中获取，用于将 `TIMESTAMP` 类型转换到特定时区的字符串。 |
+| server_time_zone | String | 系统默认时区 | 数据库的会话时区 <br>例如 `Asia/Shanghai`，用于将 `TIMESTAMP` 类型转换为特定时区的字符串。 |
 | startup_mode | String | initial | 启动模式 <li>`initial`：先做快照，再读取最新日志；<li>`earliest-offset`：跳过快照，从最早可用位置读取日志；<li>`latest-offset`：跳过快照，仅读取最新日志；<li>`specific-offset`：跳过快照，从指定位置开始读取日志；<li>`timestamp-offset`：跳过快照，从指定时间戳开始读取日志。 |
 | startup_specific_offset_file | String | | 启动参数：起始日志文件 <br>仅当启动模式是 `specific-offset` 时生效，需要与 `startup_specific_offset_pos` 搭配。 |
 | startup_specific_offset_pos | Long | | 启动参数：起始日志文件内位置 <br>仅当启动模式是 `specific-offset` 时生效，需要与 `startup_specific_offset_file` 搭配。 |

@@ -16,6 +16,7 @@ import vip.logz.rdbsync.common.rule.table.EqualTableMatcher;
 import vip.logz.rdbsync.common.rule.table.TableMatcher;
 import vip.logz.rdbsync.common.utils.BuildHelper;
 import vip.logz.rdbsync.common.utils.JacksonUtils;
+import vip.logz.rdbsync.common.utils.sql.DDLGenerator;
 import vip.logz.rdbsync.connector.mysql.config.MysqlOptions;
 import vip.logz.rdbsync.connector.mysql.config.MysqlPipelineSourceProperties;
 import vip.logz.rdbsync.connector.mysql.job.debezium.DateFormatConverter;
@@ -71,7 +72,7 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
                 // 表名列表
                 .set(
                         (Function<? super String[], ?>) builder::tableList,
-                        buildTableList(pipeline)
+                        buildTableList(pipelineProperties.getDatabase(), pipeline)
                 )
                 // 用户名
                 .set(builder::username, pipelineProperties.getUsername(), MysqlOptions.DEFAULT_USERNAME)
@@ -121,10 +122,11 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
 
     /**
      * 构建表名列表
+     * @param database 当前数据库名，用于确定表的完全限定名称
      * @param pipeline 管道
      * @return 返回表名数组。当所有绑定的来源表都是“等值表匹配”时，将返回切确的表名数组，否则匹配当前数据库下所有的表。
      */
-    private static String[] buildTableList(Pipeline<Mysql> pipeline) {
+    private static String[] buildTableList(String database, Pipeline<Mysql> pipeline) {
         // 提前退出
         List<Binding<Mysql>> bindings = pipeline.getBindings();
         if (bindings.isEmpty()) {
@@ -138,7 +140,7 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
             TableMatcher sourceTableMatcher = binding.getSourceTableMatcher();
             if (sourceTableMatcher instanceof EqualTableMatcher) {
                 String table = ((EqualTableMatcher) sourceTableMatcher).getTable();
-                preciseTables.add(table);
+                preciseTables.add(database + DDLGenerator.TOKEN_REF_DELIMITER + table);
                 continue;
             }
 

@@ -16,6 +16,11 @@ public final class Sqlserver implements Rdb {
     private Sqlserver() {
     }
 
+
+    /*
+     数值类型
+     */
+
     /** 字段类型：BIT */
     public static FieldType<Sqlserver, Integer> BIT() {
         return new IntFieldType<>("BIT");
@@ -71,6 +76,11 @@ public final class Sqlserver implements Rdb {
         return new DoubleFieldType<>("FLOAT", n);
     }
 
+
+    /*
+     日期时间类型
+     */
+
     /** 字段类型：DATE */
     public static FieldType<Sqlserver, String> DATE() {
         return new DateFieldType<>("DATE");
@@ -111,6 +121,11 @@ public final class Sqlserver implements Rdb {
         return new DatetimeFieldType<>("DATETIMEOFFSET", fractionalSecondsPrecision);
     }
 
+
+    /*
+     字符串类型
+     */
+
     /** 字段类型：CHAR(n) */
     public static FieldType<Sqlserver, String> CHAR(int n) {
         return new TextFieldType<>("CHAR", n);
@@ -140,6 +155,36 @@ public final class Sqlserver implements Rdb {
     public static FieldType<Sqlserver, String> NTEXT() {
         return new TextFieldType<>("NTEXT");
     }
+
+
+    /*
+     二进制类型
+     */
+
+    /** 字段类型：BINARY(n) */
+    public static FieldType<Sqlserver, byte[]> BINARY(int n) {
+        return new BytesFieldType<>("BINARY", n);
+    }
+
+    /** 字段类型：VARBINARY(n) */
+    public static FieldType<Sqlserver, byte[]> VARBINARY(int n) {
+        return new BytesFieldType<>("VARBINARY", n);
+    }
+
+    /** 字段类型：VARBINARY(MAX) */
+    public static FieldType<Sqlserver, byte[]> VARBINARY_MAX() {
+        return new BytesFieldType<>("VARBINARY", "MAX");
+    }
+
+    /** 字段类型：IMAGE */
+    public static FieldType<Sqlserver, byte[]> IMAGE() {
+        return new BytesFieldType<>("IMAGE");
+    }
+
+
+    /*
+     其它类型
+     */
 
     /** 字段类型：HIERARCHYID */
     public static FieldType<Sqlserver, String> HIERARCHYID() {

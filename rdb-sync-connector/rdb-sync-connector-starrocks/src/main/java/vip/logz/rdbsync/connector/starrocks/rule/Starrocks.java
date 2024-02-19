@@ -17,6 +17,11 @@ public class Starrocks implements Rdb {
     private Starrocks() {
     }
 
+
+    /*
+     数值类型
+     */
+
     /** 字段类型：SMALLINT */
     public static FieldType<Starrocks, ?> SMALLINT() {
         return new PlainFieldType<>("SMALLINT");
@@ -52,10 +57,35 @@ public class Starrocks implements Rdb {
         return new PlainFieldType<>("DOUBLE");
     }
 
+
+    /*
+     布尔类型
+     */
+
     /** 字段类型：BOOLEAN */
     public static FieldType<Starrocks, ?> BOOLEAN() {
         return new PlainFieldType<>("BOOLEAN");
     }
+
+
+    /*
+     日期时间类型
+     */
+
+    /** 字段类型：DATE */
+    public static FieldType<Starrocks, ?> DATE() {
+        return new DateFieldType<>("DATE");
+    }
+
+    /** 字段类型：DATETIME */
+    public static FieldType<Starrocks, ?> DATETIME() {
+        return new DatetimeFieldType<>("DATETIME");
+    }
+
+
+    /*
+     字符串类型
+     */
 
     /** 字段类型：STRING */
     public static FieldType<Starrocks, ?> STRING() {
@@ -70,16 +100,6 @@ public class Starrocks implements Rdb {
     /** 字段类型：VARCHAR(m) */
     public static FieldType<Starrocks, ?> VARCHAR(int m) {
         return new PlainFieldType<>("VARCHAR", m);
-    }
-
-    /** 字段类型：DATE */
-    public static FieldType<Starrocks, ?> DATE() {
-        return new DateFieldType<>("DATE");
-    }
-
-    /** 字段类型：DATETIME */
-    public static FieldType<Starrocks, ?> DATETIME() {
-        return new DatetimeFieldType<>("DATETIME");
     }
 
 }

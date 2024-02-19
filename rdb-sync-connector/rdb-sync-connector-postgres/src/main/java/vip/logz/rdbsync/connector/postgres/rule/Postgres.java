@@ -153,6 +153,16 @@ public final class Postgres implements Rdb {
 
 
     /*
+     二进制类型
+     */
+
+    /** 字段类型：BYTEA */
+    public static FieldType<Postgres, byte[]> BYTEA() {
+        return new BytesFieldType<>("BYTEA");
+    }
+
+
+    /*
      网络地址类型
      */
 
@@ -178,7 +188,7 @@ public final class Postgres implements Rdb {
 
 
     /*
-     网络地址类型
+     其它类型
      */
 
     /** 字段类型：UUID */

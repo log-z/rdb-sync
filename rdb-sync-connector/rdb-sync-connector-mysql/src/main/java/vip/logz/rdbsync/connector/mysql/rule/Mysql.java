@@ -20,6 +20,11 @@ public final class Mysql implements Rdb {
     private Mysql() {
     }
 
+
+    /*
+     数值类型
+     */
+
     /** 字段类型：TINYINT */
     public static FieldType<Mysql, Integer> TINYINT() {
         return new IntFieldType<>("TINYINT");
@@ -85,6 +90,11 @@ public final class Mysql implements Rdb {
         return new DoubleFieldType<>("DOUBLE");
     }
 
+
+    /*
+     日期时间类型
+     */
+
     /** 字段类型：DATE */
     public static FieldType<Mysql, String> DATE() {
         return new DateFieldType<>("DATE");
@@ -120,6 +130,11 @@ public final class Mysql implements Rdb {
         return new DatetimeFieldType<>("TIMESTAMP", fsp);
     }
 
+
+    /*
+     字符串类型
+     */
+
     /** 字段类型：CHAR(n) */
     public static FieldType<Mysql, String> CHAR(int n) {
         return new TextFieldType<>("CHAR", n);
@@ -149,6 +164,36 @@ public final class Mysql implements Rdb {
     public static FieldType<Mysql, String> LONGTEXT() {
         return new TextFieldType<>("LONGTEXT");
     }
+
+
+    /*
+     二进制类型
+     */
+
+    /** 字段类型：TINYBLOB */
+    public static FieldType<Mysql, byte[]> TINYBLOB() {
+        return new BytesFieldType<>("TINYBLOB");
+    }
+
+    /** 字段类型：BLOB */
+    public static FieldType<Mysql, byte[]> BLOB() {
+        return new BytesFieldType<>("BLOB");
+    }
+
+    /** 字段类型：MEDIUMBLOB */
+    public static FieldType<Mysql, byte[]> MEDIUMBLOB() {
+        return new BytesFieldType<>("MEDIUMBLOB");
+    }
+
+    /** 字段类型：LONGBLOB */
+    public static FieldType<Mysql, byte[]> LONGBLOB() {
+        return new BytesFieldType<>("LONGBLOB");
+    }
+
+
+    /*
+     其它类型
+     */
 
     /** 字段类型：ENUM(...) */
     public static FieldType<Mysql, String> ENUM(String... elements) {

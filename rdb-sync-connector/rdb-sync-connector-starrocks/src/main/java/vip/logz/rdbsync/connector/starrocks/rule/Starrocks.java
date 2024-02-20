@@ -22,6 +22,11 @@ public class Starrocks implements Rdb {
      数值类型
      */
 
+    /** 字段类型：TINYINT */
+    public static FieldType<Starrocks, ?> TINYINT() {
+        return new PlainFieldType<>("TINYINT");
+    }
+
     /** 字段类型：SMALLINT */
     public static FieldType<Starrocks, ?> SMALLINT() {
         return new PlainFieldType<>("SMALLINT");
@@ -32,9 +37,14 @@ public class Starrocks implements Rdb {
         return new PlainFieldType<>("INT");
     }
 
+    /** 字段类型：BIGINT */
+    public static FieldType<Starrocks, ?> BIGINT() {
+        return new PlainFieldType<>("BIGINT");
+    }
+
     /** 字段类型：BIGINT(m) */
     public static FieldType<Starrocks, ?> BIGINT(int m) {
-        return new PlainFieldType<>("SMALLINT", m);
+        return new PlainFieldType<>("BIGINT", m);
     }
 
     /** 字段类型：LARGEINT */
@@ -100,6 +110,11 @@ public class Starrocks implements Rdb {
     /** 字段类型：VARCHAR(m) */
     public static FieldType<Starrocks, ?> VARCHAR(int m) {
         return new PlainFieldType<>("VARCHAR", m);
+    }
+
+    /** 字段类型：TEXT */
+    public static FieldType<Starrocks, ?> TEXT() {
+        return new PlainFieldType<>("TEXT");
     }
 
 }

@@ -7,6 +7,8 @@ import vip.logz.rdbsync.common.job.debezium.DebeziumConverterFallback;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -61,7 +63,10 @@ public class TimeFormatConverter implements CustomConverter<SchemaBuilder, Relat
 
             // 情形2：读取日志
             if (x instanceof Time) {
-                return x.toString();
+                Time time = (Time) x;
+                Instant instant = Instant.ofEpochMilli(time.getTime());
+                LocalTime localTime = LocalTime.ofInstant(instant, zoneId);
+                return localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
             }
 
             return field.isOptional() ? null : DebeziumConverterFallback.TIME;

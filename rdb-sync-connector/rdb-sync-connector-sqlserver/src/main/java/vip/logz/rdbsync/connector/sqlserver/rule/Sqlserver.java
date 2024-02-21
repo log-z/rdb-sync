@@ -71,6 +71,11 @@ public final class Sqlserver implements Rdb {
         return new FloatFieldType<>("REAL");
     }
 
+    /** 字段类型：FLOAT */
+    public static FieldType<Sqlserver, Double> FLOAT() {
+        return new DoubleFieldType<>("FLOAT");
+    }
+
     /** 字段类型：FLOAT(n) */
     public static FieldType<Sqlserver, Double> FLOAT(int n) {
         return new DoubleFieldType<>("FLOAT", n);
@@ -161,9 +166,19 @@ public final class Sqlserver implements Rdb {
      二进制类型
      */
 
+    /** 字段类型：BINARY */
+    public static FieldType<Sqlserver, byte[]> BINARY() {
+        return new BytesFieldType<>("BINARY");
+    }
+
     /** 字段类型：BINARY(n) */
     public static FieldType<Sqlserver, byte[]> BINARY(int n) {
         return new BytesFieldType<>("BINARY", n);
+    }
+
+    /** 字段类型：VARBINARY */
+    public static FieldType<Sqlserver, byte[]> VARBINARY() {
+        return new BytesFieldType<>("VARBINARY");
     }
 
     /** 字段类型：VARBINARY(n) */
@@ -187,8 +202,8 @@ public final class Sqlserver implements Rdb {
      */
 
     /** 字段类型：HIERARCHYID */
-    public static FieldType<Sqlserver, String> HIERARCHYID() {
-        return new TextFieldType<>("HIERARCHYID");
+    public static FieldType<Sqlserver, byte[]> HIERARCHYID() {
+        return new BytesFieldType<>("HIERARCHYID");
     }
 
     /** 字段类型：UNIQUEIDENTIFIER */

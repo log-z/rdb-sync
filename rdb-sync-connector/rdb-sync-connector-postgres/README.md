@@ -81,6 +81,18 @@ ALTER SYSTEM SET wal_level = logical;
 
 这是由于 Postgres CDC 连接器在读取快照时，使用 `java.sql.Time` 传递时间数据导致的缺陷...
 
+#### 处理 TOAST 存储的数据
+对于大型数据元组，若超过了 `TOAST_TUPLE_THRESHOLD` 规定的大小（默认2KB）时，Postgres 将使用 TOAST 技术进行存储。一般情况下，这不会造成什么影响，但在逻辑复制中（读取日志阶段）却使我们无法获取确切的值。
+
+外在的表现是，如果同步结果中出现 `__debezium_unavailable_value`（或其 Base64 解码后）这样的值，那就说明受到了 TOAST 的影响。这在 `TEXT` 和 `BYTEA` 之类的大型数据中尤为常见。
+
+有个简单的解决办法是，对来源表添加 `REPLICA IDENTITY FULL` 属性：
+```postgresql
+ALTER TABLE table_name REPLICA IDENTITY FULL;
+```
+
+> 详情参考 Debezium 教程中 [被 TOAST 存储的值](https://debezium.io/documentation/reference/1.9/connectors/postgresql.html#postgresql-toasted-values) 这部分。
+
 
 ## 参考资料
 - [Postgres CDC 连接器](https://github.com/ververica/flink-cdc-connectors/blob/master/docs/content/connectors/postgres-cdc.md) · _Ververica CDC Connectors_

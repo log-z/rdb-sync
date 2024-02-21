@@ -111,6 +111,16 @@ public final class Postgres implements Rdb {
         return new TimeFieldType<>("TIME", p);
     }
 
+    /** 字段类型：TIMETZ */
+    public static FieldType<Postgres, String> TIMETZ() {
+        return new TimeFieldType<>("TIMETZ");
+    }
+
+    /** 字段类型：TIMETZ(p) */
+    public static FieldType<Postgres, String> TIMETZ(int p) {
+        return new TimeFieldType<>("TIMETZ", p);
+    }
+
     /** 字段类型：TIMESTAMP */
     public static FieldType<Postgres, String> TIMESTAMP() {
         return new DatetimeFieldType<>("TIMESTAMP");
@@ -119,6 +129,16 @@ public final class Postgres implements Rdb {
     /** 字段类型：TIMESTAMP(p) */
     public static FieldType<Postgres, String> TIMESTAMP(int p) {
         return new DatetimeFieldType<>("TIMESTAMP", p);
+    }
+
+    /** 字段类型：TIMESTAMPTZ */
+    public static FieldType<Postgres, String> TIMESTAMPTZ() {
+        return new DatetimeFieldType<>("TIMESTAMPTZ");
+    }
+
+    /** 字段类型：TIMESTAMPTZ(p) */
+    public static FieldType<Postgres, String> TIMESTAMPTZ(int p) {
+        return new DatetimeFieldType<>("TIMESTAMPTZ", p);
     }
 
 

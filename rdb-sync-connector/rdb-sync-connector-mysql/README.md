@@ -23,7 +23,8 @@
 > 详情参考 Debezium 教程中 [配置 MySQL](https://debezium.io/documentation/reference/1.9/connectors/mysql.html#setting-up-mysql) 这部分。
 
 ### 目标
-1. 用户至少对“目标表”具有 `Select`、`Insert`、`Update` 和 `Delete` 权限。
+1. 用户至少对“目标表”具有 `Select`、`Insert`、`Update` 和 `Delete` 权限；
+2. （可选）当容错保证配置为 `exactly-once` 时，对于 MySQL 8 及以上版本，用户还需具有 `XA_RECOVER_ADMIN` 的服务器权限。
 
 
 ## 管道配置
@@ -68,10 +69,13 @@
 | database | String | _*必填_ | 数据库名 |
 | username | String | root | 用户名 |
 | password | String | root | 密码 |
+| guarantee | String | at-least-once | 容错保证 <li>`at-least-once`：一个事件至少同步一次；<li>`exactly-once`：一个事件精确同步一次。 |
 | exec_batch_interval_ms | Long | 0 | 执行批次间隔毫秒数 |
 | exec_batch_size | Integer | 5000 | 执行批次最大容量 |
-| exec_max_retries | Integer | 3 | 执行最大重试次数 |
+| exec_max_retries | Integer | 3 | 执行最大重试次数 <br>若容错保证是 `exactly-once` 时，将强制为零。 |
 | conn_timeout_seconds | Integer | 30 | 连接超时秒数 |
+| tx_max_commit_attempts | Integer | 3 | 精确一次属性：事务提交尝试次数 <br>仅当容错保证是 `exactly-once` 时生效。 |
+| tx_timeout_seconds | Integer | | 精确一次属性：事务超时秒数 <br>仅当容错保证是 `exactly-once` 时生效。 |
 
 
 ## 参考资料

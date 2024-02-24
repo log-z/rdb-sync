@@ -25,10 +25,13 @@ create table `pipeline_dist_mysql` (
   `database` varchar(255) not null comment '数据库名',
   `username` varchar(255) comment '用户名',
   `password` varchar(255) comment '密码',
+  `guarantee` varchar(32) comment '容错保证',
   `exec_batch_interval_ms` bigint comment '执行批次间隔毫秒数',
   `exec_batch_size` int comment '执行批次最大容量',
   `exec_max_retries` int comment '执行最大重试次数',
   `conn_timeout_seconds` int comment '连接超时秒数',
+  `tx_max_commit_attempts` int comment '精确一次属性：事务提交尝试次数',
+  `tx_timeout_seconds` int comment '精确一次属性：事务超时秒数',
   primary key (`id`) using btree
 ) comment = '管道目标-MySQL扩展';
 
@@ -183,7 +186,7 @@ INSERT INTO `pipeline_dist` VALUES ('simple_dist_starrocks', 'Simple Dist StarRo
 -- ----------------------------
 -- Records of pipeline_dist_mysql
 -- ----------------------------
-INSERT INTO `pipeline_dist_mysql` VALUES ('simple_dist_mysql', 'mysql', 3306, 'test_dist', 'rdb_sync', 'rdb_sync', NULL, NULL, NULL, NULL);
+INSERT INTO `pipeline_dist_mysql` VALUES ('simple_dist_mysql', 'mysql', 3306, 'test_dist', 'rdb_sync', 'rdb_sync', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Records of pipeline_dist_starrocks

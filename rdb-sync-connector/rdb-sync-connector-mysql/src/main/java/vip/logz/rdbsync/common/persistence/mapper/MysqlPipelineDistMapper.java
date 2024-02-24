@@ -26,10 +26,13 @@ public interface MysqlPipelineDistMapper {
             ", pdm.database" +
             ", pdm.username" +
             ", pdm.password" +
+            ", pdm.guarantee" +
             ", pdm.exec_batch_interval_ms" +
             ", pdm.exec_batch_size" +
             ", pdm.exec_max_retries" +
-            ", pdm.conn_timeout_seconds " +
+            ", pdm.conn_timeout_seconds" +
+            ", pdm.tx_max_commit_attempts" +
+            ", pdm.tx_timeout_seconds " +
             "from pipeline_dist as pd " +
             "inner join pipeline_dist_mysql as pdm " +
             "on pd.id = pdm.id " +

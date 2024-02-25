@@ -72,7 +72,7 @@ ALTER SYSTEM SET wal_level = logical;
 | guarantee | String | at-least-once | 容错保证 <li>`at-least-once`：一个事件至少同步一次；<li>`exactly-once`：一个事件精确同步一次。 |
 | exec_batch_interval_ms | Long | 0 | 执行批次间隔毫秒数 |
 | exec_batch_size | Integer | 5000 | 执行批次最大容量 |
-| exec_max_retries | Integer | 3 | 执行最大重试次数 |
+| exec_max_retries | Integer | 3 | 执行最大重试次数 <br>若容错保证是 `exactly-once` 时，将强制为零。 |
 | conn_timeout_seconds | Integer | 30 | 连接超时秒数 |
 | tx_max_commit_attempts | Integer | 3 | 精确一次属性：事务提交尝试次数 <br>仅当容错保证是 `exactly-once` 时生效。 |
 | tx_timeout_seconds | Integer | | 精确一次属性：事务超时秒数 <br>仅当容错保证是 `exactly-once` 时生效。 |

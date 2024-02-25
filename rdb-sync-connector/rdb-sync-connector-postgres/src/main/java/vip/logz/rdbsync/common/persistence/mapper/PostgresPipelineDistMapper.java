@@ -21,16 +21,19 @@ public interface PostgresPipelineDistMapper {
     @Select("select pd.id" +
             ", pd.name" +
             ", pd.protocol" +
-            ", pdp.host" +
-            ", pdp.port" +
+            ", pdp.hosts" +
+            ", pdp.ports" +
             ", pdp.database" +
             ", pdp.schema" +
             ", pdp.username" +
             ", pdp.password" +
+            ", pdp.guarantee" +
             ", pdp.exec_batch_interval_ms" +
             ", pdp.exec_batch_size" +
             ", pdp.exec_max_retries" +
-            ", pdp.conn_timeout_seconds " +
+            ", pdp.conn_timeout_seconds" +
+            ", pdp.tx_max_commit_attempts" +
+            ", pdp.tx_timeout_seconds " +
             "from pipeline_dist as pd " +
             "inner join pipeline_dist_postgres as pdp " +
             "on pd.id = pdp.id " +

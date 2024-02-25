@@ -26,7 +26,8 @@ ALTER SYSTEM SET wal_level = logical;
 > ① 如果所有绑定的来源表都是“等值表匹配”时，那么只需要这些表的 `Select` 权限即可，否则需要相关模式中的全部表的 `Select` 权限。
 
 ### 目标
-1. 角色至少对“目标表”具有 `Select`、`Insert`、`Update` 和 `Delete` 权限。
+1. 角色至少对“目标表”具有 `Select`、`Insert`、`Update` 和 `Delete` 权限；
+2. （可选）当容错保证配置为 `exactly-once` 时，还需要确保数据库参数 [`max_prepared_transactions`](https://www.postgresql.org/docs/current/runtime-config-resource.html#GUC-MAX-PREPARED-TRANSACTIONS) 的大小足够，此参数只能在配置文件中更改，并在重启后才生效。
 
 
 ## 管道配置
@@ -68,10 +69,13 @@ ALTER SYSTEM SET wal_level = logical;
 | schema | String | public | 模式名 |
 | username | String | postgres | 用户名 |
 | password | String | postgres | 密码 |
+| guarantee | String | at-least-once | 容错保证 <li>`at-least-once`：一个事件至少同步一次；<li>`exactly-once`：一个事件精确同步一次。 |
 | exec_batch_interval_ms | Long | 0 | 执行批次间隔毫秒数 |
 | exec_batch_size | Integer | 5000 | 执行批次最大容量 |
 | exec_max_retries | Integer | 3 | 执行最大重试次数 |
 | conn_timeout_seconds | Integer | 30 | 连接超时秒数 |
+| tx_max_commit_attempts | Integer | 3 | 精确一次属性：事务提交尝试次数 <br>仅当容错保证是 `exactly-once` 时生效。 |
+| tx_timeout_seconds | Integer | | 精确一次属性：事务超时秒数 <br>仅当容错保证是 `exactly-once` 时生效。 |
 
 
 ## 注意事项

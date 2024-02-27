@@ -26,7 +26,7 @@ public interface MysqlPipelineDistMapper {
             ", pdm.database" +
             ", pdm.username" +
             ", pdm.password" +
-            ", pdm.guarantee" +
+            ", pdm.semantic" +
             ", pdm.exec_batch_interval_ms" +
             ", pdm.exec_batch_size" +
             ", pdm.exec_max_retries" +

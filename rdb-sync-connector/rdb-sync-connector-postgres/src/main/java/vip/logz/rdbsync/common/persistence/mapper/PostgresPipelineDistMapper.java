@@ -27,7 +27,7 @@ public interface PostgresPipelineDistMapper {
             ", pdp.schema" +
             ", pdp.username" +
             ", pdp.password" +
-            ", pdp.guarantee" +
+            ", pdp.semantic" +
             ", pdp.exec_batch_interval_ms" +
             ", pdp.exec_batch_size" +
             ", pdp.exec_max_retries" +

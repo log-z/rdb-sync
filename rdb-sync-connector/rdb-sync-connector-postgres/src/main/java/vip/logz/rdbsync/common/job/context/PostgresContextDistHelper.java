@@ -9,8 +9,8 @@ import org.postgresql.Driver;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.postgresql.xa.PGXADataSource;
 import vip.logz.rdbsync.common.annotations.Scannable;
-import vip.logz.rdbsync.common.config.GuaranteeOptions;
-import vip.logz.rdbsync.common.exception.UnsupportedDistGuaranteeException;
+import vip.logz.rdbsync.common.config.SemanticOptions;
+import vip.logz.rdbsync.common.exception.UnsupportedDistSemanticException;
 import vip.logz.rdbsync.common.job.RdbSyncEvent;
 import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Pipeline;
@@ -103,21 +103,21 @@ public class PostgresContextDistHelper implements ContextDistHelper<Postgres, Rd
         String upsertSql = new PostgresUpsertSqlGenerator(schema).generate(distTable, mapping);
         String deleteSql = new GenericDeleteSqlGenerator<Postgres>(sqlDialectService).generate(distTable, mapping);
 
-        // 获取容错保证
-        String guarantee = Optional.ofNullable(pipelineProperties.getGuarantee())
-                .orElse(GuaranteeOptions.AT_LEAST_ONCE)
+        // 获取语义保证
+        String semantic = Optional.ofNullable(pipelineProperties.getSemantic())
+                .orElse(SemanticOptions.AT_LEAST_ONCE)
                 .toLowerCase();
 
-        // 构造出口，取决于容错保证
-        switch (guarantee) {
+        // 构造出口，取决于语义保证
+        switch (semantic) {
             // 至少同步一次
-            case GuaranteeOptions.AT_LEAST_ONCE:
+            case SemanticOptions.AT_LEAST_ONCE:
                 return buildAtLeastOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
             // 精确同步一次
-            case GuaranteeOptions.EXACTLY_ONCE:
+            case SemanticOptions.EXACTLY_ONCE:
                 return buildExactlyOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
             default:
-                throw new UnsupportedDistGuaranteeException(guarantee);
+                throw new UnsupportedDistSemanticException(semantic);
         }
     }
 
@@ -142,7 +142,7 @@ public class PostgresContextDistHelper implements ContextDistHelper<Postgres, Rd
         // 解析多主机与端口
         Tuple2<String[], int[]> hostsAndPorts = parseHostsAndPorts(pipelineProperties);
 
-        // MySQL数据源，用于生成JDBC-URL
+        // Postgres数据源，用于生成JDBC-URL
         PGSimpleDataSource ds = new PGSimpleDataSource();
         ds.setServerNames(hostsAndPorts.getField(0));
         ds.setPortNumbers(hostsAndPorts.getField(1));
@@ -196,7 +196,7 @@ public class PostgresContextDistHelper implements ContextDistHelper<Postgres, Rd
         // 解析多主机与端口
         Tuple2<String[], int[]> hostsAndPorts = parseHostsAndPorts(pipelineProperties);
 
-        // MySQL数据源
+        // Postgres数据源
         PGXADataSource ds = new SerializablePGXADataSource();
         ds.setServerNames(hostsAndPorts.getField(0));
         ds.setPortNumbers(hostsAndPorts.getField(1));

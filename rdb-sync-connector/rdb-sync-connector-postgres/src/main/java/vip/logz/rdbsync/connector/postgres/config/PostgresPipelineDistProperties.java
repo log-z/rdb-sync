@@ -1,6 +1,6 @@
 package vip.logz.rdbsync.connector.postgres.config;
 
-import vip.logz.rdbsync.common.config.GuaranteeOptions;
+import vip.logz.rdbsync.common.config.SemanticOptions;
 import vip.logz.rdbsync.connector.jdbc.config.JdbcExactlyOncePipelineDistProperties;
 import vip.logz.rdbsync.connector.jdbc.config.JdbcPipelineDistProperties;
 import vip.logz.rdbsync.connector.postgres.rule.Postgres;
@@ -26,11 +26,11 @@ public class PostgresPipelineDistProperties extends JdbcPipelineDistProperties {
     private String schema;
 
     /**
-     * 容错保证
-     * @see GuaranteeOptions#EXACTLY_ONCE
-     * @see GuaranteeOptions#AT_LEAST_ONCE
+     * 语义保证
+     * @see SemanticOptions#EXACTLY_ONCE
+     * @see SemanticOptions#AT_LEAST_ONCE
      */
-    private String guarantee;
+    private String semantic;
 
     /**
      * 获取主机
@@ -131,18 +131,18 @@ public class PostgresPipelineDistProperties extends JdbcPipelineDistProperties {
     }
 
     /**
-     * 获取容错保证
+     * 获取语义保证
      */
-    public String getGuarantee() {
-        return guarantee;
+    public String getSemantic() {
+        return semantic;
     }
 
     /**
-     * 设置容错保证
-     * @param guarantee 容错保证
+     * 设置语义保证
+     * @param semantic 语义保证
      */
-    public void setGuarantee(String guarantee) {
-        this.guarantee = guarantee;
+    public void setSemantic(String semantic) {
+        this.semantic = semantic;
     }
 
     /**

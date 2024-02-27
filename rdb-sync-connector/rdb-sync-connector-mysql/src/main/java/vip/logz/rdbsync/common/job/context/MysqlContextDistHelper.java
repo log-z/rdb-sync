@@ -8,8 +8,8 @@ import org.apache.flink.connector.jdbc.JdbcExactlyOnceOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import vip.logz.rdbsync.common.annotations.Scannable;
-import vip.logz.rdbsync.common.config.GuaranteeOptions;
-import vip.logz.rdbsync.common.exception.UnsupportedDistGuaranteeException;
+import vip.logz.rdbsync.common.config.SemanticOptions;
+import vip.logz.rdbsync.common.exception.UnsupportedDistSemanticException;
 import vip.logz.rdbsync.common.job.RdbSyncEvent;
 import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Pipeline;
@@ -96,21 +96,21 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncE
         String upsertSql = new MysqlUpsertSqlGenerator().generate(distTable, mapping);
         String deleteSql = new GenericDeleteSqlGenerator<Mysql>(sqlDialectService).generate(distTable, mapping);
 
-        // 获取容错保证
-        String guarantee = Optional.ofNullable(pipelineProperties.getGuarantee())
-                .orElse(GuaranteeOptions.AT_LEAST_ONCE)
+        // 获取语义保证
+        String semantic = Optional.ofNullable(pipelineProperties.getSemantic())
+                .orElse(SemanticOptions.AT_LEAST_ONCE)
                 .toLowerCase();
 
-        // 构造出口，取决于容错保证
-        switch (guarantee) {
+        // 构造出口，取决于语义保证
+        switch (semantic) {
             // 精确同步一次
-            case GuaranteeOptions.EXACTLY_ONCE:
+            case SemanticOptions.EXACTLY_ONCE:
                 return buildExactlyOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
             // 至少同步一次
-            case GuaranteeOptions.AT_LEAST_ONCE:
-                return buildSink(upsertSql, deleteSql, mapping, pipelineProperties);
+            case SemanticOptions.AT_LEAST_ONCE:
+                return buildAtLeastOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
             default:
-                throw new UnsupportedDistGuaranteeException(guarantee);
+                throw new UnsupportedDistSemanticException(semantic);
         }
     }
 
@@ -121,10 +121,10 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncE
      * @param mapping 表映射
      * @param pipelineProperties 管道目标属性
      */
-    private SinkFunction<RdbSyncEvent> buildSink(String upsertSql,
-                                                 String deleteSql,
-                                                 Mapping<Mysql> mapping,
-                                                 MysqlPipelineDistProperties pipelineProperties) {
+    private SinkFunction<RdbSyncEvent> buildAtLeastOnceSink(String upsertSql,
+                                                            String deleteSql,
+                                                            Mapping<Mysql> mapping,
+                                                            MysqlPipelineDistProperties pipelineProperties) {
         // JDBC执行选项
         JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
                 .withBatchSize(pipelineProperties.getExecBatchSize())

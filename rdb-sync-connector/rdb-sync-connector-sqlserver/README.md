@@ -21,8 +21,30 @@
 > 重要提示：修改表结构之后，此表的 CDC 监听列不会自动更新，你需要对此表重新启用 CDC 功能。 
 
 ### 目标
-1. 用户至少对“目标表”具有 `SELECT`、`INSERT`、`UPDATE` 和 `DELETE` 权限。
+1. 用户至少对“目标表”具有 `SELECT`、`INSERT`、`UPDATE` 和 `DELETE` 权限；
+2. （可选）当语义保证配置为 `exactly-once` 时，还需要确保在 master 数据库启用了 [XA 分布式事务](https://learn.microsoft.com/zh-cn/sql/connect/jdbc/understanding-xa-transactions)。
 
+
+```sql
+-- -------------------------------------------------------------------
+-- SQLServer on Docker  [mcr.microsoft.com/mssql/server:2022-latest]
+-- 启用 XA 分布式事务步骤参考
+-- -------------------------------------------------------------------
+
+-- 1. 进入 master 数据库
+USE master
+GO
+-- 2. 启用 JDBC-XA 分布式事务组件
+--    此存储过程仅在 SQL Server 2017 CU16 及更高版本可用，低版本请参考官方文档
+EXEC sp_sqljdbc_xa_install
+GO
+-- 3. 创建数据库用户
+--    这里用户名与登录名同名（假设都是 rdb_sync）
+EXEC sp_grantdbaccess 'rdb_sync', 'rdb_sync';
+GO
+-- 4. 将数据库用户添加到 SqlJDBCXAUser 角色
+EXEC sp_addrolemember [SqlJDBCXAUser], 'rdb_sync'
+```
 
 ## 管道配置
 ### 来源
@@ -61,10 +83,13 @@
 | schema | String | dbo | 模式名 |
 | username | String | sa | 用户名 |
 | password | String | _*必填_ | 密码 |
+| semantic | String | at-least-once | 语义保证 <li>`at-least-once`：一个事件至少同步一次；<li>`exactly-once`：一个事件精确同步一次。 |
 | exec_batch_interval_ms | Long | 0 | 执行批次间隔毫秒数 |
 | exec_batch_size | Integer | 5000 | 执行批次最大容量 |
-| exec_max_retries | Integer | 3 | 执行最大重试次数 |
-| conn_timeout_seconds | Integer | 30 | 连接超时秒数 |
+| exec_max_retries | Integer | 3 | 执行最大重试次数 <br>若语义保证是 `exactly-once` 时，将强制为零。 |
+| conn_timeout_seconds | Integer | 30 | 连接超时秒数 <br>若语义保证是 `exactly-once` 时，此配置无效。 |
+| tx_max_commit_attempts | Integer | 3 | 精确一次属性：事务提交尝试次数 <br>仅当语义保证是 `exactly-once` 时生效。 |
+| tx_timeout_seconds | Integer | | 精确一次属性：事务超时秒数 <br>仅当语义保证是 `exactly-once` 时生效。 |
 
 
 ## 注意事项

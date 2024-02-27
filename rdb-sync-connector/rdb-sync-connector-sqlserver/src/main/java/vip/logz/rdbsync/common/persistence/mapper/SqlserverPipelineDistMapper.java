@@ -27,10 +27,13 @@ public interface SqlserverPipelineDistMapper {
             ", pds.schema" +
             ", pds.username" +
             ", pds.password" +
+            ", pds.semantic" +
             ", pds.exec_batch_interval_ms" +
             ", pds.exec_batch_size" +
             ", pds.exec_max_retries" +
-            ", pds.conn_timeout_seconds " +
+            ", pds.conn_timeout_seconds" +
+            ", pds.tx_max_commit_attempts" +
+            ", pds.tx_timeout_seconds " +
             "from pipeline_dist as pd " +
             "inner join pipeline_dist_sqlserver as pds " +
             "on pd.id = pds.id " +

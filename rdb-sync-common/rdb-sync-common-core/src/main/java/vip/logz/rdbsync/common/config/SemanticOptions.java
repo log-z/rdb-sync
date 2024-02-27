@@ -1,12 +1,12 @@
 package vip.logz.rdbsync.common.config;
 
 /**
- * 容错保证选项
+ * 语义保证选项
  *
  * @author logz
  * @date 2024-02-24
  */
-public interface GuaranteeOptions {
+public interface SemanticOptions {
 
     /** 至少一次 */
     String AT_LEAST_ONCE = "at-least-once";

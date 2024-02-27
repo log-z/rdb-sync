@@ -1,6 +1,7 @@
 package vip.logz.rdbsync.connector.starrocks.config;
 
 import vip.logz.rdbsync.common.config.PipelineDistProperties;
+import vip.logz.rdbsync.common.config.SemanticOptions;
 import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
 
 /**
@@ -11,35 +12,17 @@ import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
  */
 public class StarrocksPipelineDistProperties extends PipelineDistProperties {
 
-    /** 前缀：JDBC-URL */
-    private static final String PREFIX_JDBC_URL = "jdbc:mysql://";
+    /** BE-MySQL服务主机列表 */
+    private String hosts;
 
-    /** 默认值：主机 */
-    private static final String DEFAULT_HOST = "localhost";
+    /** BE-MySQL服务端口列表 */
+    private String ports;
 
-    /** 默认值：BE-MySQL服务端口 */
-    private static final int DEFAULT_PORT = 9030;
+    /** FE-HTTP服务主机列表 */
+    private String loadHosts;
 
-    /** 默认值：FE-HTTP服务端口 */
-    private static final int DEFAULT_LOAD_PORT = 8030;
-
-    /** 默认值：用户名 */
-    private static final String DEFAULT_USERNAME = "root";
-
-    /** 默认值：密码 */
-    private static final String DEFAULT_PASSWORD = "";
-
-    /** BE-MySQL服务主机 */
-    private String host;
-
-    /** BE-MySQL服务端口 */
-    private Integer port;
-
-    /** FE-HTTP服务主机 */
-    private String loadHost;
-
-    /** FE-HTTP服务端口 */
-    private Integer loadPort;
+    /** FE-HTTP服务端口列表 */
+    private String loadPorts;
 
     /** 数据库名 */
     private String database;
@@ -51,77 +34,73 @@ public class StarrocksPipelineDistProperties extends PipelineDistProperties {
     private String password;
 
     /**
-     * 读取JDBC-URL
+     * 语义保证
+     * @see SemanticOptions#EXACTLY_ONCE
+     * @see SemanticOptions#AT_LEAST_ONCE
      */
-    public String getJdbcUrl() {
-        return PREFIX_JDBC_URL + getHost() + ":" + getPort();
+    private String semantic;
+
+    /** StreamLoad的标签前缀  */
+    private String labelPrefix;
+
+    /**
+     * 获取BE-MySQL服务主机列表
+     */
+    public String getHosts() {
+        return hosts;
     }
 
     /**
-     * 获取BE-MySQL服务主机
+     * 设置BE-MySQL服务主机列表
+     * @param hosts BE-MySQL服务主机列表
      */
-    public String getHost() {
-        return host != null ? host : DEFAULT_HOST;
+    public void setHosts(String hosts) {
+        this.hosts = hosts;
     }
 
     /**
-     * 设置BE-MySQL服务主机
-     * @param host BE-MySQL服务主机
+     * 获取BE-MySQL服务端口列表
      */
-    public void setHost(String host) {
-        this.host = host;
+    public String getPorts() {
+        return ports;
     }
 
     /**
-     * 获取BE-MySQL服务端口
+     * 设置BE-MySQL服务端口列表
+     * @param ports BE-MySQL服务端口列表
      */
-    public Integer getPort() {
-        return port != null ? port : DEFAULT_PORT;
+    public void setPorts(String ports) {
+        this.ports = ports;
     }
 
     /**
-     * 设置BE-MySQL服务端口
-     * @param port BE-MySQL服务端口
+     * 获取FE-HTTP服务主机列表
      */
-    public void setPort(Integer port) {
-        this.port = port;
+    public String getLoadHosts() {
+        return loadHosts;
     }
 
     /**
-     * 读取FE-HTTP服务器
+     * 设置FE-HTTP服务主机列表
+     * @param loadHosts FE-HTTP服务主机列表
      */
-    public String getLoadUrl() {
-        return getLoadHost() + ":" + getLoadPort();
+    public void setLoadHosts(String loadHosts) {
+        this.loadHosts = loadHosts;
     }
 
     /**
-     * 获取FE-HTTP服务主机
+     * 获取FE-HTTP服务端口列表
      */
-    public String getLoadHost() {
-        return loadHost != null ? loadHost : DEFAULT_HOST;
+    public String getLoadPorts() {
+        return loadPorts;
     }
 
     /**
-     * 设置FE-HTTP服务主机
-     * @param loadHost FE-HTTP服务主机
+     * 设置FE-HTTP服务端口列表
+     * @param loadPorts FE-HTTP服务端口列表
      */
-    public void setLoadHost(String loadHost) {
-        this.loadHost = loadHost;
-    }
-
-    /**
-     * 获取FE-HTTP服务端口
-     */
-    public Integer getLoadPort() {
-        return loadPort != null ? loadPort : DEFAULT_LOAD_PORT;
-    }
-
-    /**
-     * 设置FE-HTTP服务端口
-     * @param loadPort FE-HTTP服务端口
-     */
-    public void setLoadPort(Integer loadPort) {
-        this.loadPort = loadPort;
+    public void setLoadPorts(String loadPorts) {
+        this.loadPorts = loadPorts;
     }
 
     /**
@@ -143,7 +122,7 @@ public class StarrocksPipelineDistProperties extends PipelineDistProperties {
      * 读取用户名
      */
     public String getUsername() {
-        return username != null ? username : DEFAULT_USERNAME;
+        return username != null ? username : StarrocksOptions.DEFAULT_USERNAME;
     }
 
     /**
@@ -158,7 +137,7 @@ public class StarrocksPipelineDistProperties extends PipelineDistProperties {
      * 读取密码
      */
     public String getPassword() {
-        return password != null ? password : DEFAULT_PASSWORD;
+        return password != null ? password : StarrocksOptions.DEFAULT_PASSWORD;
     }
 
     /**
@@ -167,6 +146,36 @@ public class StarrocksPipelineDistProperties extends PipelineDistProperties {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * 获取语义保证
+     */
+    public String getSemantic() {
+        return semantic;
+    }
+
+    /**
+     * 设置语义保证
+     * @param semantic 语义保证
+     */
+    public void setSemantic(String semantic) {
+        this.semantic = semantic;
+    }
+
+    /**
+     * 获取StreamLoad的标签前缀
+     */
+    public String getLabelPrefix() {
+        return labelPrefix;
+    }
+
+    /**
+     * 设置StreamLoad的标签前缀
+     * @param labelPrefix StreamLoad的标签前缀
+     */
+    public void setLabelPrefix(String labelPrefix) {
+        this.labelPrefix = labelPrefix;
     }
 
     /**

@@ -21,13 +21,15 @@
 | id | String | _*必填_ | 管道目标ID |
 | name | String | _*必填_ | 管道目标名称 |
 | protocol | String | _*必填_ | 管道目标协议，设置为 `starrocks` 以使用此连接器 |
-| host | String | localhost | BE MySQL 服务主机 |
-| port | Integer | 9030 | BE MySQL 服务端口 |
-| load_host | String | localhost | FE HTTP 服务主机 |
-| load_port | Integer | 8030 | FE HTTP 服务端口 |
+| hosts | String | localhost | BE MySQL 服务主机列表（逗号分隔） |
+| ports | String | 9030 | BE MySQL 服务端口列表（逗号分隔） |
+| load_hosts | String | localhost | FE HTTP 服务主机列表列表（逗号分隔） |
+| load_ports | String | 8030 | FE HTTP 服务端口列表（逗号分隔） |
 | database | String | _*必填_ | 数据库名 |
 | username | String | root | 用户名 |
 | password | String | | 密码 |
+| semantic | String | at-least-once | 语义保证 <li>`at-least-once`：一个事件至少同步一次；<li>`exactly-once`：一个事件精确同步一次，仅支持 StarRocks 2.5 或更高版本。 |
+| label_prefix | String | | Stream Load 的标签前缀 <br>若语义保证是 `exactly-once` 时，推荐设置此值，具体请参考[官方文档](https://docs.starrocks.io/zh/docs/loading/Flink-connector-starrocks/#exactly-once)。 |
 
 
 ## 参考资料

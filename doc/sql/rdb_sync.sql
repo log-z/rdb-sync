@@ -75,13 +75,15 @@ create table `pipeline_dist_sqlserver` (
 -- ----------------------------
 create table `pipeline_dist_starrocks` (
   `id` varchar(32) not null comment 'ID',
-  `host` varchar(255) comment 'BE-MySQL服务主机',
-  `port` int(11) comment 'BE-MySQL服务端口',
-  `load_host` varchar(255) comment 'FE-HTTP服务主机',
-  `load_port` int(11) comment 'FE-HTTP服务端口',
+  `hosts` text comment 'BE-MySQL服务主机列表',
+  `ports` varchar(255) comment 'BE-MySQL服务端口列表',
+  `load_hosts` text comment 'FE-HTTP服务主机列表',
+  `load_ports` varchar(255) comment 'FE-HTTP服务端口列表',
   `database` varchar(255) not null comment '数据库名',
   `username` varchar(255) comment '用户名',
   `password` varchar(255) comment '密码',
+  `semantic` varchar(32) comment '语义保证',
+  `label_prefix` varchar(255) comment 'StreamLoad的标签前缀',
   primary key (`id`) using btree
 ) comment = '管道目标-StarRocks扩展';
 

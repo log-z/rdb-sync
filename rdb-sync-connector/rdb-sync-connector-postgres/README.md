@@ -63,8 +63,8 @@ ALTER SYSTEM SET wal_level = logical;
 | id | String | _*必填_ | 管道目标ID |
 | name | String | _*必填_ | 管道目标名称 |
 | protocol | String | _*必填_ | 管道目标协议，设置为 `postgres` 以使用此连接器 |
-| host | String | localhost | 主机 |
-| port | Integer | 5432 | 端口 |
+| hosts | String | localhost | 主机列表（逗号分隔） |
+| ports | String | 5432 | 端口列表（逗号分隔） |
 | database | String | _*必填_ | 数据库名 |
 | schema | String | public | 模式名 |
 | username | String | postgres | 用户名 |

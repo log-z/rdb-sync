@@ -21,13 +21,15 @@ public interface StarrocksPipelineDistMapper {
     @Select("select pd.id" +
             ", pd.name" +
             ", pd.protocol" +
-            ", pds.host" +
-            ", pds.port" +
-            ", pds.load_host" +
-            ", pds.load_port" +
+            ", pds.hosts" +
+            ", pds.ports" +
+            ", pds.load_hosts" +
+            ", pds.load_ports" +
             ", pds.`database`" +
             ", pds.username" +
-            ", pds.password " +
+            ", pds.password" +
+            ", pds.semantic" +
+            ", pds.label_prefix " +
             "from pipeline_dist as pd " +
             "inner join pipeline_dist_starrocks as pds " +
             "on pd.id = pds.id " +

@@ -12,11 +12,19 @@
 ### 来源
 1. 必须将数据库参数 `wal_level` 设置为 `logical` ，若不生效请重启实例；
 2. 角色至少对“来源表”具有 `Select` 权限 <sup>①</sup> ；
-3. 角色至少具有 `REPLICATION` 属性。
+3. 角色至少对“来源数据库”具有 `Connect` 权限；
+4. 角色至少具有 `REPLICATION` 和 `LOGIN` 属性；
+5. （按需）当逻辑解码插件是 **pgoutput**（默认值）时，请使用“超级用户”手动创建 `FOR ALL TABLES` 发布，否则以“普通用户”进行同步将会提示权限不足，无法自动创建。 
 
 ```postgresql
 -- 设置数据库参数
 ALTER SYSTEM SET wal_level = logical;
+```
+
+```postgresql
+-- 使用“超级用户”手动创建 FOR ALL TABLES 发布
+-- 先进入来源数据库，再执行此语句
+CREATE PUBLICATION dbz_publication FOR ALL TABLES;
 ```
 
 > 详情参考 Debezium 教程中 [配置 Postgres](https://debezium.io/documentation/reference/1.9/connectors/postgresql.html#setting-up-postgresql) 这部分。
@@ -27,7 +35,9 @@ ALTER SYSTEM SET wal_level = logical;
 
 ### 目标
 1. 角色至少对“目标表”具有 `Select`、`Insert`、`Update` 和 `Delete` 权限；
-2. （可选）当语义保证配置为 `exactly-once` 时，还需要确保数据库参数 [`max_prepared_transactions`](https://www.postgresql.org/docs/current/runtime-config-resource.html#GUC-MAX-PREPARED-TRANSACTIONS) 的大小足够，此参数只能在配置文件中更改，并在重启后才生效。
+2. 角色至少对“来源数据库”具有 `Connect` 权限；
+3. 角色至少具有 `LOGIN` 属性；
+4. （可选）当语义保证配置为 `exactly-once` 时，还需要确保数据库参数 [`max_prepared_transactions`](https://www.postgresql.org/docs/current/runtime-config-resource.html#GUC-MAX-PREPARED-TRANSACTIONS) 的大小足够，此参数只能在配置文件中更改，并在重启后才生效。
 
 
 ## 管道配置

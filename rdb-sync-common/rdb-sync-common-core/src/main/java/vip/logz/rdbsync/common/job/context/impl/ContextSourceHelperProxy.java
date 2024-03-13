@@ -3,6 +3,7 @@ package vip.logz.rdbsync.common.job.context.impl;
 import org.apache.flink.api.connector.source.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 import vip.logz.rdbsync.common.exception.UnsupportedSourceProtocolException;
 import vip.logz.rdbsync.common.job.context.ContextMeta;
 import vip.logz.rdbsync.common.job.context.ContextSourceHelper;
@@ -90,7 +91,7 @@ public class ContextSourceHelperProxy implements ContextSourceHelper<Rdb> {
      */
     @Override
     public Source<DebeziumEvent, ?, ?> getSource(ContextMeta contextMeta) {
-        String protocol = contextMeta.getPipelineSourceProperties().getProtocol().toLowerCase();
+        String protocol = contextMeta.getPipelineSourceProperties().get(PipelineSourceProperties.PROTOCOL);
         ContextSourceHelper<Rdb> rawHelper = getRawHelper(protocol);
         return rawHelper.getSource(contextMeta);
     }

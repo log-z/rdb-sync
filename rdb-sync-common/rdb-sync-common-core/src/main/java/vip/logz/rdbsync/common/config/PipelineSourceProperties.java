@@ -1,86 +1,35 @@
 package vip.logz.rdbsync.common.config;
 
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.configuration.ConfigOptions;
+
+import java.util.Map;
+
 /**
  * 管道来源属性
  *
  * @author logz
  * @date 2024-01-09
  */
-public class PipelineSourceProperties {
+public abstract class PipelineSourceProperties extends PipelineProperties {
 
-    /** 默认值：并行度 */
-    private static final int DEFAULT_PARALLELISM = 1;
-
-    /** ID */
-    private String id;
-
-    /** 名称 */
-    private String name;
-
-    /** 协议 */
-    private String protocol;
-
-    /** 并行度 */
-    private Integer parallelism;
+    /** 属性定义：并行度 */
+    public static final ConfigOption<Integer> PARALLELISM = ConfigOptions.key("parallelism")
+            .intType()
+            .defaultValue(1);
 
     /**
-     * 获取ID
+     * 构造器
      */
-    public String getId() {
-        return id;
+    public PipelineSourceProperties() {
     }
 
     /**
-     * 设置ID
-     * @param id ID
+     * 构造器
+     * @param props 初始属性
      */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * 获取名称
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * 设置名称
-     * @param name 名称
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * 获取协议
-     */
-    public String getProtocol() {
-        return protocol;
-    }
-
-    /**
-     * 设置协议
-     * @param protocol 协议
-     */
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
-    /**
-     * 获取并行度
-     */
-    public int getParallelism() {
-        return parallelism != null ? parallelism : DEFAULT_PARALLELISM;
-    }
-
-    /**
-     * 设置并行度
-     * @param parallelism 并行度
-     */
-    public void setParallelism(int parallelism) {
-        this.parallelism = parallelism;
+    public PipelineSourceProperties(Map<String, ?> props) {
+        super(props);
     }
 
 }

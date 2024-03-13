@@ -1,5 +1,7 @@
 package vip.logz.rdbsync.common.job.context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vip.logz.rdbsync.common.config.*;
 import vip.logz.rdbsync.common.job.context.impl.ContextDistHelperProxy;
 import vip.logz.rdbsync.common.job.context.impl.ContextSourceHelperProxy;
@@ -16,6 +18,9 @@ import java.util.Map;
  * @date 2024-01-09
  */
 public abstract class ContextFactory {
+
+    /** 日志记录器 */
+    private static final Logger LOG = LoggerFactory.getLogger(ContextFactory.class);
 
     /** 启动参数 */
     protected final StartupParameter startupParameter;
@@ -51,21 +56,21 @@ public abstract class ContextFactory {
         // 1. 获取元数据
         Pipeline<Rdb> pipeline = (Pipeline<Rdb>) getPipeline();
         if (pipeline == null) {
-            throw new IllegalArgumentException("pipeline not found.");
+            throw new IllegalArgumentException("Pipeline not found.");
         }
 
-        PipelineSourceProperties pipelineSourceProperties = getPipelineSourcePropertiesLoader()
-                .load(pipeline.getSourceId());
-        PipelineDistProperties pipelineDistProperties = getPipelineDistPropertiesLoader()
-                .load(pipeline.getDistId());
-        if (pipelineSourceProperties == null) {
-            throw new RuntimeException("pipeline source [" + pipeline.getSourceId() +  "] properties not found.");
+        PipelineSourceProperties pipelineSourceProps = getPipelineSourcePropertiesLoader().load(pipeline.getSourceId());
+        PipelineDistProperties pipelineDistProps = getPipelineDistPropertiesLoader().load(pipeline.getDistId());
+        if (pipelineSourceProps == null) {
+            throw new RuntimeException("Pipeline Source [" + pipeline.getSourceId() +  "] properties not found.");
         }
-        if (pipelineDistProperties == null) {
-            throw new RuntimeException("pipeline dist [" + pipeline.getDistId() +  "] properties not found.");
+        if (pipelineDistProps == null) {
+            throw new RuntimeException("Pipeline Dist [" + pipeline.getDistId() +  "] properties not found.");
         }
+        LOG.info("Pipeline Source properties:\n" + pipelineSourceProps);
+        LOG.info("Pipeline Dist properties:\n" + pipelineDistProps);
 
-        ContextMeta contextMeta = new ContextMeta(pipeline, pipelineSourceProperties, pipelineDistProperties);
+        ContextMeta contextMeta = new ContextMeta(pipeline, pipelineSourceProps, pipelineDistProps);
 
         // 2. 构造任务上下文
         Context<Object> context = new Context<>();
@@ -75,8 +80,8 @@ public abstract class ContextFactory {
         // 设置来源
         ContextSourceHelperProxy contextSourceHelper = new ContextSourceHelperProxy();
         context.setSource(contextSourceHelper.getSource(contextMeta));
-        context.setSourceName(pipelineSourceProperties.getName());
-        context.setSourceParallelism(pipelineSourceProperties.getParallelism());
+        context.setSourceName(pipelineSourceProps.get(PipelineSourceProperties.NAME));
+        context.setSourceParallelism(pipelineSourceProps.get(PipelineSourceProperties.PARALLELISM));
         // 设置去向
         ContextDistHelperProxy contextDistHelper = new ContextDistHelperProxy();
         context.setSideOutputContextMap(contextDistHelper.getSideOutContexts(contextMeta));
@@ -91,7 +96,7 @@ public abstract class ContextFactory {
      */
     private ExecutionInfo getExecutionInfo(String jobName) {
         String env = startupParameter.getEnv();
-        Map<String, String> config = PropertiesUtils.getFlatted(env);
+        Map<String, ?> config = PropertiesUtils.getFlatted(env);
         return ExecutionInfo.builder()
                 .setJobName(jobName)
                 .setConfig(config)

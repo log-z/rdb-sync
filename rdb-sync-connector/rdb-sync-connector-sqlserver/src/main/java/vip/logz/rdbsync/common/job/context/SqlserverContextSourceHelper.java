@@ -1,5 +1,6 @@
 package vip.logz.rdbsync.common.job.context;
 
+import com.ververica.cdc.connectors.base.options.JdbcSourceOptions;
 import com.ververica.cdc.connectors.base.options.StartupOptions;
 import com.ververica.cdc.connectors.sqlserver.source.SqlServerSourceBuilder;
 import org.apache.flink.api.connector.source.Source;
@@ -11,20 +12,16 @@ import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Pipeline;
 import vip.logz.rdbsync.common.rule.table.EqualTableMatcher;
 import vip.logz.rdbsync.common.rule.table.TableMatcher;
-import vip.logz.rdbsync.common.utils.BuildHelper;
 import vip.logz.rdbsync.common.utils.sql.SqlGenerator;
-import vip.logz.rdbsync.connector.sqlserver.config.SqlserverOptions;
 import vip.logz.rdbsync.connector.sqlserver.config.SqlserverPipelineSourceProperties;
 import vip.logz.rdbsync.connector.sqlserver.job.debezium.DateFormatConverter;
 import vip.logz.rdbsync.connector.sqlserver.job.debezium.DatetimeFormatConverter;
 import vip.logz.rdbsync.connector.sqlserver.job.debezium.TimeFormatConverter;
 import vip.logz.rdbsync.connector.sqlserver.rule.Sqlserver;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Function;
 
 /**
  * SQLServer任务上下文来源辅助
@@ -35,9 +32,6 @@ import java.util.function.Function;
 @Scannable
 public class SqlserverContextSourceHelper implements ContextSourceHelper<Sqlserver> {
 
-    /** 构建辅助工具 */
-    private final BuildHelper buildHelper = BuildHelper.create();
-
     /**
      * 获取数据源
      * @param contextMeta 任务上下文元数据
@@ -47,62 +41,54 @@ public class SqlserverContextSourceHelper implements ContextSourceHelper<Sqlserv
     public Source<DebeziumEvent, ?, ?> getSource(ContextMeta contextMeta) {
         // 1. 获取配置
         Pipeline<Sqlserver> pipeline = (Pipeline<Sqlserver>) contextMeta.getPipeline();
-        SqlserverPipelineSourceProperties pipelineProperties =
+        SqlserverPipelineSourceProperties pipelineProps =
                 (SqlserverPipelineSourceProperties) contextMeta.getPipelineSourceProperties();
 
         // 2. 构造数据源
-        SqlServerSourceBuilder<DebeziumEvent> builder = new SqlServerSourceBuilder<>();
-        buildHelper
+        return new SqlServerSourceBuilder<DebeziumEvent>()
                 // 主机
-                .set(builder::hostname, pipelineProperties.getHost(), SqlserverOptions.DEFAULT_HOST)
+                .hostname(pipelineProps.get(SqlserverPipelineSourceProperties.HOSTNAME))
                 // 端口
-                .set(builder::port, pipelineProperties.getPort(), SqlserverOptions.DEFAULT_PORT)
+                .port(pipelineProps.get(SqlserverPipelineSourceProperties.PORT))
                 // 数据库名【必须】
-                .set(
-                        (Function<? super String[], ?>) builder::databaseList,
-                        new String[]{pipelineProperties.getDatabase()}
-                )
+                .databaseList(pipelineProps.getOptional(JdbcSourceOptions.DATABASE_NAME)
+                        .map(db -> new String[]{db})
+                        .orElseThrow(() -> new IllegalArgumentException("Pipeline Source [database-name] not specified.")))
                 // 表名列表
-                .set(
-                        (Function<? super String[], ?>) builder::tableList,
-                        pipelineProperties.getSchema(),
-                        schema -> buildTableList(schema, pipeline),
-                        buildTableList(SqlserverOptions.DEFAULT_SCHEMA, pipeline)
-                )
+                .tableList(buildTableList(
+                        pipelineProps.get(SqlserverPipelineSourceProperties.SCHEMA_NAME),
+                        pipeline
+                ))
                 // 用户名
-                .set(builder::username, pipelineProperties.getUsername(), SqlserverOptions.DEFAULT_USERNAME)
+                .username(pipelineProps.get(SqlserverPipelineSourceProperties.USERNAME))
                 // 密码【必须】
-                .set(builder::password, pipelineProperties.getPassword())
+                .password(pipelineProps.getOptional(JdbcSourceOptions.PASSWORD)
+                        .orElseThrow(() -> new IllegalArgumentException("Pipeline Source [password] not specified.")))
                 // 数据库的会话时区
-                .setIfNotNull(builder::serverTimeZone, pipelineProperties.getServerTimeZone())
+                .serverTimeZone(pipelineProps.get(JdbcSourceOptions.SERVER_TIME_ZONE))
                 // 启动模式
-                .setIfNotNull(builder::startupOptions, buildStartupOptions(pipelineProperties))
+                .startupOptions(buildStartupOptions(pipelineProps))
                 // 反序列化器
-                .set(builder::deserializer, new SimpleDebeziumDeserializationSchema())
+                .deserializer(new SimpleDebeziumDeserializationSchema())
                 // Debezium属性
-                .set(builder::debeziumProperties, buildDebeziumProps())
+                .debeziumProperties(buildDebeziumProps())
                 // 快照属性：表快照的分块大小（行数）
-                .setIfNotNull(builder::splitSize, pipelineProperties.getSplitSize())
+                .splitSize(pipelineProps.get(JdbcSourceOptions.SCAN_INCREMENTAL_SNAPSHOT_CHUNK_SIZE))
                 // 快照属性：拆分元数据的分组大小
-                .setIfNotNull(builder::splitMetaGroupSize, pipelineProperties.getSplitMetaGroupSize())
+                .splitMetaGroupSize(pipelineProps.get(JdbcSourceOptions.CHUNK_META_GROUP_SIZE))
                 // 快照属性：均匀分布因子的上限
-                .setIfNotNull(builder::distributionFactorUpper, pipelineProperties.getDistributionFactorUpper())
+                .distributionFactorUpper(pipelineProps.get(JdbcSourceOptions.SPLIT_KEY_EVEN_DISTRIBUTION_FACTOR_UPPER_BOUND))
                 // 快照属性：均匀分布因子的下限
-                .setIfNotNull(builder::distributionFactorLower, pipelineProperties.getDistributionFactorLower())
+                .distributionFactorLower(pipelineProps.get(JdbcSourceOptions.SPLIT_KEY_EVEN_DISTRIBUTION_FACTOR_LOWER_BOUND))
                 // 快照属性：每次轮询所能获取的最大行数
-                .setIfNotNull(builder::fetchSize, pipelineProperties.getFetchSize())
+                .fetchSize(pipelineProps.get(JdbcSourceOptions.SCAN_SNAPSHOT_FETCH_SIZE))
                 // 连接超时时长
-                .setIfNotNull(
-                        builder::connectTimeout,
-                        pipelineProperties.getConnectTimeoutSeconds(),
-                        Duration::ofSeconds
-                )
+                .connectTimeout(pipelineProps.get(JdbcSourceOptions.CONNECT_TIMEOUT))
                 // 连接最大重试次数
-                .setIfNotNull(builder::connectMaxRetries, pipelineProperties.getConnectMaxRetries())
+                .connectMaxRetries(pipelineProps.get(JdbcSourceOptions.CONNECT_MAX_RETRIES))
                 // 连接池大小
-                .setIfNotNull(builder::connectionPoolSize, pipelineProperties.getConnectionPoolSize());
-
-        return builder.build();
+                .connectionPoolSize(pipelineProps.get(JdbcSourceOptions.CONNECTION_POOL_SIZE))
+                .build();
     }
 
     /**
@@ -145,7 +131,7 @@ public class SqlserverContextSourceHelper implements ContextSourceHelper<Sqlserv
      * @return 返回启动选项，若启动模式为null则返回null
      */
     private static StartupOptions buildStartupOptions(SqlserverPipelineSourceProperties pipelineProperties) {
-        String startupMode = pipelineProperties.getStartupMode();
+        String startupMode = pipelineProperties.get(JdbcSourceOptions.SCAN_STARTUP_MODE);
         if (startupMode == null) {
             return null;
         }
@@ -153,10 +139,10 @@ public class SqlserverContextSourceHelper implements ContextSourceHelper<Sqlserv
         // 构建启动模式
         switch (startupMode) {
             // INITIAL：先做快照，再读取最新日志
-            case SqlserverPipelineSourceProperties.STARTUP_MODE_INITIAL:
+            case SqlserverPipelineSourceProperties.StartupMode.INITIAL:
                 return StartupOptions.initial();
             // LATEST：跳过快照，仅读取最新日志
-            case SqlserverPipelineSourceProperties.STARTUP_MODE_LATEST:
+            case SqlserverPipelineSourceProperties.StartupMode.LATEST:
                 return StartupOptions.latest();
             default:
                 throw new SourceException("Unknown StartupMode: " + startupMode);

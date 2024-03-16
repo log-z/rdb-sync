@@ -34,8 +34,8 @@ public abstract class PipelineProperties {
             .stringType()
             .noDefaultValue();
 
-    /** 属性定义：安全性 - 需要脱敏的属性名 */
-    public static final ConfigOption<List<String>> SECURITY_DESENSITIZE_KEYS = ConfigOptions.key("security.desensitize-keys")
+    /** 属性定义：安全性 - 敏感属性的键名列表 */
+    public static final ConfigOption<List<String>> SECURITY_SENSITIVE_KEYS = ConfigOptions.key("security.sensitive.keys")
             .stringType()
             .asList()
             .defaultValues("username", "password");
@@ -100,10 +100,10 @@ public abstract class PipelineProperties {
     }
 
     /**
-     * 获取属性定义：安全性 - 需要脱敏的属性名
+     * 获取属性定义：安全性 - 敏感属性的键名列表
      */
-    protected ConfigOption<List<String>> configOptionWithDesensitizeKeys() {
-        return SECURITY_DESENSITIZE_KEYS;
+    protected ConfigOption<List<String>> configOptionWithSensitiveKeys() {
+        return SECURITY_SENSITIVE_KEYS;
     }
 
     /**
@@ -112,8 +112,8 @@ public abstract class PipelineProperties {
     @Override
     public String toString() {
         Map<String, String> map = conf.toMap();
-        map.remove(SECURITY_DESENSITIZE_KEYS.key());
-        for (String desensitizeKey : get(configOptionWithDesensitizeKeys())) {
+        map.remove(SECURITY_SENSITIVE_KEYS.key());
+        for (String desensitizeKey : get(configOptionWithSensitiveKeys())) {
             if (map.containsKey(desensitizeKey)) {
                 map.put(desensitizeKey, "****");
             }

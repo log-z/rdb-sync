@@ -6,6 +6,7 @@ import com.mysql.cj.jdbc.MysqlXADataSource;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExactlyOnceOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
+import org.apache.flink.connector.jdbc.table.JdbcConnectorOptions;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.common.config.SemanticOptions;
@@ -25,9 +26,9 @@ import vip.logz.rdbsync.connector.mysql.utils.MysqlJdbcStatementBuilder;
 import vip.logz.rdbsync.connector.mysql.utils.MysqlUpsertSqlGenerator;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Mysql任务上下文目标辅助
@@ -86,29 +87,27 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncE
      * 构造出口
      * @param distTable 目标表名
      * @param mapping 表映射
-     * @param pipelineProperties 管道目标属性
+     * @param pipelineProps 管道目标属性
      */
     private SinkFunction<RdbSyncEvent> buildSink(String distTable,
                                                  Mapping<Mysql> mapping,
-                                                 MysqlPipelineDistProperties pipelineProperties) {
+                                                 MysqlPipelineDistProperties pipelineProps) {
         // MySQL语句模板
         SqlDialectService sqlDialectService = new MysqlDialectService();
         String upsertSql = new MysqlUpsertSqlGenerator().generate(distTable, mapping);
         String deleteSql = new GenericDeleteSqlGenerator<Mysql>(sqlDialectService).generate(distTable, mapping);
 
         // 获取语义保证
-        String semantic = Optional.ofNullable(pipelineProperties.getSemantic())
-                .orElse(SemanticOptions.AT_LEAST_ONCE)
-                .toLowerCase();
+        String semantic = pipelineProps.get(MysqlPipelineDistProperties.SINK_SEMANTIC).toLowerCase();
 
         // 构造出口，取决于语义保证
         switch (semantic) {
             // 精确同步一次
             case SemanticOptions.EXACTLY_ONCE:
-                return buildExactlyOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
+                return buildExactlyOnceSink(upsertSql, deleteSql, mapping, pipelineProps);
             // 至少同步一次
             case SemanticOptions.AT_LEAST_ONCE:
-                return buildAtLeastOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
+                return buildAtLeastOnceSink(upsertSql, deleteSql, mapping, pipelineProps);
             default:
                 throw new UnsupportedDistSemanticException(semantic);
         }
@@ -119,32 +118,36 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncE
      * @param upsertSql 更新或插入语句
      * @param deleteSql 删除语句
      * @param mapping 表映射
-     * @param pipelineProperties 管道目标属性
+     * @param pipelineProps 管道目标属性
      */
     private SinkFunction<RdbSyncEvent> buildAtLeastOnceSink(String upsertSql,
                                                             String deleteSql,
                                                             Mapping<Mysql> mapping,
-                                                            MysqlPipelineDistProperties pipelineProperties) {
+                                                            MysqlPipelineDistProperties pipelineProps) {
         // JDBC执行选项
         JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
-                .withBatchSize(pipelineProperties.getExecBatchSize())
-                .withBatchIntervalMs(pipelineProperties.getExecBatchIntervalMs())
-                .withMaxRetries(pipelineProperties.getExecMaxRetries())
+                .withBatchSize(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_MAX_ROWS))
+                .withBatchIntervalMs(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_INTERVAL).toMillis())
+                .withMaxRetries(pipelineProps.get(JdbcConnectorOptions.SINK_MAX_RETRIES))
                 .build();
 
         // MySQL数据源，用于生成JDBC-URL
         MysqlDataSource ds = new MysqlDataSource();
-        ds.setServerName(pipelineProperties.getHost());
-        ds.setPort(pipelineProperties.getPort());
-        ds.setDatabaseName(pipelineProperties.getDatabase());
+        ds.setServerName(pipelineProps.get(MysqlPipelineDistProperties.HOSTNAME));
+        ds.setPort(pipelineProps.get(MysqlPipelineDistProperties.PORT));
+        ds.setDatabaseName(pipelineProps.getOptional(MysqlPipelineDistProperties.DATABASE_NAME)
+                .orElseThrow(() -> new IllegalArgumentException("Pipeline Dist [database-name] not specified.")));
 
         // JDBC连接选项
         JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                 .withUrl(ds.getUrl())
                 .withDriverName(JDBC_MYSQL_DRIVER)
-                .withUsername(pipelineProperties.getUsername())
-                .withPassword(pipelineProperties.getPassword())
-                .withConnectionCheckTimeoutSeconds(pipelineProperties.getConnTimeoutSeconds())
+                .withUsername(pipelineProps.get(MysqlPipelineDistProperties.USERNAME))
+                .withPassword(pipelineProps.get(MysqlPipelineDistProperties.PASSWORD))
+                .withConnectionCheckTimeoutSeconds(pipelineProps.getOptional(JdbcConnectorOptions.MAX_RETRY_TIMEOUT)
+                        .map(Duration::toSeconds)
+                        .map(Long::intValue)
+                        .orElse(-1))
                 .build();
 
         // 构造至少同步一次出口，并返回
@@ -162,35 +165,41 @@ public class MysqlContextDistHelper implements ContextDistHelper<Mysql, RdbSyncE
      * @param upsertSql 更新或插入语句
      * @param deleteSql 删除语句
      * @param mapping 表映射
-     * @param pipelineProperties 管道目标属性
+     * @param pipelineProps 管道目标属性
      */
     private SinkFunction<RdbSyncEvent> buildExactlyOnceSink(String upsertSql,
                                                             String deleteSql,
                                                             Mapping<Mysql> mapping,
-                                                            MysqlPipelineDistProperties pipelineProperties) {
+                                                            MysqlPipelineDistProperties pipelineProps) {
         // JDBC执行选项
         JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
-                .withBatchSize(pipelineProperties.getExecBatchSize())
-                .withBatchIntervalMs(pipelineProperties.getExecBatchIntervalMs())
+                .withBatchSize(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_MAX_ROWS))
+                .withBatchIntervalMs(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_INTERVAL).toMillis())
                 .withMaxRetries(0)  // 参照 FLINK-22311
                 .build();
 
         // JDBC精确同步一次选项
         JdbcExactlyOnceOptions exactlyOnceOptions = JdbcExactlyOnceOptions.builder()
-                .withMaxCommitAttempts(pipelineProperties.getTxMaxCommitAttempts())
-                .withTimeoutSec(Optional.ofNullable(pipelineProperties.getTxTimeoutSeconds()))
+                .withMaxCommitAttempts(pipelineProps.get(MysqlPipelineDistProperties.SINK_XA_MAX_COMMIT_ATTEMPTS))
+                .withTimeoutSec(pipelineProps.getOptional(MysqlPipelineDistProperties.SINK_XA_TIMEOUT)
+                        .map(Duration::toSeconds)
+                        .map(Long::intValue))
                 .withTransactionPerConnection(true)
                 .build();
 
         // MySQL数据源
         MysqlXADataSource ds = new MysqlXADataSource();
-        ds.setServerName(pipelineProperties.getHost());
-        ds.setPort(pipelineProperties.getPort());
-        ds.setDatabaseName(pipelineProperties.getDatabase());
-        ds.setUser(pipelineProperties.getUsername());
-        ds.setPassword(pipelineProperties.getPassword());
+        ds.setServerName(pipelineProps.get(MysqlPipelineDistProperties.HOSTNAME));
+        ds.setPort(pipelineProps.get(MysqlPipelineDistProperties.PORT));
+        ds.setDatabaseName(pipelineProps.getOptional(MysqlPipelineDistProperties.DATABASE_NAME)
+                .orElseThrow(() -> new IllegalArgumentException("Pipeline Dist [database-name] not specified.")));
+        ds.setUser(pipelineProps.get(MysqlPipelineDistProperties.USERNAME));
+        ds.setPassword(pipelineProps.get(MysqlPipelineDistProperties.PASSWORD));
         try {
-            ds.setConnectTimeout(pipelineProperties.getConnTimeoutSeconds() * 1000);
+            ds.setConnectTimeout(pipelineProps.getOptional(JdbcConnectorOptions.MAX_RETRY_TIMEOUT)
+                    .map(Duration::toMillis)
+                    .map(Long::intValue)
+                    .orElse(-1));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

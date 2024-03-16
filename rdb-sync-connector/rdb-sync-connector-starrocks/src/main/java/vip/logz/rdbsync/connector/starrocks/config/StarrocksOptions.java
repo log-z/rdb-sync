@@ -12,7 +12,7 @@ public interface StarrocksOptions {
     /** 默认值：主机 */
     String DEFAULT_HOST = "localhost";
 
-    /** 默认值：BE-MySQL服务端口 */
+    /** 默认值：FE-MySQL服务端口 */
     int DEFAULT_PORT = 9030;
 
     /** 默认值：FE-HTTP服务端口 */

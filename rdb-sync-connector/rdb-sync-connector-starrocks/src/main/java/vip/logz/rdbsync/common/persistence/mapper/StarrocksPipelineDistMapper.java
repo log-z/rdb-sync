@@ -3,7 +3,6 @@ package vip.logz.rdbsync.common.persistence.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import vip.logz.rdbsync.common.annotations.Scannable;
-import vip.logz.rdbsync.connector.starrocks.config.StarrocksPipelineDistProperties;
 
 /**
  * StarRocks管道目标持久化映射
@@ -20,7 +19,6 @@ public interface StarrocksPipelineDistMapper {
      */
     @Select("select pd.id" +
             ", pd.name" +
-            ", pd.protocol" +
             ", pds.hosts" +
             ", pds.ports" +
             ", pds.load_hosts" +
@@ -28,12 +26,12 @@ public interface StarrocksPipelineDistMapper {
             ", pds.`database`" +
             ", pds.username" +
             ", pds.password" +
-            ", pds.semantic" +
-            ", pds.label_prefix " +
+            ", pds.options " +
             "from pipeline_dist as pd " +
             "inner join pipeline_dist_starrocks as pds " +
             "on pd.id = pds.id " +
-            "and pd.id = #{id}")
-    StarrocksPipelineDistProperties get(String id);
+            "and pd.id = #{id} " +
+            "and pd.protocol = 'starrocks'")
+    StarrocksPipelineDistPropertiesEntity get(String id);
 
 }

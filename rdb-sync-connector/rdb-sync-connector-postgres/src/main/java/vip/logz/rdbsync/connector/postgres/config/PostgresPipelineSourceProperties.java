@@ -42,9 +42,9 @@ public class PostgresPipelineSourceProperties extends PipelineSourceProperties {
             .stringType()
             .defaultValue("pgoutput");
 
-    /** 属性定义：安全性 - 需要脱敏的属性名 */
-    public static final ConfigOption<List<String>> SECURITY_DESENSITIZE_KEYS = ConfigOptions
-            .key(PipelineProperties.SECURITY_DESENSITIZE_KEYS.key())
+    /** 属性定义：安全性 - 敏感属性的键名列表 */
+    public static final ConfigOption<List<String>> SECURITY_SENSITIVE_KEYS = ConfigOptions
+            .key(PipelineProperties.SECURITY_SENSITIVE_KEYS.key())
             .stringType()
             .asList()
             .defaultValues(PostgresSourceOptions.USERNAME.key(), PostgresSourceOptions.PASSWORD.key());
@@ -77,11 +77,11 @@ public class PostgresPipelineSourceProperties extends PipelineSourceProperties {
     }
 
     /**
-     * 获取属性定义：安全性 - 需要脱敏的属性名
+     * 获取属性定义：安全性 - 敏感属性的键名列表
      */
     @Override
-    protected ConfigOption<List<String>> configOptionWithDesensitizeKeys() {
-        return SECURITY_DESENSITIZE_KEYS;
+    protected ConfigOption<List<String>> configOptionWithSensitiveKeys() {
+        return SECURITY_SENSITIVE_KEYS;
     }
 
 }

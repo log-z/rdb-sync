@@ -5,6 +5,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerXADataSource;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExactlyOnceOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
+import org.apache.flink.connector.jdbc.table.JdbcConnectorOptions;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import vip.logz.rdbsync.common.annotations.Scannable;
 import vip.logz.rdbsync.common.config.SemanticOptions;
@@ -23,9 +24,9 @@ import vip.logz.rdbsync.connector.sqlserver.utils.SqlserverDialectService;
 import vip.logz.rdbsync.connector.sqlserver.utils.SqlserverJdbcStatementBuilder;
 import vip.logz.rdbsync.connector.sqlserver.utils.SqlserverUpsertSqlGenerator;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * SQLServer任务上下文目标辅助
@@ -49,7 +50,7 @@ public class SqlserverContextDistHelper implements ContextDistHelper<Sqlserver, 
         Pipeline<Sqlserver> pipeline = (Pipeline<Sqlserver>) contextMeta.getPipeline();
         SqlserverPipelineDistProperties pipelineProperties =
                 (SqlserverPipelineDistProperties) contextMeta.getPipelineDistProperties();
-        String schema = pipelineProperties.getSchema();
+        String schema = pipelineProperties.get(SqlserverPipelineDistProperties.SCHEMA_NAME);
 
         // 2. 构建所有旁路输出上下文
         // 旁路输出关联  [旁路输出标签 -> 旁路输出上下文]
@@ -86,30 +87,28 @@ public class SqlserverContextDistHelper implements ContextDistHelper<Sqlserver, 
      * @param schema 模式名
      * @param distTable 目标表名
      * @param mapping 表映射
-     * @param pipelineProperties 管道目标属性
+     * @param pipelineProps 管道目标属性
      */
     private SinkFunction<RdbSyncEvent> buildSink(String schema,
                                                  String distTable,
                                                  Mapping<Sqlserver> mapping,
-                                                 SqlserverPipelineDistProperties pipelineProperties) {
+                                                 SqlserverPipelineDistProperties pipelineProps) {
         // Postgres语句模板
         SqlDialectService sqlDialectService = new SqlserverDialectService();
         String upsertSql = new SqlserverUpsertSqlGenerator(schema).generate(distTable, mapping);
         String deleteSql = new GenericDeleteSqlGenerator<Sqlserver>(sqlDialectService).generate(distTable, mapping);
 
         // 获取语义保证
-        String semantic = Optional.ofNullable(pipelineProperties.getSemantic())
-                .orElse(SemanticOptions.AT_LEAST_ONCE)
-                .toLowerCase();
+        String semantic = pipelineProps.get(SqlserverPipelineDistProperties.SINK_SEMANTIC).toLowerCase();
 
         // 构造出口，取决于语义保证
         switch (semantic) {
             // 至少同步一次
             case SemanticOptions.AT_LEAST_ONCE:
-                return buildAtLeastOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
+                return buildAtLeastOnceSink(upsertSql, deleteSql, mapping, pipelineProps);
             // 精确同步一次
             case SemanticOptions.EXACTLY_ONCE:
-                return buildExactlyOnceSink(upsertSql, deleteSql, mapping, pipelineProperties);
+                return buildExactlyOnceSink(upsertSql, deleteSql, mapping, pipelineProps);
             default:
                 throw new UnsupportedDistSemanticException(semantic);
         }
@@ -123,30 +122,37 @@ public class SqlserverContextDistHelper implements ContextDistHelper<Sqlserver, 
      * @param upsertSql 更新或插入语句
      * @param deleteSql 删除语句
      * @param mapping 表映射
-     * @param pipelineProperties 管道目标属性
+     * @param pipelineProps 管道目标属性
      */
     private SinkFunction<RdbSyncEvent> buildAtLeastOnceSink(String upsertSql,
                                                             String deleteSql,
                                                             Mapping<Sqlserver> mapping,
-                                                            SqlserverPipelineDistProperties pipelineProperties) {
+                                                            SqlserverPipelineDistProperties pipelineProps) {
         // JDBC执行选项
         JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
-                .withBatchSize(pipelineProperties.getExecBatchSize())
-                .withBatchIntervalMs(pipelineProperties.getExecBatchIntervalMs())
-                .withMaxRetries(pipelineProperties.getExecMaxRetries())
+                .withBatchSize(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_MAX_ROWS))
+                .withBatchIntervalMs(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_INTERVAL).toMillis())
+                .withMaxRetries(pipelineProps.get(JdbcConnectorOptions.SINK_MAX_RETRIES))
                 .build();
 
         // SQLServer数据源，用于生成JDBC-URL
-        String url = PREFIX_JDBC_URL + pipelineProperties.getHost() + ":" + pipelineProperties.getPort() +
-                ";databaseName=" + pipelineProperties.getDatabase();
+        String host = pipelineProps.get(SqlserverPipelineDistProperties.HOSTNAME);
+        int port = pipelineProps.get(SqlserverPipelineDistProperties.PORT);
+        String database = pipelineProps.getOptional(SqlserverPipelineDistProperties.DATABASE_NAME)
+                .orElseThrow(() -> new IllegalArgumentException("Pipeline Dist [database-name] not specified."));
+        String url = PREFIX_JDBC_URL + host + ":" + port +
+                ";databaseName=" + database;
 
         // JDBC连接选项
         JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                 .withUrl(url)
                 .withDriverName(JDBC_SQLSERVER_DRIVER)
-                .withUsername(pipelineProperties.getUsername())
-                .withPassword(pipelineProperties.getPassword())
-                .withConnectionCheckTimeoutSeconds(pipelineProperties.getConnTimeoutSeconds())
+                .withUsername(pipelineProps.get(SqlserverPipelineDistProperties.USERNAME))
+                .withPassword(pipelineProps.get(SqlserverPipelineDistProperties.PASSWORD))
+                .withConnectionCheckTimeoutSeconds(pipelineProps.getOptional(JdbcConnectorOptions.MAX_RETRY_TIMEOUT)
+                        .map(Duration::toSeconds)
+                        .map(Long::intValue)
+                        .orElse(-1))
                 .build();
 
         // 构造至少同步一次出口，并返回
@@ -164,32 +170,35 @@ public class SqlserverContextDistHelper implements ContextDistHelper<Sqlserver, 
      * @param upsertSql 更新或插入语句
      * @param deleteSql 删除语句
      * @param mapping 表映射
-     * @param pipelineProperties 管道目标属性
+     * @param pipelineProps 管道目标属性
      */
     private SinkFunction<RdbSyncEvent> buildExactlyOnceSink(String upsertSql,
                                                             String deleteSql,
                                                             Mapping<Sqlserver> mapping,
-                                                            SqlserverPipelineDistProperties pipelineProperties) {
+                                                            SqlserverPipelineDistProperties pipelineProps) {
         // JDBC执行选项
         JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
-                .withBatchSize(pipelineProperties.getExecBatchSize())
-                .withBatchIntervalMs(pipelineProperties.getExecBatchIntervalMs())
+                .withBatchSize(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_MAX_ROWS))
+                .withBatchIntervalMs(pipelineProps.get(JdbcConnectorOptions.SINK_BUFFER_FLUSH_INTERVAL).toMillis())
                 .withMaxRetries(0)  // 参照 FLINK-22311
                 .build();
 
         // JDBC精确同步一次选项
         JdbcExactlyOnceOptions exactlyOnceOptions = JdbcExactlyOnceOptions.builder()
-                .withMaxCommitAttempts(pipelineProperties.getTxMaxCommitAttempts())
-                .withTimeoutSec(Optional.ofNullable(pipelineProperties.getTxTimeoutSeconds()))
-                .withTransactionPerConnection(true)
+                .withMaxCommitAttempts(pipelineProps.get(SqlserverPipelineDistProperties.SINK_XA_MAX_COMMIT_ATTEMPTS))
+                .withTimeoutSec(pipelineProps.getOptional(SqlserverPipelineDistProperties.SINK_XA_TIMEOUT)
+                        .map(Duration::toSeconds)
+                        .map(Long::intValue))
+                .withTransactionPerConnection(pipelineProps.get(SqlserverPipelineDistProperties.SINK_XA_TRANSACTION_PER_CONNECTION))
                 .build();
 
         // SQLServer数据源信息
-        final String host = pipelineProperties.getHost();
-        final Integer port = pipelineProperties.getPort();
-        final String database = pipelineProperties.getDatabase();
-        final String username = pipelineProperties.getUsername();
-        final String password = pipelineProperties.getPassword();
+        final String host = pipelineProps.get(SqlserverPipelineDistProperties.HOSTNAME);
+        final int port = pipelineProps.get(SqlserverPipelineDistProperties.PORT);
+        final String database = pipelineProps.getOptional(SqlserverPipelineDistProperties.DATABASE_NAME)
+                .orElseThrow(() -> new IllegalArgumentException("Pipeline Dist [database-name] not specified."));
+        final String username = pipelineProps.get(SqlserverPipelineDistProperties.USERNAME);
+        final String password = pipelineProps.get(SqlserverPipelineDistProperties.PASSWORD);
 
         // 构造精确同步一次出口，并返回
         return RdbSyncJdbcSink.exactlyOnceSink(

@@ -67,8 +67,7 @@ public abstract class ContextFactory {
         if (pipelineDistProps == null) {
             throw new RuntimeException("Pipeline Dist [" + pipeline.getDistId() +  "] properties not found.");
         }
-        LOG.info("Pipeline Source properties:\n" + pipelineSourceProps);
-        LOG.info("Pipeline Dist properties:\n" + pipelineDistProps);
+        loggingMeta(pipelineSourceProps, pipelineDistProps);
 
         ContextMeta contextMeta = new ContextMeta(pipeline, pipelineSourceProps, pipelineDistProps);
 
@@ -101,6 +100,19 @@ public abstract class ContextFactory {
                 .setJobName(jobName)
                 .setConfig(config)
                 .build();
+    }
+
+    /**
+     * 记录日志：上下文元数据
+     * @param pipelineSourceProps 管道来源属性
+     * @param pipelineDistProps 管道目标属性
+     */
+    private void loggingMeta(PipelineSourceProperties pipelineSourceProps, PipelineDistProperties pipelineDistProps) {
+        LOG.info("Show Context meta.\n" +
+                "Pipeline Source properties:\n    " +
+                pipelineSourceProps.toString().replace("\n", "\n    ") + "\n" +
+                "Pipeline Dist properties:\n    " +
+                pipelineDistProps.toString().replace("\n", "\n    "));
     }
 
 }

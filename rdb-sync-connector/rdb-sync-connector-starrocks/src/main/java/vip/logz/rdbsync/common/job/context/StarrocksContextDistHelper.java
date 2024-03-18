@@ -65,6 +65,7 @@ public class StarrocksContextDistHelper implements ContextDistHelper<Starrocks, 
             sinkConf.set(StarRocksSinkOptions.TABLE_NAME, distTable);
             sinkConf.setString("sink.properties.format", "json");
             sinkConf.setString("sink.properties.strip_outer_array", "true");
+            sinkConf.setString("sink.properties.max_filter_ratio", "0");
             sideOutputContext.setSink(
                     StarRocksSink.sink(new StarRocksSinkOptions(sinkConf, sinkConf.toMap()))
             );

@@ -94,7 +94,7 @@ public class PostgresContextSourceHelper implements ContextSourceHelper<Postgres
                 // 连接池大小
                 .connectionPoolSize(pipelineProps.get(PostgresSourceOptions.CONNECTION_POOL_SIZE))
                 // 心跳检测间隔时长
-                .heartbeatInterval(pipelineProps.get(PostgresSourceOptions.HEARTBEAT_INTERVAL))
+                .heartbeatInterval(pipelineProps.get(PostgresPipelineSourceProperties.HEARTBEAT_INTERVAL))
                 .build();
     }
 

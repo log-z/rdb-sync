@@ -6,6 +6,7 @@ import org.apache.flink.configuration.ConfigOptions;
 import vip.logz.rdbsync.common.config.PipelineProperties;
 import vip.logz.rdbsync.common.config.PipelineSourceProperties;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,13 @@ public class PostgresPipelineSourceProperties extends PipelineSourceProperties {
     public static final ConfigOption<String> DECODING_PLUGIN_NAME = ConfigOptions.key("decoding.plugin.name")
             .stringType()
             .defaultValue("pgoutput");
+
+    /** 属性定义：心跳检测间隔 */
+    public static final ConfigOption<Duration> HEARTBEAT_INTERVAL = ConfigOptions.key("heartbeat.interval")
+            .durationType()
+            .defaultValue(Duration.ofSeconds(30))
+            .withDescription(
+                    "Optional interval of sending heartbeat event for tracing the latest available replication slot offsets");
 
     /** 属性定义：安全性 - 敏感属性的键名列表 */
     public static final ConfigOption<List<String>> SECURITY_SENSITIVE_KEYS = ConfigOptions

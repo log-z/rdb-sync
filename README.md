@@ -1,5 +1,5 @@
 # RDB Sync
-基于 Apache Flink® `1.18.x-java11` 与 Ververica CDC Connectors 的数据实时同步解决方案。
+基于 Apache Flink® `1.18.x-java11` [CDC Connectors](https://github.com/apache/flink-cdc) 的数据实时同步解决方案。
 
 ## 演练场
 ### 第一阶段（MySQL --> MySQL）

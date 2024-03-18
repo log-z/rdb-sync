@@ -2,6 +2,7 @@ package vip.logz.rdbsync.common.job.context.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vip.logz.rdbsync.common.config.PipelineProperties;
 import vip.logz.rdbsync.common.exception.UnsupportedDistProtocolException;
 import vip.logz.rdbsync.common.job.context.ContextDistHelper;
 import vip.logz.rdbsync.common.job.context.ContextMeta;
@@ -91,7 +92,7 @@ public class ContextDistHelperProxy implements ContextDistHelper<Rdb, Object> {
      */
     @Override
     public Map<SideOutputTag, SideOutputContext<Object>> getSideOutContexts(ContextMeta contextMeta) {
-        String protocol = contextMeta.getPipelineDistProperties().getProtocol();
+        String protocol = contextMeta.getPipelineDistProperties().get(PipelineProperties.PROTOCOL);
         ContextDistHelper<Rdb, Object> rawHelper = getRawHelper(protocol);
         return rawHelper.getSideOutContexts(contextMeta);
     }
@@ -102,7 +103,7 @@ public class ContextDistHelperProxy implements ContextDistHelper<Rdb, Object> {
      */
     @Override
     public DispatcherProcess getDispatcher(ContextMeta contextMeta) {
-        String protocol = contextMeta.getPipelineDistProperties().getProtocol();
+        String protocol = contextMeta.getPipelineDistProperties().get(PipelineProperties.PROTOCOL);
         ContextDistHelper<Rdb, Object> rawHelper = getRawHelper(protocol);
         return rawHelper.getDispatcher(contextMeta);
     }

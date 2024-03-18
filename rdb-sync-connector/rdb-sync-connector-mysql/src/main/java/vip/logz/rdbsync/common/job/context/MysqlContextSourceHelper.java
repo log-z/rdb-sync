@@ -1,9 +1,7 @@
 package vip.logz.rdbsync.common.job.context;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
-import com.ververica.cdc.connectors.mysql.source.MySqlSourceBuilder;
+import com.ververica.cdc.connectors.mysql.source.config.MySqlSourceOptions;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import org.apache.flink.api.connector.source.Source;
 import vip.logz.rdbsync.common.annotations.Scannable;
@@ -14,21 +12,19 @@ import vip.logz.rdbsync.common.rule.Binding;
 import vip.logz.rdbsync.common.rule.Pipeline;
 import vip.logz.rdbsync.common.rule.table.EqualTableMatcher;
 import vip.logz.rdbsync.common.rule.table.TableMatcher;
-import vip.logz.rdbsync.common.utils.BuildHelper;
-import vip.logz.rdbsync.common.utils.JacksonUtils;
 import vip.logz.rdbsync.common.utils.sql.DDLGenerator;
-import vip.logz.rdbsync.connector.mysql.config.MysqlOptions;
 import vip.logz.rdbsync.connector.mysql.config.MysqlPipelineSourceProperties;
 import vip.logz.rdbsync.connector.mysql.job.debezium.DateFormatConverter;
 import vip.logz.rdbsync.connector.mysql.job.debezium.DatetimeFormatConverter;
 import vip.logz.rdbsync.connector.mysql.job.debezium.TimeFormatConverter;
 import vip.logz.rdbsync.connector.mysql.rule.Mysql;
 
-import java.time.Duration;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Function;
 
 /**
  * Mysql任务上下文来源辅助
@@ -39,12 +35,6 @@ import java.util.function.Function;
 @Scannable
 public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
 
-    /** 构建辅助工具 */
-    private final BuildHelper buildHelper = BuildHelper.create();
-
-    /** 对象转换器 */
-    private final ObjectMapper objectMapper = JacksonUtils.createInstance();
-
     /**
      * 获取数据源
      * @param contextMeta 任务上下文元数据
@@ -54,70 +44,57 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
     public Source<DebeziumEvent, ?, ?> getSource(ContextMeta contextMeta) {
         // 1. 获取配置
         Pipeline<Mysql> pipeline = (Pipeline<Mysql>) contextMeta.getPipeline();
-        MysqlPipelineSourceProperties pipelineProperties =
+        MysqlPipelineSourceProperties pipelineProps =
                 (MysqlPipelineSourceProperties) contextMeta.getPipelineSourceProperties();
 
         // 2. 构造数据源
-        MySqlSourceBuilder<DebeziumEvent> builder = MySqlSource.builder();
-        buildHelper
+        return MySqlSource.<DebeziumEvent>builder()
                 // 主机
-                .set(builder::hostname, pipelineProperties.getHost(), MysqlOptions.DEFAULT_HOST)
+                .hostname(pipelineProps.get(MysqlPipelineSourceProperties.HOSTNAME))
                 // 端口
-                .set(builder::port, pipelineProperties.getPort(), MysqlOptions.DEFAULT_PORT)
+                .port(pipelineProps.get(MySqlSourceOptions.PORT))
                 // 数据库名列表【必须】
-                .set(
-                        (Function<? super String[], ?>) builder::databaseList,
-                        new String[]{pipelineProperties.getDatabase()}
-                )
+                .databaseList(pipelineProps.getOptional(MySqlSourceOptions.DATABASE_NAME)
+                        .map(db -> new String[]{db})
+                        .orElseThrow(() -> new IllegalArgumentException("Pipeline Source [database-name] not specified.")))
                 // 表名列表
-                .set(
-                        (Function<? super String[], ?>) builder::tableList,
-                        buildTableList(pipelineProperties.getDatabase(), pipeline)
-                )
+                .tableList(buildTableList(pipelineProps.get(MySqlSourceOptions.DATABASE_NAME), pipeline))
                 // 用户名
-                .set(builder::username, pipelineProperties.getUsername(), MysqlOptions.DEFAULT_USERNAME)
+                .username(pipelineProps.get(MysqlPipelineSourceProperties.USERNAME))
                 // 密码
-                .set(builder::password, pipelineProperties.getPassword(), MysqlOptions.DEFAULT_PASSWORD)
+                .password(pipelineProps.get(MysqlPipelineSourceProperties.PASSWORD))
                 // 模拟服务端ID
-                .setIfNotNull(builder::serverId, pipelineProperties.getServerId())
+                .serverId(pipelineProps.get(MySqlSourceOptions.SERVER_ID))
                 // 数据库的会话时区
-                .setIfNotNull(builder::serverTimeZone, pipelineProperties.getServerTimeZone())
+                .serverTimeZone(pipelineProps.getOptional(MySqlSourceOptions.SERVER_TIME_ZONE)
+                        .orElseGet(() -> ZoneId.systemDefault().getId()))
                 // 启动模式
-                .setIfNotNull(builder::startupOptions, buildStartupOptions(pipelineProperties))
+                .startupOptions(buildStartupOptions(pipelineProps))
                 // 反序列化器
-                .set(builder::deserializer, new SimpleDebeziumDeserializationSchema())
+                .deserializer(new SimpleDebeziumDeserializationSchema())
                 // Debezium属性
-                .set(builder::debeziumProperties, buildDebeziumProps())
+                .debeziumProperties(buildDebeziumProps())
                 // JDBC属性
-                .setIfNotNull(builder::jdbcProperties, buildJdbcProps(pipelineProperties.getJdbcProperties()))
+                .jdbcProperties(buildJdbcProps(pipelineProps))
                 // 快照属性：表快照的分块大小（行数）
-                .setIfNotNull(builder::splitSize, pipelineProperties.getSplitSize())
+                .splitSize(pipelineProps.get(MySqlSourceOptions.SCAN_INCREMENTAL_SNAPSHOT_CHUNK_SIZE))
                 // 快照属性：拆分元数据的分组大小
-                .setIfNotNull(builder::splitMetaGroupSize, pipelineProperties.getSplitMetaGroupSize())
+                .splitMetaGroupSize(pipelineProps.get(MySqlSourceOptions.CHUNK_META_GROUP_SIZE))
                 // 快照属性：均匀分布因子的上限
-                .setIfNotNull(builder::distributionFactorUpper, pipelineProperties.getDistributionFactorUpper())
+                .distributionFactorUpper(pipelineProps.get(MySqlSourceOptions.CHUNK_KEY_EVEN_DISTRIBUTION_FACTOR_UPPER_BOUND))
                 // 快照属性：均匀分布因子的下限
-                .setIfNotNull(builder::distributionFactorLower, pipelineProperties.getDistributionFactorLower())
+                .distributionFactorLower(pipelineProps.get(MySqlSourceOptions.CHUNK_KEY_EVEN_DISTRIBUTION_FACTOR_LOWER_BOUND))
                 // 快照属性：每次轮询所能获取的最大行数
-                .setIfNotNull(builder::fetchSize, pipelineProperties.getFetchSize())
+                .fetchSize(pipelineProps.get(MySqlSourceOptions.SCAN_SNAPSHOT_FETCH_SIZE))
                 // 连接超时时长
-                .setIfNotNull(
-                        builder::connectTimeout,
-                        pipelineProperties.getConnectTimeoutSeconds(),
-                        Duration::ofSeconds
-                )
+                .connectTimeout(pipelineProps.get(MySqlSourceOptions.CONNECT_TIMEOUT))
                 // 连接最大重试次数
-                .setIfNotNull(builder::connectMaxRetries, pipelineProperties.getConnectMaxRetries())
+                .connectMaxRetries(pipelineProps.get(MySqlSourceOptions.CONNECT_MAX_RETRIES))
                 // 连接池大小
-                .setIfNotNull(builder::connectionPoolSize, pipelineProperties.getConnectionPoolSize())
+                .connectionPoolSize(pipelineProps.get(MySqlSourceOptions.CONNECTION_POOL_SIZE))
                 // 心跳检测间隔时长
-                .setIfNotNull(
-                        builder::heartbeatInterval,
-                        pipelineProperties.getHeartbeatIntervalSeconds(),
-                        Duration::ofSeconds
-                );
-
-        return builder.build();
+                .heartbeatInterval(pipelineProps.get(MySqlSourceOptions.HEARTBEAT_INTERVAL))
+                .build();
     }
 
     /**
@@ -160,39 +137,36 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
      * @return 返回启动选项，若启动模式为null则返回null
      */
     private static StartupOptions buildStartupOptions(MysqlPipelineSourceProperties pipelineProperties) {
-        String startupMode = pipelineProperties.getStartupMode();
-        if (startupMode == null) {
-            return null;
-        }
+        String startupMode = pipelineProperties.get(MySqlSourceOptions.SCAN_STARTUP_MODE);
 
         // 构建启动选项
         switch (startupMode) {
             // INITIAL：先做快照，再读取最新日志
-            case MysqlPipelineSourceProperties.STARTUP_MODE_INITIAL:
+            case MysqlPipelineSourceProperties.StartupMode.INITIAL:
                 return StartupOptions.initial();
             // EARLIEST：跳过快照，从最早可用位置读取日志
-            case MysqlPipelineSourceProperties.STARTUP_MODE_EARLIEST:
+            case MysqlPipelineSourceProperties.StartupMode.EARLIEST:
                 return StartupOptions.earliest();
             // LATEST：跳过快照，仅读取最新日志
-            case MysqlPipelineSourceProperties.STARTUP_MODE_LATEST:
+            case MysqlPipelineSourceProperties.StartupMode.LATEST:
                 return StartupOptions.latest();
-            // OFFSET：跳过快照，从指定位置开始读取日志
-            case MysqlPipelineSourceProperties.STARTUP_MODE_SPECIFIC_OFFSET:
-                String gtidSet = pipelineProperties.getStartupSpecificOffsetGtidSet();
-                Long pos = pipelineProperties.getStartupSpecificOffsetPos();
-                String file = pipelineProperties.getStartupSpecificOffsetFile();
+            // SPECIFIC_OFFSET：跳过快照，从指定位置开始读取日志
+            case MysqlPipelineSourceProperties.StartupMode.SPECIFIC_OFFSET:
+                String gtidSet = pipelineProperties.get(MySqlSourceOptions.SCAN_STARTUP_SPECIFIC_OFFSET_GTID_SET);
+                Long pos = pipelineProperties.get(MySqlSourceOptions.SCAN_STARTUP_SPECIFIC_OFFSET_POS);
+                String file = pipelineProperties.get(MySqlSourceOptions.SCAN_STARTUP_SPECIFIC_OFFSET_FILE);
                 if (gtidSet != null) {
                     return StartupOptions.specificOffset(gtidSet);
-                } else if (file != null) {
+                } else if (file != null && pos != null) {
                     return StartupOptions.specificOffset(file, pos);
                 } else {
                     throw new SourceException("StartupMode '" +
-                            MysqlPipelineSourceProperties.STARTUP_MODE_SPECIFIC_OFFSET +
+                            MysqlPipelineSourceProperties.StartupMode.SPECIFIC_OFFSET +
                             "' Missing parameter.");
                 }
             // TIMESTAMP：跳过快照，从指定时间戳开始读取日志
-            case MysqlPipelineSourceProperties.STARTUP_MODE_TIMESTAMP:
-                return StartupOptions.timestamp(pipelineProperties.getStartupTimestampMillis());
+            case MysqlPipelineSourceProperties.StartupMode.TIMESTAMP:
+                return StartupOptions.timestamp(pipelineProperties.get(MySqlSourceOptions.SCAN_STARTUP_TIMESTAMP_MILLIS));
             default:
                 throw new SourceException("Unknown StartupMode: " + startupMode);
         }
@@ -212,20 +186,33 @@ public class MysqlContextSourceHelper implements ContextSourceHelper<Mysql> {
         return props;
     }
 
+    /** JDBC属性之间的分隔符 */
+    private static final String JDBC_PROPS_DELIMITER = "&";
+
+    /** JDBC属性中键和值的分隔符 */
+    private static final String JDBC_PROPS_KV_DELIMITER = "=";
+
     /**
      * 构建JDBC属性
-     * @param json JSON对象
+     * @param pipelineProperties MySQL管道来源属性
      */
-    private Properties buildJdbcProps(String json) {
-        if (json == null || json.isEmpty()) {
-            return null;
+    private Properties buildJdbcProps(MysqlPipelineSourceProperties pipelineProperties) {
+        Properties pros = new Properties();
+        String jdbcProps = pipelineProperties.get(MysqlPipelineSourceProperties.JDBC_PROPS);
+        if (jdbcProps == null || jdbcProps.isEmpty()) {
+            return pros;
         }
 
-        try {
-            return objectMapper.readValue(json, Properties.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        for (String kv : jdbcProps.split(JDBC_PROPS_DELIMITER)) {
+            String[] kvTuple = kv.split(JDBC_PROPS_KV_DELIMITER, 2);
+            if (kvTuple.length == 2) {
+                String key = URLDecoder.decode(kvTuple[0].strip(), StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(kvTuple[1].strip(), StandardCharsets.UTF_8);
+                pros.put(key, value);
+            }
         }
+
+        return pros;
     }
 
 }

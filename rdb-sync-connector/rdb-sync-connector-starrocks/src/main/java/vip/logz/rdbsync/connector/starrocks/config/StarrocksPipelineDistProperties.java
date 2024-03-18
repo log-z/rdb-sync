@@ -1,8 +1,13 @@
 package vip.logz.rdbsync.connector.starrocks.config;
 
+import com.starrocks.connector.flink.table.sink.StarRocksSinkOptions;
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.configuration.ConfigOptions;
 import vip.logz.rdbsync.common.config.PipelineDistProperties;
-import vip.logz.rdbsync.common.config.SemanticOptions;
-import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
+import vip.logz.rdbsync.common.config.PipelineProperties;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * StarRocks管道目标属性
@@ -12,178 +17,67 @@ import vip.logz.rdbsync.connector.starrocks.rule.Starrocks;
  */
 public class StarrocksPipelineDistProperties extends PipelineDistProperties {
 
-    /** BE-MySQL服务主机列表 */
-    private String hosts;
+    /** 属性定义：FE-MySQL服务主机名列表 */
+    public static final ConfigOption<List<String>> HOSTNAMES = ConfigOptions.key("hostnames")
+            .stringType()
+            .asList()
+            .defaultValues(StarrocksOptions.DEFAULT_HOST);
 
-    /** BE-MySQL服务端口列表 */
-    private String ports;
+    /** 属性定义：FE-MySQL服务端口列表 */
+    public static final ConfigOption<List<Integer>> PORTS = ConfigOptions.key("ports")
+            .intType()
+            .asList()
+            .defaultValues(StarrocksOptions.DEFAULT_PORT);
 
-    /** FE-HTTP服务主机列表 */
-    private String loadHosts;
+    /** 属性定义：FE-HTTP服务主机名列表 */
+    public static final ConfigOption<List<String>> LOAD_HOSTNAMES = ConfigOptions.key("load-hostnames")
+            .stringType()
+            .asList()
+            .defaultValues(StarrocksOptions.DEFAULT_HOST);
 
-    /** FE-HTTP服务端口列表 */
-    private String loadPorts;
+    /** 属性定义：FE-HTTP服务端口列表 */
+    public static final ConfigOption<List<Integer>> LOAD_PORTS = ConfigOptions.key("load-ports")
+            .intType()
+            .asList()
+            .defaultValues(StarrocksOptions.DEFAULT_LOAD_PORT);
 
-    /** 数据库名 */
-    private String database;
+    /** 属性定义：用户名 */
+    public static final ConfigOption<String> USERNAME = ConfigOptions.key(StarRocksSinkOptions.USERNAME.key())
+            .stringType()
+            .defaultValue(StarrocksOptions.DEFAULT_USERNAME);
 
-    /** 用户名 */
-    private String username;
+    /** 属性定义：密码 */
+    public static final ConfigOption<String> PASSWORD = ConfigOptions.key(StarRocksSinkOptions.PASSWORD.key())
+            .stringType()
+            .defaultValue(StarrocksOptions.DEFAULT_PASSWORD);
 
-    /** 密码 */
-    private String password;
+    /** 属性定义：安全性 - 敏感属性的键名列表 */
+    public static final ConfigOption<List<String>> SECURITY_SENSITIVE_KEYS = ConfigOptions
+            .key(PipelineProperties.SECURITY_SENSITIVE_KEYS.key())
+            .stringType()
+            .asList()
+            .defaultValues(USERNAME.key(), PASSWORD.key());
 
     /**
-     * 语义保证
-     * @see SemanticOptions#EXACTLY_ONCE
-     * @see SemanticOptions#AT_LEAST_ONCE
+     * 构造器
      */
-    private String semantic;
-
-    /** StreamLoad的标签前缀  */
-    private String labelPrefix;
-
-    /**
-     * 获取BE-MySQL服务主机列表
-     */
-    public String getHosts() {
-        return hosts;
+    public StarrocksPipelineDistProperties() {
     }
 
     /**
-     * 设置BE-MySQL服务主机列表
-     * @param hosts BE-MySQL服务主机列表
+     * 构造器
+     * @param props 初始属性
      */
-    public void setHosts(String hosts) {
-        this.hosts = hosts;
+    public StarrocksPipelineDistProperties(Map<String, ?> props) {
+        super(props);
     }
 
     /**
-     * 获取BE-MySQL服务端口列表
-     */
-    public String getPorts() {
-        return ports;
-    }
-
-    /**
-     * 设置BE-MySQL服务端口列表
-     * @param ports BE-MySQL服务端口列表
-     */
-    public void setPorts(String ports) {
-        this.ports = ports;
-    }
-
-    /**
-     * 获取FE-HTTP服务主机列表
-     */
-    public String getLoadHosts() {
-        return loadHosts;
-    }
-
-    /**
-     * 设置FE-HTTP服务主机列表
-     * @param loadHosts FE-HTTP服务主机列表
-     */
-    public void setLoadHosts(String loadHosts) {
-        this.loadHosts = loadHosts;
-    }
-
-    /**
-     * 获取FE-HTTP服务端口列表
-     */
-    public String getLoadPorts() {
-        return loadPorts;
-    }
-
-    /**
-     * 设置FE-HTTP服务端口列表
-     * @param loadPorts FE-HTTP服务端口列表
-     */
-    public void setLoadPorts(String loadPorts) {
-        this.loadPorts = loadPorts;
-    }
-
-    /**
-     * 读取数据库名
-     */
-    public String getDatabase() {
-        return database;
-    }
-
-    /**
-     * 设置数据库名
-     * @param database 数据库名
-     */
-    public void setDatabase(String database) {
-        this.database = database;
-    }
-
-    /**
-     * 读取用户名
-     */
-    public String getUsername() {
-        return username != null ? username : StarrocksOptions.DEFAULT_USERNAME;
-    }
-
-    /**
-     * 设置用户名
-     * @param username 用户名
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
-     * 读取密码
-     */
-    public String getPassword() {
-        return password != null ? password : StarrocksOptions.DEFAULT_PASSWORD;
-    }
-
-    /**
-     * 设置密码
-     * @param password 密码
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * 获取语义保证
-     */
-    public String getSemantic() {
-        return semantic;
-    }
-
-    /**
-     * 设置语义保证
-     * @param semantic 语义保证
-     */
-    public void setSemantic(String semantic) {
-        this.semantic = semantic;
-    }
-
-    /**
-     * 获取StreamLoad的标签前缀
-     */
-    public String getLabelPrefix() {
-        return labelPrefix;
-    }
-
-    /**
-     * 设置StreamLoad的标签前缀
-     * @param labelPrefix StreamLoad的标签前缀
-     */
-    public void setLabelPrefix(String labelPrefix) {
-        this.labelPrefix = labelPrefix;
-    }
-
-    /**
-     * 获取协议
+     * 获取属性定义：安全性 - 敏感属性的键名列表
      */
     @Override
-    public String getProtocol() {
-        return Starrocks.class.getSimpleName();
+    protected ConfigOption<List<String>> configOptionWithSensitiveKeys() {
+        return SECURITY_SENSITIVE_KEYS;
     }
 
 }

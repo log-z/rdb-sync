@@ -2,6 +2,7 @@ package vip.logz.rdbsync.common.job.context;
 
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
+import vip.logz.rdbsync.common.utils.Configurations;
 
 import java.time.Duration;
 import java.util.Map;
@@ -66,8 +67,8 @@ public class ExecutionInfo {
          * @param config 执行器环境配置
          * @return 返回当前对象
          */
-        public Builder setConfig(Map<String, String> config) {
-            info.config = Configuration.fromMap(config);
+        public Builder setConfig(Map<String, ?> config) {
+            info.config = Configurations.parse(config);
 
             // 补充必要的配置
             if (info.config.get(ExecutionCheckpointingOptions.CHECKPOINTING_INTERVAL) == null) {

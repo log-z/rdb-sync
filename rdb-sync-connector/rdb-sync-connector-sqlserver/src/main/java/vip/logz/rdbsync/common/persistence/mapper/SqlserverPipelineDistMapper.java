@@ -3,7 +3,7 @@ package vip.logz.rdbsync.common.persistence.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import vip.logz.rdbsync.common.annotations.Scannable;
-import vip.logz.rdbsync.connector.sqlserver.config.SqlserverPipelineDistProperties;
+import vip.logz.rdbsync.connector.jdbc.persistence.entity.JdbcPipelineDistPropertiesEntity;
 
 /**
  * SQLServer管道目标持久化映射
@@ -20,24 +20,18 @@ public interface SqlserverPipelineDistMapper {
      */
     @Select("select pd.id" +
             ", pd.name" +
-            ", pd.protocol" +
             ", pds.host" +
             ", pds.port" +
             ", pds.database" +
             ", pds.schema" +
             ", pds.username" +
             ", pds.password" +
-            ", pds.semantic" +
-            ", pds.exec_batch_interval_ms" +
-            ", pds.exec_batch_size" +
-            ", pds.exec_max_retries" +
-            ", pds.conn_timeout_seconds" +
-            ", pds.tx_max_commit_attempts" +
-            ", pds.tx_timeout_seconds " +
+            ", pds.options " +
             "from pipeline_dist as pd " +
             "inner join pipeline_dist_sqlserver as pds " +
             "on pd.id = pds.id " +
-            "and pd.id = #{id}")
-    SqlserverPipelineDistProperties get(String id);
+            "and pd.id = #{id} " +
+            "and pd.protocol = 'sqlserver'")
+    JdbcPipelineDistPropertiesEntity get(String id);
 
 }

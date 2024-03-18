@@ -1,65 +1,27 @@
 package vip.logz.rdbsync.common.config;
 
+import java.util.Map;
+
 /**
  * 管道目标属性
  *
  * @author logz
  * @date 2024-01-09
  */
-public class PipelineDistProperties {
-
-    /** ID */
-    private String id;
-
-    /** 名称 */
-    private String name;
-
-    /** 协议 */
-    private String protocol;
+public class PipelineDistProperties extends PipelineProperties {
 
     /**
-     * 获取ID
+     * 构造器
      */
-    public String getId() {
-        return id;
+    public PipelineDistProperties() {
     }
 
     /**
-     * 设置ID
-     * @param id ID
+     * 构造器
+     * @param props 初始属性
      */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * 获取名称
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * 设置名称
-     * @param name 名称
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * 获取协议
-     */
-    public String getProtocol() {
-        return protocol;
-    }
-
-    /**
-     * 设置协议
-     * @param protocol 协议
-     */
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
+    public PipelineDistProperties(Map<String, ?> props) {
+        super(props);
     }
 
 }

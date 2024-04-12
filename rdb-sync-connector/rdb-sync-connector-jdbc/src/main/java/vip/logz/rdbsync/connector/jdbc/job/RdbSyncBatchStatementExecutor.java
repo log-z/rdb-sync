@@ -7,6 +7,8 @@ import vip.logz.rdbsync.common.job.RdbSyncEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +76,25 @@ public class RdbSyncBatchStatementExecutor implements JdbcBatchStatementExecutor
                 throw new UnsupportedRdbSyncEventOpException("JDBC", event.getOp());
         }
 
+        fixDeserialization(event);
         batch.add(event);
+    }
+
+    /**
+     * 修复反序列化缺陷
+     * @param event 数据同步事件
+     */
+    private void fixDeserialization(RdbSyncEvent event) {
+        event.getRecord().entrySet().forEach(entry -> {
+            // OffsetDateTime：修复丢失的时区ID
+            if (entry.getValue() instanceof OffsetDateTime) {
+                OffsetDateTime dt = (OffsetDateTime) entry.getValue();
+                int zoneOffsetSec = dt.getOffset().getTotalSeconds();
+                entry.setValue(
+                        OffsetDateTime.of(dt.toLocalDateTime(), ZoneOffset.ofTotalSeconds(zoneOffsetSec))
+                );
+            }
+        });
     }
 
     /**

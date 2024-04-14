@@ -78,7 +78,7 @@ public class OracleContextSourceHelper implements ContextSourceHelper<Oracle> {
                 // 反序列化器
                 .deserializer(new SimpleDebeziumDeserializationSchema())
                 // Debezium属性
-                .debeziumProperties(buildDebeziumProps())
+                .debeziumProperties(buildDebeziumProps(pipelineProps))
                 // 快照属性：表快照的分块大小（行数）
                 .splitSize(pipelineProps.get(OracleSourceOptions.SCAN_INCREMENTAL_SNAPSHOT_CHUNK_SIZE))
                 // 快照属性：拆分元数据的分组大小
@@ -89,8 +89,6 @@ public class OracleContextSourceHelper implements ContextSourceHelper<Oracle> {
                 .distributionFactorLower(pipelineProps.get(OracleSourceOptions.SPLIT_KEY_EVEN_DISTRIBUTION_FACTOR_LOWER_BOUND))
                 // 快照属性：每次轮询所能获取的最大行数
                 .fetchSize(pipelineProps.get(OracleSourceOptions.SCAN_SNAPSHOT_FETCH_SIZE))
-                // 快照属性：是否在快照阶段结束时关闭空闲读取器
-                .closeIdleReaders(pipelineProps.get(OracleSourceOptions.SCAN_INCREMENTAL_CLOSE_IDLE_READER_ENABLED))
                 // 连接超时时长
                 .connectTimeout(pipelineProps.get(OracleSourceOptions.CONNECT_TIMEOUT))
                 // 连接最大重试次数
@@ -136,11 +134,11 @@ public class OracleContextSourceHelper implements ContextSourceHelper<Oracle> {
 
     /**
      * 构建启动选项
-     * @param pipelineProperties Oracle管道来源属性
+     * @param pipelineProps Oracle管道来源属性
      * @return 返回启动选项，若启动模式为null则返回null
      */
-    private static StartupOptions buildStartupOptions(OraclePipelineSourceProperties pipelineProperties) {
-        String startupMode = pipelineProperties.get(OracleSourceOptions.SCAN_STARTUP_MODE);
+    private static StartupOptions buildStartupOptions(OraclePipelineSourceProperties pipelineProps) {
+        String startupMode = pipelineProps.get(OracleSourceOptions.SCAN_STARTUP_MODE);
         if (startupMode == null) {
             return null;
         }
@@ -162,7 +160,8 @@ public class OracleContextSourceHelper implements ContextSourceHelper<Oracle> {
      * 构建Debezium属性
      * @return 返回Debezium属性
      */
-    private static Properties buildDebeziumProps() {
+    private static Properties buildDebeziumProps(OraclePipelineSourceProperties pipelineProps) {
+        // 基础属性
         Properties props = new Properties();
         props.put("log.mining.strategy", "online_catalog");
         props.put("binary.handling.mode", "base64");
@@ -172,6 +171,10 @@ public class OracleContextSourceHelper implements ContextSourceHelper<Oracle> {
         props.put("converters", "date, timestamp");
         props.put("date.type", DateFormatConverter.class.getName());
         props.put("timestamp.type", TimestampFormatConverter.class.getName());
+
+        // 可选属性
+        pipelineProps.getOptional(OraclePipelineSourceProperties.DEBEZIUM_DATABASE_PDB_NAME)
+                .ifPresent(val -> props.put("database.pdb.name", val));
 
         return props;
     }

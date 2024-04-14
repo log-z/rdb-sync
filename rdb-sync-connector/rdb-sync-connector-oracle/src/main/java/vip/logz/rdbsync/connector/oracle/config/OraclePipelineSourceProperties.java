@@ -27,6 +27,11 @@ public class OraclePipelineSourceProperties extends PipelineSourceProperties {
             .stringType()
             .defaultValue("ORCLCDB");
 
+    /** 属性定义：Debezium - 指定一个 PDB 名称 */
+    public static final ConfigOption<String> DEBEZIUM_DATABASE_PDB_NAME = ConfigOptions.key("debezium.database.pdb.name")
+            .stringType()
+            .noDefaultValue();
+
     /** 属性定义：安全性 - 敏感属性的键名列表 */
     public static final ConfigOption<List<String>> SECURITY_SENSITIVE_KEYS = ConfigOptions
             .key(PipelineProperties.SECURITY_SENSITIVE_KEYS.key())

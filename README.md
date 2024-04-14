@@ -43,12 +43,13 @@
 ### 连接器
 根据同步的数据库，按需引入连接器依赖。其它**必要依赖**请参考示例项目的 [pom.xml](rdb-sync-job/rdb-sync-job-simple/pom.xml) 文件。
 
-| 协议 | 连接器 | 管道 | 语义保证 |
-|---|---|---|---|
-| MySQL | [rdb-sync-connector-mysql](rdb-sync-connector/rdb-sync-connector-mysql) | <li>来源 <li>目标 | <li>精确一次 <li>至少一次 / 精确一次 |
-| Postgres | [rdb-sync-connector-postgres](rdb-sync-connector/rdb-sync-connector-postgres) | <li>来源 <li>目标 | <li>精确一次 <li>至少一次 / 精确一次 |
-| SQL Server | [rdb-sync-connector-sqlserver](rdb-sync-connector/rdb-sync-connector-sqlserver) | <li>来源 <li>目标 | <li>精确一次 <li>至少一次 / 精确一次 |
-| StarRocks | [rdb-sync-connector-starrocks](rdb-sync-connector/rdb-sync-connector-starrocks) | <li>目标 | <li>至少一次 / 精确一次 |
+| 协议         | 连接器                                                                             | 管道                     | 语义保证                     |
+|------------|---------------------------------------------------------------------------------|------------------------|--------------------------|
+| MySQL      | [rdb-sync-connector-mysql](rdb-sync-connector/rdb-sync-connector-mysql)         | <li>来源 <li>目标          | <li>精确一次 <li>至少一次 / 精确一次 |
+| Oracle     | [rdb-sync-connector-oracle](rdb-sync-connector/rdb-sync-connector-oracle)       | <li>来源（preview） <li>目标 | <li>精确一次 <li>至少一次 / 精确一次 |
+| Postgres   | [rdb-sync-connector-postgres](rdb-sync-connector/rdb-sync-connector-postgres)   | <li>来源 <li>目标          | <li>精确一次 <li>至少一次 / 精确一次 |
+| SQL Server | [rdb-sync-connector-sqlserver](rdb-sync-connector/rdb-sync-connector-sqlserver) | <li>来源 <li>目标          | <li>精确一次 <li>至少一次 / 精确一次 |
+| StarRocks  | [rdb-sync-connector-starrocks](rdb-sync-connector/rdb-sync-connector-starrocks) | <li>目标                 | <li>至少一次 / 精确一次          |
 
 ### 表映射 & 管道
 表映射：定义目标表结构，依据此进行类型转换和建表语句生成。

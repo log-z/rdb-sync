@@ -2,6 +2,7 @@ package vip.logz.rdbsync.common.job;
 
 import vip.logz.rdbsync.common.enums.RdbSyncEventOp;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Map;
  * @author logz
  * @date 2024-01-17
  */
-public class RdbSyncEvent {
+public class RdbSyncEvent implements Serializable {
 
     /** 操作 */
     private final RdbSyncEventOp op;

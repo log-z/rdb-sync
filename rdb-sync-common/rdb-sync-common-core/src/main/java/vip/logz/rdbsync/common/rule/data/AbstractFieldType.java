@@ -6,9 +6,9 @@ import vip.logz.rdbsync.common.rule.Rdb;
 import vip.logz.rdbsync.common.rule.convert.Converter;
 import vip.logz.rdbsync.common.rule.convert.ConverterRegistrar;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 抽象的字段类型
@@ -22,7 +22,23 @@ public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<
 
     private static final long serialVersionUID = 1L;
 
+    /** 日志记录器 */
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFieldType.class);
+
+    /** 参数分隔符 */
+    private static final String ARG_DELIMITER = ", ";
+
+    /** 参数列表开始 */
+    private static final String ARGS_BEGIN = "(";
+
+    /** 参数列表结束 */
+    private static final String ARGS_END = ")";
+
+    /** 占位符：任意 */
+    private static final String PLACEHOLDER_ANY = "{}";
+
+    /** 占位符匹配器 */
+    private static final Pattern PATTERN_PLACEHOLDER = Pattern.compile("\\{(.*?)}");
 
     /** 具体名称 */
     private final String name;
@@ -81,7 +97,8 @@ public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<
      * 获取名称
      */
     public String getName() {
-        return name;
+        // 清除所有占位符
+        return PATTERN_PLACEHOLDER.matcher(name).replaceAll("");
     }
 
     /**
@@ -89,14 +106,79 @@ public abstract class AbstractFieldType<DB extends Rdb, T> implements FieldType<
      */
     @Override
     public String toString() {
-        if (args.length == 0) {
-            return getName();
+        Matcher matcher = PATTERN_PLACEHOLDER.matcher(name);
+
+        // 默认情况下，即未指定参数位置时，在名称末尾追加参数
+        String expr = args.length > 0 && !matcher.find() ?
+                name + PLACEHOLDER_ANY :
+                name;
+
+        // 替换占位符
+        return PATTERN_PLACEHOLDER.matcher(expr).replaceAll(matchResult -> {
+            IdxRange idxRange = new IdxRange(matchResult.group(1));
+            int begin = idxRange.begin;
+            int end = Math.min(idxRange.end, args.length);
+            if (begin >= end) {
+                return "";
+            }
+
+            StringBuilder sb = new StringBuilder(ARGS_BEGIN);
+            for (int i = begin; i < end; i++) {
+                sb.append(args[i]);
+                if (end - i > 1) {
+                    sb.append(ARG_DELIMITER);
+                }
+            }
+
+            return sb.append(ARGS_END).toString();
+        });
+    }
+
+    /**
+     * 索引范围
+     * <li> {@code ""} 与 {@code ":"} 表示[0,+∞)
+     * <li> {@code "1"} 表示 [1,1]
+     * <li> {@code "1:3"} 表示 [1,3)
+     * <li> {@code "1:"} 表示 [1,+∞)
+     * <li> {@code ":3"} 表示 [0,3)
+     */
+    private static class IdxRange {
+
+        /** 分隔符 */
+        private static final String DELIMITER = ":";
+
+        /** 起始 */
+        final Integer begin;
+
+        /** 结束 */
+        final Integer end;
+
+        IdxRange(String expr) {
+            if (expr.isEmpty()) {
+                begin = 0;
+                end = Integer.MAX_VALUE;
+                return;
+            }
+
+            if (!expr.contains(DELIMITER)) {
+                begin = Integer.valueOf(expr);
+                end = Integer.parseInt(expr) + 1;
+                return;
+            }
+
+            String[] range = expr.split(DELIMITER);
+            if (range.length == 0) {
+                begin = 0;
+                end = Integer.MAX_VALUE;
+            } else if (range.length == 1) {
+                begin = Integer.valueOf(range[0]);
+                end = Integer.MAX_VALUE;
+            } else {
+                begin = range[0].isEmpty() ? 0 : Integer.parseInt(range[0]);
+                end = Integer.valueOf(range[1]);
+            }
         }
 
-        String argsText = Arrays.stream(this.args)
-                .map(Object::toString)
-                .collect(Collectors.joining(", "));
-        return getName() + "(" + argsText + ")";
     }
 
 }

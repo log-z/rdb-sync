@@ -1,6 +1,6 @@
 -- ----------------------------
 -- RDB Sync 配置库
--- 2024-02-27
+-- 2024-04-12
 -- ----------------------------
 CREATE DATABASE rdb_sync;
 USE rdb_sync;
@@ -28,6 +28,21 @@ create table `pipeline_dist_mysql` (
   `options` text comment '高级选项',
   primary key (`id`) using btree
 ) comment = '管道目标-MySQL扩展';
+
+-- ----------------------------
+-- Table pipeline_dist_oracle
+-- ----------------------------
+create table `pipeline_dist_oracle` (
+  `id` varchar(32) not null comment 'ID',
+  `host` varchar(255) comment '主机',
+  `port` int(11) comment '端口',
+  `database` varchar(255) comment '数据库名',
+  `schema` varchar(255) not null comment '模式名',
+  `username` varchar(255) not null comment '用户名',
+  `password` varchar(255) not null comment '密码',
+  `options` text comment '高级选项',
+  primary key (`id`) using btree
+) comment = '管道目标-Oracle扩展';
 
 -- ----------------------------
 -- Table pipeline_dist_postgres
@@ -98,6 +113,21 @@ create table `pipeline_source_mysql` (
   `options` text comment '高级选项',
   primary key (`id`) using btree
 ) comment = '管道来源-MySQL扩展';
+
+-- ----------------------------
+-- Table pipeline_source_oracle
+-- ----------------------------
+create table `pipeline_source_oracle` (
+  `id` varchar(32) not null comment 'id',
+  `host` varchar(255) comment '主机',
+  `port` int comment '端口',
+  `database` varchar(255) comment '数据库名',
+  `schema` varchar(255) not null comment '模式名',
+  `username` varchar(255) not null comment '用户名',
+  `password` varchar(255) not null comment '密码',
+  `options` text comment '高级选项',
+  primary key (`id`) using btree
+) comment = '管道来源-Oracle扩展';
 
 -- ----------------------------
 -- Table pipeline_source_postgres

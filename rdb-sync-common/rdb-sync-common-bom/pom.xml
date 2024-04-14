@@ -13,7 +13,7 @@
         <flink.version>1.18.0</flink.version>
         <flink.minor.version>1.18</flink.minor.version>
         <flink.connector.jdbc>3.1.1-1.17</flink.connector.jdbc>
-        <flink.connector.cdc.version>3.0.0</flink.connector.cdc.version>
+        <flink.connector.cdc.version>3.0.1</flink.connector.cdc.version>
         <flink.connector.starrocks.version>1.2.9_flink-${flink.minor.version}</flink.connector.starrocks.version>
         <scala.binary.version>2.12</scala.binary.version>
         <log4j2.version>2.22.0</log4j2.version>
@@ -76,6 +76,12 @@
             <dependency>
                 <groupId>com.ververica</groupId>
                 <artifactId>flink-connector-mysql-cdc</artifactId>
+                <version>${flink.connector.cdc.version}</version>
+            </dependency>
+            <!-- flink-connector-oracle-cdc -->
+            <dependency>
+                <groupId>com.ververica</groupId>
+                <artifactId>flink-connector-oracle-cdc</artifactId>
                 <version>${flink.connector.cdc.version}</version>
             </dependency>
             <!-- flink-connector-postgres-cdc -->
@@ -152,6 +158,12 @@
             <dependency>
                 <groupId>vip.logz</groupId>
                 <artifactId>rdb-sync-connector-mysql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- rdb-sync-connector-oracle -->
+            <dependency>
+                <groupId>vip.logz</groupId>
+                <artifactId>rdb-sync-connector-oracle</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- rdb-sync-connector-postgres -->
